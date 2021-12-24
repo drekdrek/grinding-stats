@@ -5,7 +5,7 @@ class Files {
     int finishes = 0;
     int resets = 0;
     int time = 0;
-    Json::Value json_obj = Json::Parse('{"map_id": "' + map_id + '","finishes": 0,"resets": 0,"time": 0}');
+    Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0}');
     Files() {}
     
     Files(string id, bool load = true) {
@@ -26,7 +26,7 @@ class Files {
             auto content = file_obj.ReadToEnd();
             file_obj.Close();
 
-            if (content == "" || content == "null") {json_obj = Json::Parse('{"map_id": "' + map_id + '","finishes": 0,"resets": 0,"time": 0}');} // if the file is empty or null set the 'json_obj' to an empty json object
+            if (content == "" || content == "null") {json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0}');} // if the file is empty or null set the 'json_obj' to an empty json object
             else {
                 json_obj = Json::FromFile(json_file);
                 }
@@ -36,7 +36,6 @@ class Files {
         time = json_obj["time"];
     }
     void write_file() {
-        json_obj["map_id"] = map_id;
         json_obj["finishes"] = finishes;
         json_obj["resets"] = resets;
         json_obj["time"] = time;
