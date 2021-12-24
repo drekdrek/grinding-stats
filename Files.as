@@ -8,15 +8,14 @@ class Files {
     Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0}');
     Files() {}
     
-    Files(string id, bool load = true) {
+    Files(string id) {
         if (id == "") return; // if the map id is empty, something's gone wrong but we will just return and not do anything
         string folder = IO::FromDataFolder("") + "Grinding Stats";
         if (!IO::FolderExists(folder)) IO::CreateFolder(folder); // if the folder does not exist create the folder
         
         map_id = id;
         json_file = folder + "/" + map_id + ".json";
-        if (load) read_file(); // if load is true read the file
-        if (!load) write_file(); // if load is false write the file
+        read_file();
     }
 
     void read_file() {
@@ -44,15 +43,12 @@ class Files {
 
     void set_finishes(int f) {
         finishes = f;
-        
     }
     void set_resets(int r) {
         resets = r;
-        
     }
     void set_time(int t) {
-        time = t;
-        
+        time = t;   
     }
     int get_time() {
         return time;

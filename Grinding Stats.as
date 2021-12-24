@@ -77,7 +77,7 @@ void Main() {
                 auto ui_sequence = terminal.UISequence_Current;
                 map_id = playground.Map.IdName;
                 if (!handled_file) {
-                    file = Files(map_id,true);
+                    file = Files(map_id);
                     handled_file = true;
                 }
                 if (player !is null) {
