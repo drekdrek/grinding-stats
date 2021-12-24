@@ -4,6 +4,7 @@ author = "Drek"
 category = "Overlay"
 
 version = "1.0.0"
+siteid = 158
 
 [script]
 imports = [ "Icons.as", "Formatting.as", "Time.as" ]
