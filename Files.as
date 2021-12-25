@@ -5,7 +5,8 @@ class Files {
     int finishes = 0;
     int resets = 0;
     int time = 0;
-    Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0}');
+    int respawns = 0;
+    Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns":0}');
     Files() {}
     
     Files(string id) {
@@ -25,19 +26,21 @@ class Files {
             auto content = file_obj.ReadToEnd();
             file_obj.Close();
 
-            if (content == "" || content == "null") {json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0}');} // if the file is empty or null set the 'json_obj' to an empty json object
+            if (content == "" || content == "null") {json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns": 0}');} // if the file is empty or null set the 'json_obj' to an empty json object
             else {
                 json_obj = Json::FromFile(json_file);
                 }
         }
-        finishes = json_obj["finishes"];
-        resets = json_obj["resets"];
-        time = json_obj["time"];
+        finishes = json_obj.HasKey("finishes") ? json_obj["finishes"] : 0;
+        resets = json_obj.HasKey("resets") ? json_obj["resets"] : 0;
+        time = json_obj.HasKey("time") ? json_obj["time"] : 0;
+        respawns = json_obj.HasKey("respawns") ? json_obj["respawns"] : 0;
     }
     void write_file() {
         json_obj["finishes"] = finishes;
         json_obj["resets"] = resets;
         json_obj["time"] = time;
+        json_obj["respawns"] = respawns;
         Json::ToFile(json_file,json_obj);
     }
 
@@ -58,5 +61,11 @@ class Files {
     }
     int get_resets() {
         return resets;
+    }
+    int get_respawns() {
+        return respawns;
+    }
+    void set_respawns(int r) {
+        respawns = r;
     }
 }

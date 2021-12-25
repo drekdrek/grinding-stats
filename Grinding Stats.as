@@ -33,12 +33,20 @@ bool setting_show_resets_session = true;
 [Setting name="Show Total resets" category="Stats"]
 bool setting_show_resets_total = true;
 
+
+[Setting name="Show Session respawns" category="Stats"]
+bool setting_show_respawns_session = false;
+[Setting name="Show Total respawns" category="Stats"]
+bool setting_show_respawns_total = false;
+
+
+
 int finishes = 0;
 int resets = 0;
 int pbs = 0;
 int start_time = 0;
 int time = 0;
-int pbs_time = 0;
+int respawns = 0;
 string map_id = "";
 vec2 anchor = vec2(0,500);
 Files file;
@@ -48,8 +56,9 @@ void Main() {
     bool handled_reset = false ;
     bool handled_finish = false;
     bool handled_file = false;
+    bool handled_respawn = false;
     bool handled_pb = false;
-
+    int temp_respawns = 0;
     while(true) {
         if (setting_enabled) {
             CGameCtnApp@ app = GetApp();
@@ -64,11 +73,14 @@ void Main() {
                 handled_reset = false;
                 handled_finish = false;
                 handled_file = false;
+                handled_respawn = false;
                 handled_pb = false;
+                
 
                 resets = 0;
                 finishes = 0;
                 start_time = 0;
+                respawns = 0;
                 pbs = 0;
             }
             if (app.RootMap !is null) {
@@ -87,7 +99,8 @@ void Main() {
                     }
 
                     if (player !is null) {
-                        auto post = player.ScriptAPI.Post;
+                        auto script = player.ScriptAPI;
+                        auto post = script.Post;
                         if (!handled_timer && post == CSmScriptPlayer::EPost::Char) {
                             //not using Time::Now, because Time::Now doesn't pause when the game is paused.
                             start_time = network.PlaygroundClientScriptAPI.GameTime;
@@ -97,10 +110,17 @@ void Main() {
                             resets++;
                             file.set_resets(file.get_resets()+ 1);
                             handled_reset = true;
+                            
                         }
                         if (handled_reset && post != CSmScriptPlayer::EPost::Char) {
                             handled_reset = false;
                         }
+                        if (script.Score.NbRespawnsRequested != temp_respawns) {
+                            temp_respawns = script.Score.NbRespawnsRequested;
+                            respawns++;
+                            file.set_respawns(file.get_respawns()+ 1);
+                        }
+                        
                     }
                     if (!handled_finish && ui_sequence == CGamePlaygroundUIConfig::EUISequence::Finish
                     && player !is null) {
@@ -194,6 +214,19 @@ void Render() {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::Repeat + " Resets");
+                UI::TableNextColumn();
+                UI::Text(text);
+            }
+            if (setting_show_respawns_session || setting_show_respawns_total) {
+                string text = setting_show_resets_session ? "\\$bbb" + respawns : "";
+                if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
+                    text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
+                    text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
+                }
+
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
                 UI::TableNextColumn();
                 UI::Text(text);
             }

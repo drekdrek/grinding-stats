@@ -9,6 +9,8 @@ Openplanet plugin for TM 2020 which shows statistics
 
 - Total/Current finishes on track
 
+- Total/Current 
+
 ### Planned Features
 - Total PBs
 
