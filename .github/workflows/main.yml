@@ -1,0 +1,18 @@
+name: Create Archive and Release
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Archive Release
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        filename: 'grinding stats.zip'
+        exclusions: '*.git* /*node_modules/* .editorconfig README.md'
+    - name: Upload Release
+    - uses: ncipollo/release-action@v1
+    - with:
+        artifacts: "release.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
