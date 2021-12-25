@@ -109,8 +109,12 @@ void Main() {
                         if (!handled_reset && post == CSmScriptPlayer::EPost::Char) {
                             resets++;
                             file.set_resets(file.get_resets()+ 1);
+                            respawns--;
+                            file.set_respawns(file.get_respawns() - 1);
+
                             handled_reset = true;
                             
+
                         }
                         if (handled_reset && post != CSmScriptPlayer::EPost::Char) {
                             handled_reset = false;
