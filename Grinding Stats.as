@@ -225,7 +225,7 @@ void Render() {
                 UI::Text(text);
             }
             if (setting_show_respawns_session || setting_show_respawns_total) {
-                string text = setting_show_resets_session ? "\\$bbb" + respawns : "";
+                string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
                 if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
                     text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
                     text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
