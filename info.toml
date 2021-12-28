@@ -3,8 +3,8 @@ name = "Grinding Stats"
 author = "Drek"
 category = "Overlay"
 
-version = "1.0.0"
+version = "1.1.0"
 siteid = 158
 
 [script]
-imports = [ "Icons.as", "Formatting.as", "Time.as" ]
+imports = [ "Icons.as", "Formatting.as", "Time.as"]

@@ -6,11 +6,8 @@ bool setting_enabled = true;
 [Setting name="Lock window location" category="UI"]
 bool setting_lock_window_location = false;
 
-[Setting name="Show GUI when interface hidden" category="UI"]
+[Setting name="Show GUI when interface hidden" category="UI" description=" "]
 bool setting_show_on_hidden_interface = false;
-
-[Setting name="Show map name/author" category="UI" description=""]
-bool setting_show_map_name = true;
 
 [Setting name="Show only one number" category="UI" description="Only one number is shown, instead of showing the same number twice."]
 bool setting_show_only_one_number = false;
@@ -18,14 +15,24 @@ bool setting_show_only_one_number = false;
 [Setting name="Show only one time" category="UI" description="Only one time is shown, instead of showing the same time twice."]
 bool setting_show_only_one_time = false;
 
+[Setting name="Show map name/author" category="UI"]
+bool setting_show_map_name = true;
+
+[Setting name="Show thousands" category="UI"]
+bool setting_show_thousands = true;
+
+[Setting name="Show hour if 0" category="UI"]
+bool setting_show_hour_if_0 = true;
+
 [Setting name="Show Total time" category="Stats"]
 bool setting_show_total_time = true;
-[Setting name="Show Session time" category="Stats" description=" "]
+
+[Setting name="Show Session time" category="Stats" description=]
 bool setting_show_session_time = true;
 
 [Setting name="Show Session finishes" category="Stats"]
 bool setting_show_finishes_session = true;
-[Setting name="Show Total finishes" category="Stats" description=" "]
+[Setting name="Show Total finishes" category="Stats" description=]
 bool setting_show_finishes_total = true;
 
 [Setting name="Show Session resets" category="Stats"]
@@ -41,12 +48,13 @@ bool setting_show_respawns_total = false;
 
 
 
-int finishes = 0;
-int resets = 0;
-int pbs = 0;
-int start_time = 0;
-int time = 0;
-int respawns = 0;
+
+uint finishes = 0;
+uint resets = 0;
+uint pbs = 0;
+uint start_time = 0;
+uint time = 0;
+uint respawns = 0;
 string map_id = "";
 vec2 anchor = vec2(0,500);
 Files file;
@@ -58,7 +66,7 @@ void Main() {
     bool handled_file = false;
     bool handled_respawn = false;
     bool handled_pb = false;
-    int temp_respawns = 0;
+    uint temp_respawns = 0;
     while(true) {
         if (setting_enabled) {
             CGameCtnApp@ app = GetApp();
@@ -109,20 +117,12 @@ void Main() {
                         if (!handled_reset && post == CSmScriptPlayer::EPost::Char) {
                             resets++;
                             file.set_resets(file.get_resets()+ 1);
-                            if (respawns > 1) {
-                                respawns--;
-                                file.set_respawns(file.get_respawns() - 1);
-                            }
-                            
-
                             handled_reset = true;
-                            
-
                         }
                         if (handled_reset && post != CSmScriptPlayer::EPost::Char) {
                             handled_reset = false;
                         }
-                        if (script.Score.NbRespawnsRequested != temp_respawns) {
+                        if (script.Score.NbRespawnsRequested != temp_respawns && post != CSmScriptPlayer::EPost::Char) {
                             temp_respawns = script.Score.NbRespawnsRequested;
                             respawns++;
                             file.set_respawns(file.get_respawns()+ 1);
@@ -248,8 +248,8 @@ void render_time(int t) {
     int hour = int(Math::Floor((t) / 3600000));
     int minute =  int(Math::Floor((t) / 60000 - hour * 60));
     int second =  int(Math::Floor((t) / 1000 - hour * 3600 - minute * 60));
-    int millisecond = ((t) % 1000);
-    UI::Text("\\$bbb" +Time::Internal::PadNumber(hour,2) + ":" + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,3));
+    int millisecond = Text::ParseInt(Text::Format("%03d",(t) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
+    UI::Text("\\$bbb" + (setting_show_hour_if_0 || hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
 }
 
 void save_time() {

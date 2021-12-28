@@ -2,10 +2,10 @@
 class Files {
     string map_id = "";
     string json_file = "";
-    int finishes = 0;
-    int resets = 0;
-    int time = 0;
-    int respawns = 0;
+    uint finishes = 0;
+    uint resets = 0;
+    uint time = 0;
+    uint respawns = 0;
     Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns":0}');
     Files() {}
     
@@ -44,28 +44,28 @@ class Files {
         Json::ToFile(json_file,json_obj);
     }
 
-    void set_finishes(int f) {
+    void set_finishes(uint f) {
         finishes = f;
     }
-    void set_resets(int r) {
+    void set_resets(uint r) {
         resets = r;
     }
-    void set_time(int t) {
+    void set_time(uint t) {
         time = t;   
     }
-    int get_time() {
+    uint get_time() {
         return time;
     }
-    int get_finishes() {
+    uint get_finishes() {
         return finishes;
     }
-    int get_resets() {
+    uint get_resets() {
         return resets;
     }
-    int get_respawns() {
+    uint get_respawns() {
         return respawns;
     }
-    void set_respawns(int r) {
+    void set_respawns(uint r) {
         respawns = r;
     }
 }
