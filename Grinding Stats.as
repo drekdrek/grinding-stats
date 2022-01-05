@@ -1,12 +1,20 @@
 //Credit to TheToastyFail for helping me find bugs
 
+enum display_setting
+{
+    Only_when_Openplanet_menu_is_open,
+    Always_except_when_interface_is_hidden,
+    Always   
+}
+
 [Setting name="Enabled" category="UI"]
 bool setting_enabled = true;
 
 [Setting name="Lock window location" category="UI"]
 bool setting_lock_window_location = false;
 
-[Setting name="Show GUI when interface hidden" category="UI" description=" "]
+[Setting name="Display setting" category="UI"]
+display_setting setting_display = display_setting::Always_except_when_interface_is_hidden;
 bool setting_show_on_hidden_interface = false;
 
 [Setting name="Show only one number" category="UI" description="Only one number is shown, instead of showing the same number twice."]
@@ -66,12 +74,41 @@ void Main() {
     bool handled_file = false;
     bool handled_respawn = false;
     bool handled_pb = false;
+    bool handled_disable = false;
     uint temp_respawns = 0;
+
+
+    uint disabled_time = 0;
+    uint disabled_start_time = 0;
+    bool handled_disabled_time = false;
     while(true) {
+        CGameCtnApp@ app = GetApp();
+        auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
+        auto network = cast<CTrackManiaNetwork>(app.Network);
+
+
+        if (!setting_enabled && !handled_disable) {
+            if (!handled_disabled_time) {
+                handled_disabled_time = true;
+                disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
+            }
+            disabled_time = network.PlaygroundClientScriptAPI.GameTime;
+            print("Disabled");
+        }
+
         if (setting_enabled) {
-            CGameCtnApp@ app = GetApp();
-            auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
-            auto network = cast<CTrackManiaNetwork>(app.Network);
+            if (handled_disabled_time) {
+                handled_disabled_time = false;
+                print("time " + time);
+                print("disabled time " + disabled_time);
+                print("start time " + start_time);
+                print("disabled start time " + disabled_start_time);
+
+                time = time-disabled_start_time;
+            }
+            if (handled_disable)
+            handled_disable = false;
+            
 
             if (app.RootMap is null) {
                 if (handled_file) {
@@ -146,14 +183,112 @@ void Main() {
 }
 
 void Render() {
-    if (!setting_enabled) return;
+    if (!setting_enabled || setting_display == display_setting::Only_when_Openplanet_menu_is_open) return;
     auto app = cast<CTrackMania>(GetApp());
     auto map = app.RootMap;
     auto network = cast<CTrackManiaNetwork>(app.Network);
     if (app.RootMap is null) {
         return;
     }
-    if(!setting_show_on_hidden_interface) {
+    if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
+        auto playground = app.CurrentPlayground;
+        if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
+            return;
+        }
+    }
+    time = network.PlaygroundClientScriptAPI.GameTime;
+    UI::SetNextWindowPos(int(anchor.x), int(anchor.y), setting_lock_window_location ? UI::Cond::Always : UI::Cond::FirstUseEver);
+
+    int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
+    if (!UI::IsOverlayShown()) {
+        window_flags |= UI::WindowFlags::NoInputs;
+    }
+    UI::Begin("Grinding Stats", window_flags);
+    if (!setting_lock_window_location) {
+        anchor = UI::GetWindowPos();
+    }
+    UI::BeginGroup();
+        if (setting_show_map_name) {
+            UI::BeginTable("header",1,UI::TableFlags::SizingFixedFit);
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + StripFormatCodes(map.MapInfo.Name));
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$888" + map.MapInfo.AuthorNickName);
+            UI::EndTable();
+        }
+        int columns = 2;
+        if (UI::BeginTable("table",columns,UI::TableFlags::SizingFixedFit)){
+            if (setting_show_total_time && !(setting_show_only_one_time && file.get_time() == 0)) {
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
+                UI::TableNextColumn();
+                render_time(file.get_time() + time - start_time);
+
+            }
+            if (setting_show_session_time || (setting_show_only_one_time && file.get_time() == time-start_time)) {
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
+                UI::TableNextColumn();
+                render_time(time-start_time);
+            }
+            if (setting_show_finishes_session || setting_show_finishes_total) {
+                string text = setting_show_finishes_session ? "\\$bbb" + finishes : "";
+                if (!(setting_show_only_one_number && finishes == file.get_finishes())) {
+                    text += setting_show_finishes_session && setting_show_finishes_total ? "\\$fff  /  " : "";
+                    text += setting_show_finishes_total ? "\\$bbb" + file.get_finishes() : "";
+                }
+
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Flag + " Finishes");
+                UI::TableNextColumn();
+                UI::Text("\\$bbb" +text);
+            }
+            if (setting_show_resets_session || setting_show_resets_total) {
+                string text = setting_show_resets_session ? "\\$bbb" + resets : "";
+                if (!(setting_show_only_one_number && resets == file.get_resets())) {
+                    text += setting_show_resets_session && setting_show_resets_total ? "\\$fff  /  " : "";
+                    text += setting_show_resets_total ? "\\$bbb" + file.get_resets() : "";
+                }
+
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Repeat + " Resets");
+                UI::TableNextColumn();
+                UI::Text(text);
+            }
+            if (setting_show_respawns_session || setting_show_respawns_total) {
+                string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
+                if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
+                    text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
+                    text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
+                }
+
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
+                UI::TableNextColumn();
+                UI::Text(text);
+            }
+        }
+        UI::EndTable();
+    UI::EndGroup();
+    UI::End();
+
+}
+void RenderInterface() {
+    if (!setting_enabled || setting_display != display_setting::Only_when_Openplanet_menu_is_open) return;
+    auto app = cast<CTrackMania>(GetApp());
+    auto map = app.RootMap;
+    auto network = cast<CTrackManiaNetwork>(app.Network);
+    if (app.RootMap is null) {
+        return;
+    }
+    if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
         if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
             return;
@@ -244,6 +379,9 @@ void Render() {
 
 }
 
+
+
+
 void render_time(int t) {
     int hour = int(Math::Floor((t) / 3600000));
     int minute =  int(Math::Floor((t) / 60000 - hour * 60));
@@ -255,12 +393,4 @@ void render_time(int t) {
 void save_time() {
     file.set_time(file.get_time() + (time - start_time));
     file.write_file();
-}
-
-void OnDestroyed() {
-    save_time();
-}
-
-void OnDisabled() {
-    save_time();    
 }
