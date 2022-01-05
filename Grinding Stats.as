@@ -32,6 +32,9 @@ bool setting_show_thousands = true;
 [Setting name="Show hour if 0" category="UI"]
 bool setting_show_hour_if_0 = true;
 
+[Setting name="Show Time spent on current Campaign" category="Stats"]
+bool setting_show_campaign_time = false;
+
 [Setting name="Show Total time" category="Stats"]
 bool setting_show_total_time = true;
 
@@ -56,7 +59,6 @@ bool setting_show_respawns_total = false;
 
 
 
-
 uint finishes = 0;
 uint resets = 0;
 uint pbs = 0;
@@ -67,6 +69,10 @@ string map_id = "";
 vec2 anchor = vec2(0,500);
 Files file;
 
+uint disabled_time = 0;
+uint total_disabled_time = 0;
+uint disabled_start_time = 0;
+
 void Main() {
     bool handled_timer = false;
     bool handled_reset = false ;
@@ -75,12 +81,10 @@ void Main() {
     bool handled_respawn = false;
     bool handled_pb = false;
     bool handled_disable = false;
-    uint temp_respawns = 0;
-
-
-    uint disabled_time = 0;
-    uint disabled_start_time = 0;
     bool handled_disabled_time = false;
+    uint temp_respawns = 0;
+    
+
     while(true) {
         CGameCtnApp@ app = GetApp();
         auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
@@ -91,20 +95,14 @@ void Main() {
             if (!handled_disabled_time) {
                 handled_disabled_time = true;
                 disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
+                disabled_time = 0;
             }
-            disabled_time = network.PlaygroundClientScriptAPI.GameTime;
-            print("Disabled");
         }
-
         if (setting_enabled) {
             if (handled_disabled_time) {
                 handled_disabled_time = false;
-                print("time " + time);
-                print("disabled time " + disabled_time);
-                print("start time " + start_time);
-                print("disabled start time " + disabled_start_time);
-
-                time = time-disabled_start_time;
+                disabled_time = network.PlaygroundClientScriptAPI.GameTime;
+                total_disabled_time = total_disabled_time + (disabled_time - disabled_start_time);
             }
             if (handled_disable)
             handled_disable = false;
@@ -178,8 +176,96 @@ void Main() {
                 }
             }
         }
-        sleep(100);
+        yield();
     }
+}
+
+void render_ui() {
+    auto app = cast<CTrackMania>(GetApp());
+    auto map = app.RootMap;
+    auto network = cast<CTrackManiaNetwork>(app.Network);
+    time = network.PlaygroundClientScriptAPI.GameTime - (total_disabled_time);
+    UI::SetNextWindowPos(int(anchor.x), int(anchor.y), setting_lock_window_location ? UI::Cond::Always : UI::Cond::FirstUseEver);
+
+    int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
+    if (!UI::IsOverlayShown()) {
+        window_flags |= UI::WindowFlags::NoInputs;
+    }
+    UI::Begin("Grinding Stats", window_flags);
+    if (!setting_lock_window_location) {
+        anchor = UI::GetWindowPos();
+    }
+    UI::BeginGroup();
+        if (setting_show_map_name) {
+            UI::BeginTable("header",1,UI::TableFlags::SizingFixedFit);
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + StripFormatCodes(map.MapInfo.Name));
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$888" + map.MapInfo.AuthorNickName);
+            UI::EndTable();
+        }
+        int columns = 2;
+        if (UI::BeginTable("table",columns,UI::TableFlags::SizingFixedFit)){
+            if (setting_show_total_time && !(setting_show_only_one_time && file.get_time() == 0)) {
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
+                UI::TableNextColumn();
+                render_time(file.get_time() + time - start_time);
+
+            }
+            if (setting_show_session_time || (setting_show_only_one_time && file.get_time() == time-start_time)) {
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
+                UI::TableNextColumn();
+                render_time(time-start_time);
+            }
+            if (setting_show_finishes_session || setting_show_finishes_total) {
+                string text = setting_show_finishes_session ? "\\$bbb" + finishes : "";
+                if (!(setting_show_only_one_number && finishes == file.get_finishes())) {
+                    text += setting_show_finishes_session && setting_show_finishes_total ? "\\$fff  /  " : "";
+                    text += setting_show_finishes_total ? "\\$bbb" + file.get_finishes() : "";
+                }
+
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Flag + " Finishes");
+                UI::TableNextColumn();
+                UI::Text("\\$bbb" +text);
+            }
+            if (setting_show_resets_session || setting_show_resets_total) {
+                string text = setting_show_resets_session ? "\\$bbb" + resets : "";
+                if (!(setting_show_only_one_number && resets == file.get_resets())) {
+                    text += setting_show_resets_session && setting_show_resets_total ? "\\$fff  /  " : "";
+                    text += setting_show_resets_total ? "\\$bbb" + file.get_resets() : "";
+                }
+
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Repeat + " Resets");
+                UI::TableNextColumn();
+                UI::Text(text);
+            }
+            if (setting_show_respawns_session || setting_show_respawns_total) {
+                string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
+                if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
+                    text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
+                    text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
+                }
+
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
+                UI::TableNextColumn();
+                UI::Text(text);
+            }
+        }
+        UI::EndTable();
+    UI::EndGroup();
+    UI::End();
 }
 
 void Render() {
@@ -196,89 +282,7 @@ void Render() {
             return;
         }
     }
-    time = network.PlaygroundClientScriptAPI.GameTime;
-    UI::SetNextWindowPos(int(anchor.x), int(anchor.y), setting_lock_window_location ? UI::Cond::Always : UI::Cond::FirstUseEver);
-
-    int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
-    if (!UI::IsOverlayShown()) {
-        window_flags |= UI::WindowFlags::NoInputs;
-    }
-    UI::Begin("Grinding Stats", window_flags);
-    if (!setting_lock_window_location) {
-        anchor = UI::GetWindowPos();
-    }
-    UI::BeginGroup();
-        if (setting_show_map_name) {
-            UI::BeginTable("header",1,UI::TableFlags::SizingFixedFit);
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + StripFormatCodes(map.MapInfo.Name));
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$888" + map.MapInfo.AuthorNickName);
-            UI::EndTable();
-        }
-        int columns = 2;
-        if (UI::BeginTable("table",columns,UI::TableFlags::SizingFixedFit)){
-            if (setting_show_total_time && !(setting_show_only_one_time && file.get_time() == 0)) {
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
-                UI::TableNextColumn();
-                render_time(file.get_time() + time - start_time);
-
-            }
-            if (setting_show_session_time || (setting_show_only_one_time && file.get_time() == time-start_time)) {
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
-                UI::TableNextColumn();
-                render_time(time-start_time);
-            }
-            if (setting_show_finishes_session || setting_show_finishes_total) {
-                string text = setting_show_finishes_session ? "\\$bbb" + finishes : "";
-                if (!(setting_show_only_one_number && finishes == file.get_finishes())) {
-                    text += setting_show_finishes_session && setting_show_finishes_total ? "\\$fff  /  " : "";
-                    text += setting_show_finishes_total ? "\\$bbb" + file.get_finishes() : "";
-                }
-
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::Flag + " Finishes");
-                UI::TableNextColumn();
-                UI::Text("\\$bbb" +text);
-            }
-            if (setting_show_resets_session || setting_show_resets_total) {
-                string text = setting_show_resets_session ? "\\$bbb" + resets : "";
-                if (!(setting_show_only_one_number && resets == file.get_resets())) {
-                    text += setting_show_resets_session && setting_show_resets_total ? "\\$fff  /  " : "";
-                    text += setting_show_resets_total ? "\\$bbb" + file.get_resets() : "";
-                }
-
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::Repeat + " Resets");
-                UI::TableNextColumn();
-                UI::Text(text);
-            }
-            if (setting_show_respawns_session || setting_show_respawns_total) {
-                string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
-                if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
-                    text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
-                    text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
-                }
-
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
-                UI::TableNextColumn();
-                UI::Text(text);
-            }
-        }
-        UI::EndTable();
-    UI::EndGroup();
-    UI::End();
-
+    render_ui();
 }
 void RenderInterface() {
     if (!setting_enabled || setting_display != display_setting::Only_when_Openplanet_menu_is_open) return;
@@ -294,92 +298,8 @@ void RenderInterface() {
             return;
         }
     }
-    time = network.PlaygroundClientScriptAPI.GameTime;
-    UI::SetNextWindowPos(int(anchor.x), int(anchor.y), setting_lock_window_location ? UI::Cond::Always : UI::Cond::FirstUseEver);
-
-    int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
-    if (!UI::IsOverlayShown()) {
-        window_flags |= UI::WindowFlags::NoInputs;
-    }
-    UI::Begin("Grinding Stats", window_flags);
-    if (!setting_lock_window_location) {
-        anchor = UI::GetWindowPos();
-    }
-    UI::BeginGroup();
-        if (setting_show_map_name) {
-            UI::BeginTable("header",1,UI::TableFlags::SizingFixedFit);
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + StripFormatCodes(map.MapInfo.Name));
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$888" + map.MapInfo.AuthorNickName);
-            UI::EndTable();
-        }
-        int columns = 2;
-        if (UI::BeginTable("table",columns,UI::TableFlags::SizingFixedFit)){
-            if (setting_show_total_time && !(setting_show_only_one_time && file.get_time() == 0)) {
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
-                UI::TableNextColumn();
-                render_time(file.get_time() + time - start_time);
-
-            }
-            if (setting_show_session_time || (setting_show_only_one_time && file.get_time() == time-start_time)) {
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
-                UI::TableNextColumn();
-                render_time(time-start_time);
-            }
-            if (setting_show_finishes_session || setting_show_finishes_total) {
-                string text = setting_show_finishes_session ? "\\$bbb" + finishes : "";
-                if (!(setting_show_only_one_number && finishes == file.get_finishes())) {
-                    text += setting_show_finishes_session && setting_show_finishes_total ? "\\$fff  /  " : "";
-                    text += setting_show_finishes_total ? "\\$bbb" + file.get_finishes() : "";
-                }
-
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::Flag + " Finishes");
-                UI::TableNextColumn();
-                UI::Text("\\$bbb" +text);
-            }
-            if (setting_show_resets_session || setting_show_resets_total) {
-                string text = setting_show_resets_session ? "\\$bbb" + resets : "";
-                if (!(setting_show_only_one_number && resets == file.get_resets())) {
-                    text += setting_show_resets_session && setting_show_resets_total ? "\\$fff  /  " : "";
-                    text += setting_show_resets_total ? "\\$bbb" + file.get_resets() : "";
-                }
-
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::Repeat + " Resets");
-                UI::TableNextColumn();
-                UI::Text(text);
-            }
-            if (setting_show_respawns_session || setting_show_respawns_total) {
-                string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
-                if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
-                    text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
-                    text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
-                }
-
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
-                UI::TableNextColumn();
-                UI::Text(text);
-            }
-        }
-        UI::EndTable();
-    UI::EndGroup();
-    UI::End();
-
+    render_ui();
 }
-
-
 
 
 void render_time(int t) {
