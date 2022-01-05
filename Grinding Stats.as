@@ -125,6 +125,7 @@ void Main() {
                 start_time = 0;
                 respawns = 0;
                 pbs = 0;
+                total_disabled_time = 0;
             }
             if (app.RootMap !is null) {
 
