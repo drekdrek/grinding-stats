@@ -16,6 +16,11 @@ Shows stats that are useful for grinding a track
 
 ### Changelog
 
+#### 1.2
+- added display mode selector
+
+- fixed timer pausing when enabled/disabled
+
 #### 1.1
 - added feature to hide the thousands place from the time
 
