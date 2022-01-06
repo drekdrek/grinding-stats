@@ -55,10 +55,6 @@ bool setting_show_respawns_session = false;
 bool setting_show_respawns_total = false;
 
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 uint finishes = 0;
 uint resets = 0;
 uint respawns = 0;
@@ -71,24 +67,6 @@ string map_id = "";
 vec2 anchor = vec2(0,500);
 Files file;
 
-<<<<<<< Updated upstream
-uint disabled_time = 0;
-uint total_disabled_time = 0;
-uint disabled_start_time = 0;
-
-void Main() {
-    bool handled_timer = false;
-    bool handled_reset = false ;
-    bool handled_finish = false;
-    bool handled_file = false;
-    bool handled_respawn = false;
-    bool handled_pb = false;
-    bool handled_disable = false;
-    bool handled_disabled_time = false;
-    uint temp_respawns = 0;
-    
-
-=======
 bool handled_timer = false;
 bool handled_reset = false ;
 bool handled_finish = false;
@@ -120,7 +98,6 @@ void file_loader() {
 void Main() {
     uint temp_respawns = 0;
     startnew(file_loader);
->>>>>>> Stashed changes
     while(true) {
         CGameCtnApp@ app = GetApp();
         auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
@@ -156,10 +133,6 @@ void Main() {
                 finishes = 0;
                 start_time = 0;
                 respawns = 0;
-<<<<<<< Updated upstream
-                pbs = 0;
-=======
->>>>>>> Stashed changes
                 total_disabled_time = 0;
             }
             if (app.RootMap !is null) {
