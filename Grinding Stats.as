@@ -1,5 +1,3 @@
-//Credit to TheToastyFail for helping me find bugs
-
 enum display_setting
 {
     Only_when_Openplanet_menu_is_open,
@@ -15,7 +13,6 @@ bool setting_lock_window_location = false;
 
 [Setting name="Display setting" category="UI"]
 display_setting setting_display = display_setting::Always_except_when_interface_is_hidden;
-bool setting_show_on_hidden_interface = false;
 
 [Setting name="Show only one number" category="UI" description="Only one number is shown, instead of showing the same number twice."]
 bool setting_show_only_one_number = false;
@@ -58,17 +55,23 @@ bool setting_show_respawns_session = false;
 bool setting_show_respawns_total = false;
 
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 uint finishes = 0;
 uint resets = 0;
-uint pbs = 0;
+uint respawns = 0;
 uint start_time = 0;
 uint time = 0;
-uint respawns = 0;
+uint disabled_time = 0;
+uint total_disabled_time = 0;
+uint disabled_start_time = 0;
 string map_id = "";
 vec2 anchor = vec2(0,500);
 Files file;
 
+<<<<<<< Updated upstream
 uint disabled_time = 0;
 uint total_disabled_time = 0;
 uint disabled_start_time = 0;
@@ -85,11 +88,43 @@ void Main() {
     uint temp_respawns = 0;
     
 
+=======
+bool handled_timer = false;
+bool handled_reset = false ;
+bool handled_finish = false;
+bool handled_respawn = false;
+bool handled_pb = false;
+bool handled_disable = false;
+bool handled_disabled_time = false;
+bool handled_file = false;
+
+void file_loader() {
+    while(true) {
+    CGameCtnApp@ app = GetApp();
+    auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
+    auto network = cast<CTrackManiaNetwork>(app.Network);
+    {
+        map_id = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
+        handled_file = map_id == file.get_map_id();
+        if (!handled_file) {
+            if (file !is null) {save_time(-4000);}
+            file = Files(map_id);
+            start_time = network.PlaygroundClientScriptAPI.GameTime;
+            handled_file = true;
+            handled_timer = false;
+        }
+    }
+    yield();   
+    }
+}
+void Main() {
+    uint temp_respawns = 0;
+    startnew(file_loader);
+>>>>>>> Stashed changes
     while(true) {
         CGameCtnApp@ app = GetApp();
         auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
         auto network = cast<CTrackManiaNetwork>(app.Network);
-
 
         if (!setting_enabled && !handled_disable) {
             if (!handled_disabled_time) {
@@ -109,13 +144,10 @@ void Main() {
             
 
             if (app.RootMap is null) {
-                if (handled_file) {
-                    save_time();
-                }
+                
                 handled_timer = false;
                 handled_reset = false;
                 handled_finish = false;
-                handled_file = false;
                 handled_respawn = false;
                 handled_pb = false;
                 
@@ -124,7 +156,10 @@ void Main() {
                 finishes = 0;
                 start_time = 0;
                 respawns = 0;
+<<<<<<< Updated upstream
                 pbs = 0;
+=======
+>>>>>>> Stashed changes
                 total_disabled_time = 0;
             }
             if (app.RootMap !is null) {
@@ -135,12 +170,6 @@ void Main() {
                     auto terminal = playground.GameTerminals[0];
                     auto player = cast<CSmPlayer>(terminal.GUIPlayer);
                     auto ui_sequence = terminal.UISequence_Current;
-                    map_id = playground.Map.IdName;
-
-                    if (!handled_file) {
-                        file = Files(map_id);
-                        handled_file = true;
-                    }
 
                     if (player !is null) {
                         auto script = player.ScriptAPI;
@@ -311,7 +340,7 @@ void render_time(int t) {
     UI::Text("\\$bbb" + (setting_show_hour_if_0 || hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
 }
 
-void save_time() {
-    file.set_time(file.get_time() + (time - start_time));
+void save_time(int offset) {
+    file.set_time(file.get_time() + time - start_time + offset);
     file.write_file();
 }
