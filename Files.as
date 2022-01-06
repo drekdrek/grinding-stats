@@ -44,6 +44,12 @@ class Files {
         Json::ToFile(json_file,json_obj);
     }
 
+    string get_map_id() {
+        return map_id;
+    }
+    void set_map_id(string i) {
+        map_id = i;
+    }
     void set_finishes(uint f) {
         finishes = f;
     }
