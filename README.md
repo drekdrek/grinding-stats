@@ -16,6 +16,10 @@ Shows stats that are useful for grinding a track
 
 ### Changelog
 
+#### 1.3
+- added support for ManiaPlanet4 (TM^2)
+
+
 #### 1.2
 - added display mode selector
 
