@@ -1,8 +1,9 @@
-enum display_setting
-{
+// thanks to Loupphok for allowing me to use their account for testing MP4 stuff.
+
+enum display_setting {
     Only_when_Openplanet_menu_is_open,
     Always_except_when_interface_is_hidden,
-    Always   
+    Always
 }
 
 [Setting name="Enabled" category="UI"]
@@ -29,9 +30,6 @@ bool setting_show_thousands = true;
 [Setting name="Show hour if 0" category="UI"]
 bool setting_show_hour_if_0 = true;
 
-[Setting name="Show Time spent on current Campaign" category="Stats"]
-bool setting_show_campaign_time = false;
-
 [Setting name="Show Total time" category="Stats"]
 bool setting_show_total_time = true;
 
@@ -48,23 +46,24 @@ bool setting_show_resets_session = true;
 [Setting name="Show Total resets" category="Stats"]
 bool setting_show_resets_total = true;
 
-
+#if TMNEXT
 [Setting name="Show Session respawns" category="Stats"]
 bool setting_show_respawns_session = false;
 [Setting name="Show Total respawns" category="Stats"]
 bool setting_show_respawns_total = false;
-
+#endif
 
 uint finishes = 0;
 uint resets = 0;
 uint respawns = 0;
-uint start_time = 0;
-uint time = 0;
-uint disabled_time = 0;
-uint total_disabled_time = 0;
-uint disabled_start_time = 0;
+uint64 start_time = 0;
+uint64 time = 0;
+uint64 disabled_time = 0;
+uint64 total_disabled_time = 0;
+uint64 disabled_start_time = 0;
 string map_id = "";
 vec2 anchor = vec2(0,500);
+
 Files file;
 
 bool handled_timer = false;
@@ -72,110 +71,157 @@ bool handled_reset = false ;
 bool handled_finish = false;
 bool handled_respawn = false;
 bool handled_pb = false;
-bool handled_disable = false;
 bool handled_disabled_time = false;
 bool handled_file = false;
 
 void file_loader() {
     while(true) {
-    CGameCtnApp@ app = GetApp();
-    auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
-    auto network = cast<CTrackManiaNetwork>(app.Network);
-    {
-        map_id = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
-        handled_file = map_id == file.get_map_id();
-        if (!handled_file) {
-            if (file !is null) {save_time(-4000);}
-            file = Files(map_id);
-            start_time = network.PlaygroundClientScriptAPI.GameTime;
-            handled_file = true;
-            handled_timer = false;
+#if TMNEXT
+        CGameCtnApp@ app = GetApp();
+        auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
+#elif MP4
+        auto app = GetApp();
+        auto playground = app.CurrentPlayground;
+#endif      
+        auto network = cast<CTrackManiaNetwork>(app.Network);
+        {
+#if TMNEXT
+            map_id = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
+#elif MP4
+            map_id = (app.RootMap is null) ? "" : app.RootMap.IdName;
+#endif
+            handled_file = map_id == file.get_map_id();
+            if (!handled_file) {
+                if (file !is null){
+#if TMNEXT
+                    save_time(-4000);
+#elif MP4
+                    save_time(0);
+#endif
+                }
+                file = Files(map_id);
+#if TMNEXT
+                start_time=network.PlaygroundClientScriptAPI.GameTime;
+#elif MP4
+                start_time = network.PlaygroundClientScriptAPI.GameTime;
+#endif
+                handled_file = true;
+                handled_timer = false;
+            }
         }
-    }
-    yield();   
+        yield();
     }
 }
+
 void Main() {
     uint temp_respawns = 0;
     startnew(file_loader);
     while(true) {
-        CGameCtnApp@ app = GetApp();
-        auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
+        auto app = GetApp();
+        auto playground = app.CurrentPlayground;
         auto network = cast<CTrackManiaNetwork>(app.Network);
+        auto map = app.RootMap;
 
-        if (!setting_enabled && !handled_disable) {
-            if (!handled_disabled_time) {
-                handled_disabled_time = true;
-                disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
-                disabled_time = 0;
-            }
+        if (!setting_enabled && !handled_disabled_time) {
+            handled_disabled_time = true;
+
+#if TMNEXT
+            disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
+#elif MP4
+            disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
+#endif
+
+            disabled_time = 0;
         }
         if (setting_enabled) {
             if (handled_disabled_time) {
                 handled_disabled_time = false;
+#if TMNEXT
                 disabled_time = network.PlaygroundClientScriptAPI.GameTime;
+#elif MP4
+                disabled_time = network.PlaygroundClientScriptAPI.GameTime;
+#endif
                 total_disabled_time = total_disabled_time + (disabled_time - disabled_start_time);
             }
-            if (handled_disable)
-            handled_disable = false;
-            
-
-            if (app.RootMap is null) {
-                
+            if (map is null) {
                 handled_timer = false;
                 handled_reset = false;
                 handled_finish = false;
                 handled_respawn = false;
-                handled_pb = false;
-                
 
                 resets = 0;
                 finishes = 0;
-                start_time = 0;
                 respawns = 0;
                 total_disabled_time = 0;
             }
-            if (app.RootMap !is null) {
+            if (map !is null) {
+                if (playground !is null && playground.GameTerminals.Length > 0) {
+#if TMNEXT
+                        auto terminal = playground.GameTerminals[0];
+                        auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
+                        auto ui_sequence = terminal.UISequence_Current;
+                        if (gui_player !is null) {
+                            auto script = gui_player.ScriptAPI;
+                            auto post = script.Post;
+                            if (!handled_timer && post == CSmScriptPlayer::EPost::Char) {
+                                start_time = network.PlaygroundClientScriptAPI.GameTime;
+                                handled_timer = true;
+                            }
+                            if (!handled_reset && post == CSmScriptPlayer::EPost::Char) {
+                                handled_reset = true;
+                                resets++;
+                                file.set_resets(file.get_resets() + 1);
+                            }
+                            if (!handled_finish && ui_sequence == CGamePlaygroundUIConfig::EUISequence::Finish) {
+                                handled_finish = true;
+                                finishes++;
+                                file.set_finishes(file.get_finishes() + 1);
+                            }
 
-                if (playground !is null && playground.Arena !is null
-                && playground.Map !is null && playground.GameTerminals.Length > 0 ) {
+                            if (script.Score.NbRespawnsRequested != temp_respawns && post != CSmScriptPlayer::EPost::Char) {
+                                temp_respawns = script.Score.NbRespawnsRequested;
+                                respawns++;
+                                file.set_respawns(file.get_respawns() + 1);
+                            }
 
-                    auto terminal = playground.GameTerminals[0];
-                    auto player = cast<CSmPlayer>(terminal.GUIPlayer);
-                    auto ui_sequence = terminal.UISequence_Current;
-
-                    if (player !is null) {
-                        auto script = player.ScriptAPI;
-                        auto post = script.Post;
-                        if (!handled_timer && post == CSmScriptPlayer::EPost::Char) {
-                            //not using Time::Now, because Time::Now doesn't pause when the game is paused.
-                            start_time = network.PlaygroundClientScriptAPI.GameTime;
-                            handled_timer = true;
+                            if (handled_reset && post != CSmScriptPlayer::EPost::Char) {
+                                handled_reset = false;
+                            }
+                            if (handled_finish && ui_sequence != CGamePlaygroundUIConfig::EUISequence::Finish) {
+                                handled_finish = false;
+                            }
                         }
-                        if (!handled_reset && post == CSmScriptPlayer::EPost::Char) {
-                            resets++;
-                            file.set_resets(file.get_resets()+ 1);
-                            handled_reset = true;
+#elif MP4
+                        auto ui_config = playground.UIConfigs[0];
+                        auto terminal = playground.GameTerminals[0];
+                        auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
+                        if (gui_player !is null) {
+                            auto script = gui_player.ScriptAPI;
+                            auto race_state = script.RaceState;
+                            if (!handled_timer && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
+                                start_time = network.PlaygroundClientScriptAPI.GameTime;
+                                handled_timer = true;
+                                finishes--;
+                                file.set_finishes(file.get_finishes() - 1);
+                            }
+                            if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
+                                handled_reset = true;
+                                resets++;
+                                file.set_resets(file.get_resets() + 1);
+                            }
+                            if (!handled_finish && race_state == CTrackManiaPlayer::ERaceState::Finished) {
+                                handled_finish = true;
+                                finishes++;
+                                file.set_finishes(file.get_finishes() + 1);
+                            }
+                            if (handled_reset && race_state != CTrackManiaPlayer::ERaceState::BeforeStart) {
+                                handled_reset = false;
+                            }
+                            if (handled_finish && race_state != CTrackManiaPlayer::ERaceState::Finished) {
+                                handled_finish = false;
+                            }
                         }
-                        if (handled_reset && post != CSmScriptPlayer::EPost::Char) {
-                            handled_reset = false;
-                        }
-                        if (script.Score.NbRespawnsRequested != temp_respawns && post != CSmScriptPlayer::EPost::Char) {
-                            temp_respawns = script.Score.NbRespawnsRequested;
-                            respawns++;
-                            file.set_respawns(file.get_respawns()+ 1);
-                        }
-                        
-                    }
-                    if (!handled_finish && ui_sequence == CGamePlaygroundUIConfig::EUISequence::Finish
-                    && player !is null) {
-                        handled_finish = true;
-                        finishes++;
-                        file.set_finishes(file.get_finishes()+ 1);
-                    }
-                    if (ui_sequence != CGamePlaygroundUIConfig::EUISequence::Finish) {
-                        handled_finish = false;
-                    }
+#endif
                 }
             }
         }
@@ -252,6 +298,7 @@ void render_ui() {
                 UI::TableNextColumn();
                 UI::Text(text);
             }
+#if TMNEXT
             if (setting_show_respawns_session || setting_show_respawns_total) {
                 string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
                 if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
@@ -265,10 +312,18 @@ void render_ui() {
                 UI::TableNextColumn();
                 UI::Text(text);
             }
+#endif
         }
         UI::EndTable();
     UI::EndGroup();
     UI::End();
+}
+void render_time(int t) {
+    int hour = int(Math::Floor((t) / 3600000));
+    int minute =  int(Math::Floor((t) / 60000 - hour * 60));
+    int second =  int(Math::Floor((t) / 1000 - hour * 3600 - minute * 60));
+    int millisecond = Text::ParseInt(Text::Format("%03d",(t) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
+    UI::Text("\\$bbb" + (setting_show_hour_if_0 || hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
 }
 
 void Render() {
@@ -281,9 +336,15 @@ void Render() {
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
-        if(playground is null || playground.Interface is null || !UI::IsRendering()) {
+#if TMNEXT
+        if (playground is null || playground.Interface is null || !UI::IsRendering()) {
             return;
         }
+#elif MP4
+        if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
+            return;
+        }
+#endif
     }
     render_ui();
 }
@@ -297,20 +358,18 @@ void RenderInterface() {
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
-        if(playground is null || playground.Interface is null || !UI::IsRendering()) {
+
+#if TMNEXT
+        if (playground is null || playground.Interface is null || !UI::IsRendering()) {
             return;
         }
+#elif MP4
+        if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
+            return;
+        }
+#endif
     }
     render_ui();
-}
-
-
-void render_time(int t) {
-    int hour = int(Math::Floor((t) / 3600000));
-    int minute =  int(Math::Floor((t) / 60000 - hour * 60));
-    int second =  int(Math::Floor((t) / 1000 - hour * 3600 - minute * 60));
-    int millisecond = Text::ParseInt(Text::Format("%03d",(t) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
-    UI::Text("\\$bbb" + (setting_show_hour_if_0 || hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
 }
 
 void save_time(int offset) {
