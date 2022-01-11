@@ -281,7 +281,7 @@ void Render() {
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
-        if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
+        if(playground is null || playground.Interface is null || !UI::IsRendering()) {
             return;
         }
     }
@@ -297,7 +297,7 @@ void RenderInterface() {
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
-        if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
+        if(playground is null || playground.Interface is null || !UI::IsRendering()) {
             return;
         }
     }
@@ -316,4 +316,8 @@ void render_time(int t) {
 void save_time(int offset) {
     file.set_time(file.get_time() + time - start_time + offset);
     file.write_file();
+}
+
+void OnDestroyed() {
+    save_time(0);
 }
