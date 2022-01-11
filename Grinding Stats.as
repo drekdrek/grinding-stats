@@ -206,7 +206,7 @@ void render_ui() {
                 UI::Text("\\$ddd" + StripFormatCodes(map.MapInfo.Name));
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$888" + map.MapInfo.AuthorNickName);
+                UI::Text("\\$888" + StripFormatCodes(map.MapInfo.AuthorNickName));
             UI::EndTable();
         }
         int columns = 2;
