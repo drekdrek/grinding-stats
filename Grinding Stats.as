@@ -3,7 +3,7 @@
 enum display_setting {
     Only_when_Openplanet_menu_is_open,
     Always_except_when_interface_is_hidden,
-    Always   
+    Always
 }
 
 [Setting name="Enabled" category="UI"]
@@ -76,7 +76,7 @@ bool handled_file = false;
 
 void file_loader() {
     while(true) {
-        
+
         auto app = GetApp();
         auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
         auto network = cast<CTrackManiaNetwork>(app.Network);
@@ -120,7 +120,7 @@ void Main() {
 
         if (!setting_enabled && !handled_disabled_time) {
             handled_disabled_time = true;
-            
+
 #if TMNEXT
             disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
 #elif MP4
@@ -144,10 +144,10 @@ void Main() {
                 handled_reset = false;
                 handled_finish = false;
                 handled_respawn = false;
-                
+
                 resets = 0;
 #if TMNEXT
-                finishes = 4294967295; // 2^32 - 1 to overflow when spawning for the first time to have first attempt not be reset 1.
+                finishes = 0;
 #elif MP4
                 finishes = 4294967295; // 2^32 - 1 to overflow when spawning for the first time, because the game is weird and has a finish RaceState when it loads the map.
 #endif
@@ -164,26 +164,18 @@ void Main() {
                             auto script = gui_player.ScriptAPI;
                             auto post = script.Post;
                             if (!handled_timer && post == CSmScriptPlayer::EPost::Char) {
-                                start_Time = network.PlaygroundClientScriptAPI.GameTime;
+                                start_time = network.PlaygroundClientScriptAPI.GameTime;
                                 handled_timer = true;
                             }
                             if (!handled_reset && post == CSmScriptPlayer::EPost::Char) {
                                 handled_reset = true;
-                                if (resets != 4294967295) {
-                                    resets++;
-                                    file.set_resets(file.get_resets() + 1);
-                                } else {
-                                    resets++;
-                                }                                
+                                resets++;
+                                file.set_resets(file.get_resets() + 1);
                             }
                             if (!handled_finish && ui_sequence == CGamePlaygroundUIConfig::EUISequence::Finish) {
                                 handled_finish = true;
-                                if (finishes != 4294967295) {
-                                    finishes++;
-                                    file.set_finishes(file.get_finishes() + 1);
-                                } else {
-                                    finishes++;
-                                }
+                                finishes++;
+                                file.set_finishes(file.get_finishes() + 1);
                             }
 
                             if (script.Score.NbRespawnsRequested != temp_respawns && post != CSmScriptPlayer::EPost::Char) {
@@ -212,12 +204,8 @@ void Main() {
                             }
                             if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 handled_reset = true;
-                                if (resets != 4294967295) {
-                                    finishes ++;
-                                    file.set_finishes(file.get_finishes() + 1);
-                                } else {
-                                    resets++;
-                                }
+                                finishes ++;
+                                file.set_finishes(file.get_finishes() + 1);
                             }
                             if (!handled_finish && race_state == CTrackManiaPlayer::ERaceState::Finished) {
                                 handled_finish = true;
