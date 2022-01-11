@@ -358,6 +358,7 @@ void RenderInterface() {
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
+
 #if TMNEXT
         if (playground is null || playground.Interface is null || !UI::IsRendering()) {
             return;
@@ -376,10 +377,6 @@ void save_time(int offset) {
     file.write_file();
 }
 
-
-
 void OnDestroyed() {
     save_time(0);
 }
-
-
