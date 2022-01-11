@@ -78,7 +78,7 @@ void file_loader() {
     while(true) {
 
         auto app = GetApp();
-        auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
+        auto playground = app.CurrentPlayground;
         auto network = cast<CTrackManiaNetwork>(app.Network);
         {
 #if TMNEXT
@@ -99,7 +99,7 @@ void file_loader() {
 #if TMNEXT
                 start_time=network.PlaygroundClientScriptAPI.GameTime;
 #elif MP4
-                start_time = Time::Now;
+                start_time = network.PlaygroundClientScriptAPI.GameTime;
 #endif
                 handled_file = true;
                 handled_timer = false;
@@ -113,6 +113,7 @@ void Main() {
     uint temp_respawns = 0;
     startnew(file_loader);
     while(true) {
+        print("time: " + time);
         auto app = GetApp();
         auto playground = app.CurrentPlayground;
         auto network = cast<CTrackManiaNetwork>(app.Network);
@@ -124,7 +125,7 @@ void Main() {
 #if TMNEXT
             disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
 #elif MP4
-            disabled_start_time = Time::Now;
+            disabled_start_time = network.PlaygroundClientScriptAPI.GameTime;
 #endif
 
             disabled_time = 0;
@@ -135,7 +136,7 @@ void Main() {
 #if TMNEXT
                 disabled_time = network.PlaygroundClientScriptAPI.GameTime;
 #elif MP4
-                disabled_time = Time::Now;
+                disabled_time = network.PlaygroundClientScriptAPI.GameTime;
 #endif
                 total_disabled_time = total_disabled_time + (disabled_time - disabled_start_time);
             }
@@ -146,11 +147,7 @@ void Main() {
                 handled_respawn = false;
 
                 resets = 0;
-#if TMNEXT
                 finishes = 0;
-#elif MP4
-                finishes = 4294967295; // 2^32 - 1 to overflow when spawning for the first time, because the game is weird and has a finish RaceState when it loads the map.
-#endif
                 respawns = 0;
                 total_disabled_time = 0;
             }
@@ -199,22 +196,26 @@ void Main() {
                             auto script = gui_player.ScriptAPI;
                             auto race_state = script.RaceState;
                             if (!handled_timer && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
-                                start_time = Time::Now;
+                                start_time = network.PlaygroundClientScriptAPI.GameTime;
                                 handled_timer = true;
+                                finishes--;
+                                file.set_finishes(file.get_finishes() - 1);
                             }
                             if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 handled_reset = true;
-                                finishes ++;
-                                file.set_finishes(file.get_finishes() + 1);
+                                resets++;
+                                file.set_resets(file.get_resets() + 1);
                             }
                             if (!handled_finish && race_state == CTrackManiaPlayer::ERaceState::Finished) {
                                 handled_finish = true;
-                                if (finishes != 4294967295){
-                                    finishes++;
-                                    file.set_finishes(file.get_finishes() + 1);
-                                } else {
-                                    finishes++;
-                                }
+                                finishes++;
+                                file.set_finishes(file.get_finishes() + 1);
+                            }
+                            if (handled_reset && race_state != CTrackManiaPlayer::ERaceState::BeforeStart) {
+                                handled_reset = false;
+                            }
+                            if (handled_finish && race_state != CTrackManiaPlayer::ERaceState::Finished) {
+                                handled_finish = false;
                             }
                         }
 #endif
@@ -294,6 +295,7 @@ void render_ui() {
                 UI::TableNextColumn();
                 UI::Text(text);
             }
+#if TMNEXT
             if (setting_show_respawns_session || setting_show_respawns_total) {
                 string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
                 if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
@@ -307,6 +309,7 @@ void render_ui() {
                 UI::TableNextColumn();
                 UI::Text(text);
             }
+#endif
         }
         UI::EndTable();
     UI::EndGroup();
