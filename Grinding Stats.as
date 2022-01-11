@@ -76,9 +76,13 @@ bool handled_file = false;
 
 void file_loader() {
     while(true) {
-
+#if TMNEXT
+        CGameCtnApp@ app = GetApp();
+        auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
+#elif MP4
         auto app = GetApp();
         auto playground = app.CurrentPlayground;
+#endif      
         auto network = cast<CTrackManiaNetwork>(app.Network);
         {
 #if TMNEXT
@@ -113,7 +117,6 @@ void Main() {
     uint temp_respawns = 0;
     startnew(file_loader);
     while(true) {
-        print("time: " + time);
         auto app = GetApp();
         auto playground = app.CurrentPlayground;
         auto network = cast<CTrackManiaNetwork>(app.Network);
