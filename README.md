@@ -16,6 +16,9 @@ Shows stats that are useful for grinding a track
 
 ### Changelog
 
+#### 1.4
+- remade saving function
+
 #### 1.3
 - added support for ManiaPlanet4 (TM^2)
 
