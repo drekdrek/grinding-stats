@@ -17,6 +17,7 @@ class Files {
         map_id = id;
         json_file = folder + "/" + map_id + ".json";
         read_file();
+
     }
 
     void read_file() {
@@ -73,5 +74,16 @@ class Files {
     }
     void set_respawns(uint r) {
         respawns = r;
+    }
+    void reset_file() {
+        json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns": 0}');
+        write_file();
+    }
+    void reset_all() {
+        Json::Value to_write = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns": 0}');
+        auto files = IO::IndexFolder(IO::FromDataFolder("") + "Grinding Stats",true);
+        for (uint i = 0; i < files.Length; i++) {
+            Json::ToFile(files[i],to_write);
+        }
     }
 }
