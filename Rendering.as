@@ -100,9 +100,10 @@ void Render() {
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
 #if TMNEXT
-        if (playground is null || playground.Interface is null || !UI::IsRendering()) {
+       if (playground is null || playground.Interface is null /* ||  !UI::IsRendering() //this isn't needed */ ) {
             return;
         }
+
 #elif MP4
         if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
             return;
