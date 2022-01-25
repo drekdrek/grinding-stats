@@ -238,7 +238,9 @@ void Main() {
                             if (!handled_timer && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 start_time = network.PlaygroundClientScriptAPI.GameTime;
                                 handled_timer = true;
-                                finishes--;
+                                if (finishes == 1) {
+                                    finishes--;
+                                }
                             }
                             if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 handled_reset = true;
