@@ -330,12 +330,34 @@ void OnDestroyed() {
 }
 
 void RenderSettings() {
+    auto app = GetApp();
+#if TMNEXT||MP4
+    auto rootmap = app.RootMap;
+#elif TURBO
+    auto rootmap = app.Challenge;
+#endif
      if (UI::Button("Reset current map's data")) {
+        if (rootmap is null) {
+            return;
+        }
         file.reset_file();
+        resets = 0;
+        finishes = 0;
+        respawns = 0;
+        auto network = cast<CTrackManiaNetwork>(app.Network);
+        start_time = network.PlaygroundClientScriptAPI is null ? 0 : network.PlaygroundClientScriptAPI.GameTime;
         UI::ShowNotification("Reset current map's data",4000);
     }
     if (UI::Button("Reset all map data")) {
+        if (rootmap !is null) {
+        resets = 0;
+        finishes = 0;
+        respawns = 0;
+        auto network = cast<CTrackManiaNetwork>(GetApp().Network);
+        start_time = network.PlaygroundClientScriptAPI is null ? 0 : network.PlaygroundClientScriptAPI.GameTime;
+        }
         file.reset_all();
+        
         UI::ShowNotification("Reset all map data",4000);
     }
 }

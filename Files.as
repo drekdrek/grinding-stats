@@ -76,14 +76,17 @@ class Files {
         respawns = r;
     }
     void reset_file() {
-        json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns": 0}');
+        finishes = 0;
+        resets = 0;
+        time = 0;
+        respawns = 0;
         write_file();
     }
     void reset_all() {
-        Json::Value to_write = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns": 0}');
         auto files = IO::IndexFolder(IO::FromDataFolder("") + "Grinding Stats",true);
+
         for (uint i = 0; i < files.Length; i++) {
-            Json::ToFile(files[i],to_write);
+            IO::Delete(files[i]);
         }
     }
 }
