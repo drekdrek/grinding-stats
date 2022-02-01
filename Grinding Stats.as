@@ -1,4 +1,5 @@
 // thanks to Loupphok for allowing me to use their account for testing MP4 stuff.
+// thanks to dequubi for doing most of the annoying work of porting to TURBO
 
 enum display_setting {
     Only_when_Openplanet_menu_is_open,
@@ -64,6 +65,7 @@ uint64 disabled_start_time = 0;
 string map_id = "";
 vec2 anchor = vec2(0,500);
 
+
 Files file;
 
 bool handled_timer = false;
@@ -78,7 +80,7 @@ bool loaded = false;
 bool handled_save = true;
 void file_handler() {
     bool startup = true;
-    
+
     while (true) {
         if (setting_enabled) {
 #if TMNEXT
@@ -90,10 +92,8 @@ void file_handler() {
             if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
                 auto terminal = playground.GameTerminals[0];
                 auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
-                auto tm_gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
                 if (gui_player !is null) {
                     auto script = gui_player.ScriptAPI;
-                    auto spawn_status = script.SpawnStatus;
                     auto post = script.Post;
                     if (startup || handled_save && post == CSmScriptPlayer::EPost::Char) {
                         startup = false;
@@ -102,7 +102,7 @@ void file_handler() {
                         loaded = false;
                     }
                 }
-            }  
+            }
 #elif MP4
             auto app = GetApp();
             auto playground = app.CurrentPlayground;
@@ -122,34 +122,43 @@ void file_handler() {
                     }
                 }
             }
+#elif TURBO
+            // basically copy & paste of the MP4 code, the only change is
+            // RootMap becomes Challenge, and RaceState can be accessed
+            // directly through gui_player (which is also called ControlledPlayer)
+            auto app = GetApp();
+            auto playground = app.CurrentPlayground;
+            auto rootmap = app.Challenge;
+            map_id = (rootmap is null ) ? "" : rootmap.IdName;
+            if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0){
+                auto terminal = playground.GameTerminals[0];
+                auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
+                if (gui_player !is null) {
+                    auto race_state = gui_player.RaceState;
+                    if (startup || handled_save && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
+                        startup = false;
+                        handled_save = false;
+                        file = Files(map_id);
+                        loaded = false;
+                    }
+                }
+            }
 #endif
-#if TMNEXT
+#if TMNEXT||MP4||TURBO
+            // this peace of code was the same between all versions
+            // so i thought there was no reason to duplicate it
             if (!handled_save && playground is null && !loaded){
                 handled_save = true;
                 loaded = true;
                 if (file !is null) {
                     save_time();
                 }
-
-            }
-
-#elif MP4
-            if (!handled_save && playground is null && !loaded){
-                handled_save = true;
-                loaded = true;
-                if (file !is null) {
-                    save_time();
-                }
-
             }
 #endif
-            
         }
         yield();
     }
 }
-    
-
 
 void Main() {
     bool startup = true;
@@ -159,7 +168,11 @@ void Main() {
         auto app = GetApp();
         auto playground = app.CurrentPlayground;
         auto network = cast<CTrackManiaNetwork>(app.Network);
+#if TMNEXT||MP4
         auto map = app.RootMap;
+#elif TURBO
+        auto map = app.Challenge;
+#endif
 
         if (startup) {
             start_time = network.PlaygroundClientScriptAPI is null ? 0 : network.PlaygroundClientScriptAPI.GameTime;
@@ -229,12 +242,15 @@ void Main() {
                             }
                         }
 #elif MP4
-                        auto ui_config = playground.UIConfigs[0];
                         auto terminal = playground.GameTerminals[0];
                         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
+
                         if (gui_player !is null) {
                             auto script = gui_player.ScriptAPI;
                             auto race_state = script.RaceState;
+
+                            
+
                             if (!handled_timer && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 start_time = network.PlaygroundClientScriptAPI.GameTime;
                                 handled_timer = true;
@@ -259,6 +275,42 @@ void Main() {
                                 handled_finish = false;
                             }
                         }
+#elif TURBO
+                        auto terminal = playground.GameTerminals[0];
+                        auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
+                        auto ui_sequence = cast<CGamePlaygroundUIConfig>(network.PlaygroundClientScriptAPI.UI);
+
+
+                        if (gui_player !is null) {
+                            auto race_state = gui_player.RaceState;
+
+                            if (!handled_timer && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
+                                start_time = network.PlaygroundClientScriptAPI.GameTime;
+                                handled_timer = true;
+                                if (finishes == 1) {
+                                    finishes--;
+                                }
+                                if (resets == 1) {
+                                    resets--;
+                                }
+                            }
+                            if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart && ui_sequence.UISequence == CGamePlaygroundUIConfig::EUISequence::Playing) {
+                                handled_reset = true;
+                                resets++;
+                                file.set_resets(file.get_resets() + 1);
+                            }
+                            if (!handled_finish && race_state == CTrackManiaPlayer::ERaceState::Finished && !network.PlaygroundClientScriptAPI.IsSpectator) {
+                                handled_finish = true;
+                                finishes++;
+                                file.set_finishes(file.get_finishes() + 1);
+                            }
+                            if (handled_reset && race_state != CTrackManiaPlayer::ERaceState::BeforeStart && (race_state != CTrackManiaPlayer::ERaceState::Finished && !network.PlaygroundClientScriptAPI.IsSpectator)) {
+                                handled_reset = false;
+                            }
+                            if (handled_finish && race_state != CTrackManiaPlayer::ERaceState::Finished) {
+                                handled_finish = false;
+                            }
+                        }
 #endif
                 }
             }
@@ -266,7 +318,6 @@ void Main() {
         yield();
     }
 }
-
 
 
 void save_time() {
@@ -277,7 +328,6 @@ void save_time() {
 void OnDestroyed() {
     save_time();
 }
-
 
 void RenderSettings() {
      if (UI::Button("Reset current map's data")) {

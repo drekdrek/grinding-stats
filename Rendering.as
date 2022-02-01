@@ -1,6 +1,10 @@
 void render_ui() {
     auto app = cast<CTrackMania>(GetApp());
+#if TMNEXT||MP4
     auto map = app.RootMap;
+#elif TURBO
+    auto map = app.Challenge;
+#endif
     auto network = cast<CTrackManiaNetwork>(app.Network);
     time = network.PlaygroundClientScriptAPI.GameTime - (total_disabled_time);
     UI::SetNextWindowPos(int(anchor.x), int(anchor.y), setting_lock_window_location ? UI::Cond::Always : UI::Cond::FirstUseEver);
@@ -92,9 +96,13 @@ void render_time(int t) {
 void Render() {
     if (!setting_enabled || setting_display == display_setting::Only_when_Openplanet_menu_is_open) return;
     auto app = cast<CTrackMania>(GetApp());
+#if TMNEXT||MP4
     auto map = app.RootMap;
+#elif TURBO
+    auto map = app.Challenge;
+#endif
     auto network = cast<CTrackManiaNetwork>(app.Network);
-    if (app.RootMap is null) {
+    if (map is null) {
         return;
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
@@ -115,9 +123,13 @@ void Render() {
 void RenderInterface() {
     if (!setting_enabled || setting_display != display_setting::Only_when_Openplanet_menu_is_open) return;
     auto app = cast<CTrackMania>(GetApp());
+#if TMNEXT||MP4
     auto map = app.RootMap;
+#elif TURBO
+    auto map = app.Challenge;
+#endif
     auto network = cast<CTrackManiaNetwork>(app.Network);
-    if (app.RootMap is null) {
+    if (map is null) {
         return;
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
