@@ -16,6 +16,10 @@ Shows stats that are useful for grinding a track
 
 ### Changelog
 
+#### 1.5
+- TURBO support! (thank you @ShaidenUNI)
+- fixed the buttons that reset files
+
 #### 1.4
 - remade saving function
 
