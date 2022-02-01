@@ -1,4 +1,5 @@
 // thanks to Loupphok for allowing me to use their account for testing MP4 stuff.
+// thanks to dequubi for doing most of the annoying work of porting to TURBO
 
 enum display_setting {
     Only_when_Openplanet_menu_is_open,
@@ -64,13 +65,6 @@ uint64 disabled_start_time = 0;
 string map_id = "";
 vec2 anchor = vec2(0,500);
 
-#if TURBO
-// the game switches it's player state weirdly on a map entry
-// which triggers a reset counter to go up.
-// this doesn't happen in TM 2020, so I came up with this hacky way
-// to just ignore the first reset on map entry
-bool ignore_on_entry_reset = true;
-#endif
 
 Files file;
 
@@ -98,10 +92,8 @@ void file_handler() {
             if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
                 auto terminal = playground.GameTerminals[0];
                 auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
-                auto tm_gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
                 if (gui_player !is null) {
                     auto script = gui_player.ScriptAPI;
-                    auto spawn_status = script.SpawnStatus;
                     auto post = script.Post;
                     if (startup || handled_save && post == CSmScriptPlayer::EPost::Char) {
                         startup = false;
@@ -209,11 +201,6 @@ void Main() {
                 finishes = 0;
                 respawns = 0;
                 total_disabled_time = 0;
-
-#if TURBO
-                // reset on_entry flag if player exits a map
-                ignore_on_entry_reset = true;
-#endif
             }
             if (map !is null) {
                 if (playground !is null && playground.GameTerminals.Length > 0) {
@@ -255,12 +242,15 @@ void Main() {
                             }
                         }
 #elif MP4
-                        auto ui_config = playground.UIConfigs[0];
                         auto terminal = playground.GameTerminals[0];
                         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
+
                         if (gui_player !is null) {
                             auto script = gui_player.ScriptAPI;
                             auto race_state = script.RaceState;
+
+                            
+
                             if (!handled_timer && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 start_time = network.PlaygroundClientScriptAPI.GameTime;
                                 handled_timer = true;
@@ -286,44 +276,35 @@ void Main() {
                             }
                         }
 #elif TURBO
-                        // another copy of MP4 code with the same changes mentioned previously
-                        // but with some stupid workarounds because of stupid event changes
-                        auto ui_config = playground.UIConfigs[0];
                         auto terminal = playground.GameTerminals[0];
                         auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
+                        auto ui_sequence = cast<CGamePlaygroundUIConfig>(network.PlaygroundClientScriptAPI.UI);
+
+
                         if (gui_player !is null) {
                             auto race_state = gui_player.RaceState;
-                            // sometimes when you reset game randomly despawns your car
-                            // which changes ERaceState to Finished
-                            // and it wrongly counts towards finish counter
-                            auto is_spawned = gui_player.IsSpawned;
-                            // if car is not spawned and ERaceState is Finished, that means
-                            // there's INSERT COIN screen, and replay of your PB starts playing.
-                            // after the replay ends the state changes back to BeforeStart
-                            // and it counts towards the reset counter, which is also wrong
-                            auto player_idle = gui_player.RaceStartTime == 0;
+
                             if (!handled_timer && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 start_time = network.PlaygroundClientScriptAPI.GameTime;
                                 handled_timer = true;
                                 if (finishes == 1) {
                                     finishes--;
                                 }
-                            }
-                            if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart && !player_idle) {
-                                handled_reset = true;
-                                if (ignore_on_entry_reset) {
-                                    ignore_on_entry_reset = false;
-                                } else {
-                                    resets++;
-                                    file.set_resets(file.get_resets() + 1);
+                                if (resets == 1) {
+                                    resets--;
                                 }
                             }
-                            if (!handled_finish && race_state == CTrackManiaPlayer::ERaceState::Finished && is_spawned) {
+                            if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart && ui_sequence.UISequence == CGamePlaygroundUIConfig::EUISequence::Playing) {
+                                handled_reset = true;
+                                resets++;
+                                file.set_resets(file.get_resets() + 1);
+                            }
+                            if (!handled_finish && race_state == CTrackManiaPlayer::ERaceState::Finished && !network.PlaygroundClientScriptAPI.IsSpectator) {
                                 handled_finish = true;
                                 finishes++;
                                 file.set_finishes(file.get_finishes() + 1);
                             }
-                            if (handled_reset && race_state != CTrackManiaPlayer::ERaceState::BeforeStart) {
+                            if (handled_reset && race_state != CTrackManiaPlayer::ERaceState::BeforeStart && (race_state != CTrackManiaPlayer::ERaceState::Finished && !network.PlaygroundClientScriptAPI.IsSpectator)) {
                                 handled_reset = false;
                             }
                             if (handled_finish && race_state != CTrackManiaPlayer::ERaceState::Finished) {
@@ -339,7 +320,6 @@ void Main() {
 }
 
 
-
 void save_time() {
     file.set_time(file.get_time() + time - start_time);
     file.write_file();
@@ -348,7 +328,6 @@ void save_time() {
 void OnDestroyed() {
     save_time();
 }
-
 
 void RenderSettings() {
      if (UI::Button("Reset current map's data")) {
