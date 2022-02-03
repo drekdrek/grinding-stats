@@ -108,7 +108,7 @@ void Render() {
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
 #if TMNEXT
-       if (playground is null || playground.Interface is null /* ||  !UI::IsRendering() //this isn't needed */ ) {
+       if (playground is null || playground.Interface is null  || !UI::IsGameUIVisible() ) {
             return;
         }
 
@@ -135,7 +135,7 @@ void RenderInterface() {
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
 #if TMNEXT
-        if (playground is null || playground.Interface is null || !UI::IsRendering()) {
+        if (playground is null || playground.Interface is null || !UI::IsGameUIVisible()) {
             return;
         }
 #elif MP4
