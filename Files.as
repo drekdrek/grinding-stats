@@ -10,7 +10,7 @@ class Files {
     Files() {}
     
     Files(string id) {
-        if (id == "") return; // if the map id is empty, something's gone wrong but we will just return and not do anything
+        if (id == "" || id == "Unassigned") return; // if the map id is empty, or the id is not assigned return
         string folder = IO::FromDataFolder("") + "Grinding Stats";
         if (!IO::FolderExists(folder)) IO::CreateFolder(folder); // if the folder does not exist create the folder
         

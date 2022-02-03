@@ -94,6 +94,7 @@ void render_time(int t) {
     UI::Text("\\$bbb" + (setting_show_hour_if_0 || hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
 }
 void Render() {
+   
     if (!setting_enabled || setting_display == display_setting::Only_when_Openplanet_menu_is_open) return;
     auto app = cast<CTrackMania>(GetApp());
 #if TMNEXT||MP4
@@ -102,7 +103,7 @@ void Render() {
     auto map = app.Challenge;
 #endif
     auto network = cast<CTrackManiaNetwork>(app.Network);
-    if (map is null) {
+    if (map is null || map.MapInfo.MapUid == "" || app.Editor !is null) {
         return;
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
@@ -112,7 +113,7 @@ void Render() {
             return;
         }
 
-#elif MP4
+#elif MP4||TURBO
         if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
             return;
         }
