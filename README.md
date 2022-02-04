@@ -16,6 +16,12 @@ Shows stats that are useful for grinding a track
 
 ### Changelog
 
+##### 1.5.2
+- fixed gui appearing in the editor
+
+##### 1.5.1
+- fixed rendering mode not working properly
+
 #### 1.5
 - TURBO support! (thank you @dequubi)
 - fixed the buttons that reset files
