@@ -16,7 +16,7 @@ bool setting_lock_window_location = false;
 [Setting name="Display setting" category="UI"]
 display_setting setting_display = display_setting::Always_except_when_interface_is_hidden;
 
-[Setting name="Show Duplicates" category="UI" description="will show both total and session time if they are the same and the finishes, resets, ect."]
+[Setting name="Show Duplicates" category="UI" description="will show both total and session time, finishes and resets if they are the same "]
 bool setting_show_duplicates = false;
 
 [Setting name="Show map name/author" category="UI"]
@@ -282,7 +282,10 @@ void Main() {
                                 if (finishes == 1) {
                                     finishes--;
                                 }
-                                resets--;
+                                if (resets != 0) {
+                                    resets--;
+                                }
+                                
                                 
                             }
                             if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart && ui_sequence.UISequence == CGamePlaygroundUIConfig::EUISequence::Playing) {
