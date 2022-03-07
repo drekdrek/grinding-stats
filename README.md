@@ -16,6 +16,10 @@ Shows stats that are useful for grinding a track
 
 ### Changelog
 
+##### 1.6
+- fixed rare timer issue where saving would occur twice
+- simplified setttings
+
 ##### 1.5.2
 - fixed gui appearing in the editor
 
