@@ -38,6 +38,9 @@ class Files {
         respawns = json_obj.HasKey("respawns") ? json_obj["respawns"] : 0;
     }
     void write_file() {
+        if (map_id == "" || map_id == "Unassigned") {
+            return;
+        }
         json_obj["finishes"] = finishes;
         json_obj["resets"] = resets;
         json_obj["time"] = time;
