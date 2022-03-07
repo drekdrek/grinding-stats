@@ -16,20 +16,15 @@ bool setting_lock_window_location = false;
 [Setting name="Display setting" category="UI"]
 display_setting setting_display = display_setting::Always_except_when_interface_is_hidden;
 
-[Setting name="Show only one number" category="UI" description="Only one number is shown, instead of showing the same number twice."]
-bool setting_show_only_one_number = false;
-
-[Setting name="Show only one time" category="UI" description="Only one time is shown, instead of showing the same time twice."]
-bool setting_show_only_one_time = false;
+[Setting name="Show Duplicates" category="UI" description="will show both total and session time, finishes and resets if they are the same "]
+bool setting_show_duplicates = false;
 
 [Setting name="Show map name/author" category="UI"]
 bool setting_show_map_name = true;
 
 [Setting name="Show thousands" category="UI"]
-bool setting_show_thousands = true;
+bool setting_show_thousands = false;
 
-[Setting name="Show hour if 0" category="UI"]
-bool setting_show_hour_if_0 = true;
 
 [Setting name="Show Total time" category="Stats"]
 bool setting_show_total_time = true;
@@ -144,17 +139,13 @@ void file_handler() {
                 }
             }
 #endif
-#if TMNEXT||MP4||TURBO
-            // this peace of code was the same between all versions
-            // so i thought there was no reason to duplicate it
-            if (!handled_save && playground is null && !loaded){
+        if (!handled_save && playground is null && !loaded){
                 handled_save = true;
                 loaded = true;
                 if (file !is null) {
                     save_time();
                 }
             }
-#endif
         }
         yield();
     }
@@ -257,6 +248,7 @@ void Main() {
                                 if (finishes == 1) {
                                     finishes--;
                                 }
+                                resets--;
                             }
                             if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                                 handled_reset = true;
@@ -290,9 +282,11 @@ void Main() {
                                 if (finishes == 1) {
                                     finishes--;
                                 }
-                                if (resets == 1) {
+                                if (resets != 0) {
                                     resets--;
                                 }
+                                
+                                
                             }
                             if (!handled_reset && race_state == CTrackManiaPlayer::ERaceState::BeforeStart && ui_sequence.UISequence == CGamePlaygroundUIConfig::EUISequence::Playing) {
                                 handled_reset = true;
@@ -321,8 +315,16 @@ void Main() {
 
 
 void save_time() {
+    auto app = GetApp();
+    auto playground = app.CurrentPlayground;
+    auto network = cast<CTrackManiaNetwork>(app.Network);
+
     file.set_time(file.get_time() + time - start_time);
+
     file.write_file();
+    
+    start_time = network.PlaygroundClientScriptAPI.GameTime;
+
 }
 
 void OnDestroyed() {
