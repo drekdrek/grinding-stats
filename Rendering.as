@@ -29,14 +29,14 @@ void render_ui() {
         }
         int columns = 2;
         if (UI::BeginTable("table",columns,UI::TableFlags::SizingFixedFit)){
-            if (setting_show_total_time && !(setting_show_only_one_time && file.get_time() == 0)) {
+            if (setting_show_total_time && !(!setting_show_duplicates && file.get_time() == 0)) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
                 UI::TableNextColumn();
                 render_time(file.get_time() + time - start_time);
             }
-            if (setting_show_session_time || (setting_show_only_one_time && file.get_time() == time-start_time)) {
+            if (setting_show_session_time || (setting_show_duplicates && file.get_time() == time-start_time)) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
@@ -45,7 +45,7 @@ void render_ui() {
             }
             if (setting_show_finishes_session || setting_show_finishes_total) {
                 string text = setting_show_finishes_session ? "\\$bbb" + finishes : "";
-                if (!(setting_show_only_one_number && finishes == file.get_finishes())) {
+                if (!(!setting_show_duplicates && finishes == file.get_finishes())) {
                     text += setting_show_finishes_session && setting_show_finishes_total ? "\\$fff  /  " : "";
                     text += setting_show_finishes_total ? "\\$bbb" + file.get_finishes() : "";
                 }
@@ -57,7 +57,7 @@ void render_ui() {
             }
             if (setting_show_resets_session || setting_show_resets_total) {
                 string text = setting_show_resets_session ? "\\$bbb" + resets : "";
-                if (!(setting_show_only_one_number && resets == file.get_resets())) {
+                if (!(!setting_show_duplicates && resets == file.get_resets())) {
                     text += setting_show_resets_session && setting_show_resets_total ? "\\$fff  /  " : "";
                     text += setting_show_resets_total ? "\\$bbb" + file.get_resets() : "";
                 }
@@ -70,7 +70,7 @@ void render_ui() {
 #if TMNEXT
             if (setting_show_respawns_session || setting_show_respawns_total) {
                 string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
-                if (!(setting_show_only_one_number && respawns == file.get_respawns())) {
+                if (!(!setting_show_duplicates && respawns == file.get_respawns())) {
                     text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
                     text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
                 }
@@ -87,11 +87,20 @@ void render_ui() {
     UI::End();
 }
 void render_time(int t) {
-    int hour = int(Math::Floor((t) / 3600000));
-    int minute =  int(Math::Floor((t) / 60000 - hour * 60));
-    int second =  int(Math::Floor((t) / 1000 - hour * 3600 - minute * 60));
-    int millisecond = Text::ParseInt(Text::Format("%03d",(t) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
-    UI::Text("\\$bbb" + (setting_show_hour_if_0 || hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
+    if (t > 0) {
+        int hour = int(Math::Floor((t) / 3600000));
+        int minute =  int(Math::Floor((t) / 60000 - hour * 60));
+        int second =  int(Math::Floor((t) / 1000 - hour * 3600 - minute * 60));
+        int millisecond = Text::ParseInt(Text::Format("%03d",(t) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
+        UI::Text("\\$bbb" + (hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
+    } else {
+        string hour = "--";
+        string minute = "--";
+        string second = "--";
+        string millisecond = "---";
+        UI::Text("\\$bbb" + minute + ":" + second + "." + millisecond.SubStr(0,setting_show_thousands ? 3 : 2));
+    }
+    
 }
 void Render() {
    
@@ -108,16 +117,9 @@ void Render() {
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
-#if TMNEXT
-       if (playground is null || playground.Interface is null  || !UI::IsGameUIVisible() ) {
+    if (playground is null || playground.Interface is null  || !UI::IsGameUIVisible() ) {
             return;
-        }
-
-#elif MP4||TURBO
-        if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
-            return;
-        }
-#endif
+    }
     }
     render_ui();
 }
@@ -135,15 +137,9 @@ void RenderInterface() {
     }
     if(setting_display == display_setting::Always_except_when_interface_is_hidden) {
         auto playground = app.CurrentPlayground;
-#if TMNEXT
         if (playground is null || playground.Interface is null || !UI::IsGameUIVisible()) {
             return;
         }
-#elif MP4
-        if(playground is null || playground.Interface is null || Dev::GetOffsetUint32(playground.Interface, 0x1C) == 0) {
-            return;
-        }
-#endif
     }
     render_ui();
 }
