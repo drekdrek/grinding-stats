@@ -88,7 +88,7 @@ void file_handler() {
                 auto terminal = playground.GameTerminals[0];
                 auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
                 if (gui_player !is null) {
-                    auto script = gui_player.ScriptAPI;
+                    auto script = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
                     auto post = script.Post;
                     if (startup || handled_save && post == CSmScriptPlayer::EPost::Char) {
                         startup = false;
@@ -200,7 +200,7 @@ void Main() {
                         auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
                         auto ui_sequence = terminal.UISequence_Current;
                         if (gui_player !is null) {
-                            auto script = gui_player.ScriptAPI;
+                            auto script = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
                             auto post = script.Post;
                             if (!handled_timer && post == CSmScriptPlayer::EPost::Char) {
                                 start_time = network.PlaygroundClientScriptAPI.GameTime;
