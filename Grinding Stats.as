@@ -25,6 +25,9 @@ bool setting_show_map_name = true;
 [Setting name="Show thousands" category="UI"]
 bool setting_show_thousands = false;
 
+[Setting name="Show Hour if 0" category="UI"]
+bool setting_show_hour_if_0 = false;
+
 
 [Setting name="Show Total time" category="Stats"]
 bool setting_show_total_time = true;
@@ -323,8 +326,9 @@ void save_time() {
 
     file.write_file();
     
+    if (network !is null) {
     start_time = network.PlaygroundClientScriptAPI.GameTime;
-
+    }
 }
 
 void OnDestroyed() {

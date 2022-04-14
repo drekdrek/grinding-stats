@@ -92,7 +92,7 @@ void render_time(int t) {
         int minute =  int(Math::Floor((t) / 60000 - hour * 60));
         int second =  int(Math::Floor((t) / 1000 - hour * 3600 - minute * 60));
         int millisecond = Text::ParseInt(Text::Format("%03d",(t) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
-        UI::Text("\\$bbb" + (hour > 0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
+        UI::Text("\\$bbb" + (hour > 0 || setting_show_hour_if_0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
     } else {
         string hour = "--";
         string minute = "--";
