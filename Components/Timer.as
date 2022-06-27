@@ -31,14 +31,12 @@ class Timer {
         }
     }
     void start() {
-        print("started");
         start_time = Time::Now;
         running = true;
         startnew(CoroutineFunc(start_timer));
     }
 
     void stop() {
-        print("stopped");
         time_offset = time_dif;
         running = false;
     }
@@ -93,7 +91,6 @@ bool is_timer_running() {
     auto playground = app.CurrentPlayground;
     if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
         multiplayer = app.PlaygroundScript is null;
-        
         auto terminal = playground.GameTerminals[0];
 #if TMNEXT
         paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !multiplayer;

@@ -45,7 +45,6 @@ class Files {
         json_obj["time"] = time;
         json_obj["respawns"] = respawns;
         Json::ToFile(json_file,json_obj);
-        print("wrote file");
     }
 
     string get_map_id() {
