@@ -47,14 +47,14 @@ uint setting_idle_speed = 2;
 [Setting name="Idle Detection Delay" category="Idle" description="The amount of time before Idling will begin."]
 uint setting_idle_time = 5;
 //respawns will be updated later, the component i made is slightly broken.
-/*
+
 [Setting name="Show Current Run's respawns" category="Stats"]
 bool setting_show_respawns_current = false;
 [Setting name="Show Session respawns" category="Stats"]
 bool setting_show_respawns_session = false;
 [Setting name="Show Total respawns" category="Stats"]
 bool setting_show_respawns_total = false;
- */
+ 
 
 
 
@@ -95,7 +95,9 @@ void map_handler() {
             OnDestroyed();
             finishes.destroy();
             resets.destroy();
-            //respawns.destroy();
+#if TMNEXT
+            respawns.destroy();
+#endif
             session_time.destroy();
             total_time.destroy();
             
@@ -104,11 +106,14 @@ void map_handler() {
             total_time = Timer(file.get_time());
             finishes = Finishes(file.get_finishes());
             resets = Resets(file.get_resets());
+#if TMNEXT
+            respawns = Respawns(file.get_respawns());
+#endif
             timing = false;
             startnew(timer_handler);
             finishes.start();
             resets.start();
-            //respawns.start();
+            respawns.start();
         }
     yield();
     }

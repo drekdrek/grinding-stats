@@ -4,7 +4,9 @@ class Respawns {
     uint current_respawns = 0;
     uint session_respawns = 0;
     uint total_respawns = 0;
+
     Respawns() {}
+
     Respawns(uint total) {
         total_respawns = total;
     }
@@ -12,7 +14,7 @@ class Respawns {
         running = false;
     }
     void destroy() {
-        running = false;
+        running = false; 
     }
     void start() {
         running = true;
@@ -28,7 +30,6 @@ class Respawns {
 
     void respawn_handler() {
 #if TMNEXT
-    uint temp_respawns = 0;
         while(running) {
             auto app = GetApp();
             auto playground = app.CurrentPlayground;
@@ -39,15 +40,13 @@ class Respawns {
                     auto script = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
                     auto post = script.Post;
 
-                    if (script.Score.NbRespawnsRequested != temp_respawns && post != CSmScriptPlayer::EPost::Char) {
-                        temp_respawns = script.Score.NbRespawnsRequested;
+                    if (script.Score.NbRespawnsRequested > current_respawns && post != CSmScriptPlayer::EPost::Char) {
                         current_respawns += 1;
                         session_respawns += 1;
                         total_respawns += 1;   
                     }
                     if (script.Score.NbRespawnsRequested == 0) {
                         current_respawns = 0;
-                        temp_respawns = 0;
                     }
                 }
             }

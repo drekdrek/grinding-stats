@@ -23,14 +23,14 @@ void render_ui() {
             UI::EndTable();
         }
             UI::BeginTable("table",2,UI::TableFlags::SizingFixedFit);
-            if (setting_show_total_time && !(!setting_show_duplicates && total_time.get_offset() == session_time.get_offset())) {
+            if (setting_show_total_time && (!(!setting_show_duplicates && session_time.get_offset() == total_time.get_offset()))) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
                 UI::TableNextColumn();
                 UI::Text("\\$bbb" + total_time.get_time_string());
             }
-            if (setting_show_session_time || (setting_show_duplicates && total_time.get_time() == session_time.get_time())) {
+            if (setting_show_session_time) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
@@ -58,6 +58,24 @@ void render_ui() {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::Repeat + " Resets");
+                UI::TableNextColumn();
+                UI::Text(text);
+            }
+            if (setting_show_respawns_current || setting_show_respawns_session || setting_show_respawns_total) {
+                string text = setting_show_respawns_current ? "\\$bbb" + respawns.get_current_respawns() : "";
+                text += !(!setting_show_duplicates && respawns.get_current_respawns() == respawns.get_session_respawns()) && setting_show_respawns_current && setting_show_respawns_session ?
+                    "\\$fff  /  \\$bbb" + respawns.get_session_respawns() :
+                    !(!setting_show_duplicates && respawns.get_current_respawns() == respawns.get_session_respawns()) && setting_show_respawns_session ?
+                        "\\$bbb" + respawns.get_session_respawns() :
+                        ""; 
+                text += !(!setting_show_duplicates && respawns.get_total_respawns() == respawns.get_session_respawns()) && setting_show_respawns_session && setting_show_respawns_total ?
+                    "\\$fff  /  \\$bbb" + respawns.get_total_respawns() :
+                    !(!setting_show_duplicates && respawns.get_total_respawns() == respawns.get_session_respawns()) && setting_show_respawns_total ?
+                        "\\$bbb" + respawns.get_total_respawns() :
+                        "";
+                UI::TableNextRow();
+                UI::TableNextColumn();
+                UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
                 UI::TableNextColumn();
                 UI::Text(text);
             }
