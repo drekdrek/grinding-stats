@@ -42,6 +42,10 @@ bool setting_show_resets_session = true;
 [Setting name="Show Total resets" category="Stats"]
 bool setting_show_resets_total = true;
 
+[Setting name="Idle Detection Speed" category="Idle" description="The speed where the car will be considered idle after a set time. (this is not the speed that the car is going but the internal value of the speed)"]
+uint setting_idle_speed = 2;
+[Setting name="Idle Detection Delay" category="Idle" description="The amount of time before Idling will begin."]
+uint setting_idle_time = 5;
 //respawns will be updated later, the component i made is slightly broken.
 /*
 [Setting name="Show Current Run's respawns" category="Stats"]

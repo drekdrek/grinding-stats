@@ -109,10 +109,10 @@ bool is_timer_running() {
         if (gui_player !is null) {
             playing = true;
             // will be changed to a user changable value in the settings
-            if (script_player.Speed < 2 && script_player.Speed > -2) {
+            if (script_player.Speed < int(setting_idle_speed) && script_player.Speed > -1 * int(setting_idle_speed)) {
                 if (start_idle == 0) {
                     start_idle = Time::Now/10;
-                } else if (Time::Now/10 - start_idle > 500) {
+                } else if (Time::Now/10 - start_idle > 100 * int(setting_idle_time)) {
                     idle = true;
                 }
             } else {
