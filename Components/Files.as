@@ -28,7 +28,7 @@ class Files {
             if (content == "" || content == "null") {json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns": 0}');} // if the file is empty or null set the 'json_obj' to an empty json object
             else {
                 json_obj = Json::FromFile(json_file);
-                }
+            }
         }
         finishes = json_obj.HasKey("finishes") ? json_obj["finishes"] : 0;
         resets = json_obj.HasKey("resets") ? json_obj["resets"] : 0;
