@@ -93,22 +93,24 @@ bool is_timer_running() {
     auto playground = app.CurrentPlayground;
     if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
         multiplayer = app.PlaygroundScript is null;
-        paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !multiplayer;
+        
         auto terminal = playground.GameTerminals[0];
 #if TMNEXT
+        paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !multiplayer;
         auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
-        if (gui_player is null) return false;
         auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
-        countdown = script_player.CurrentRaceTime > 0;
+        countdown = script_player.CurrentRaceTime < 0;
 #elif MP4
+        paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed
         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
-        if (gui_player is null) return false;
         auto script_player = gui_player.ScriptAPI;
+#elif TURBO
+        paused = playground.Interface.ManialinkScriptHandler.IsInGameMenuDisplayed;
+        auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
+        auto script_player = gui_player;
 #endif
-
         if (gui_player !is null) {
             playing = true;
-            // will be changed to a user changable value in the settings
             if (script_player.Speed < int(setting_idle_speed) && script_player.Speed > -1 * int(setting_idle_speed)) {
                 if (start_idle == 0) {
                     start_idle = Time::Now/10;
@@ -124,6 +126,6 @@ bool is_timer_running() {
             idle = false;
             start_idle = 0;
         }
-    }
-    return (!idle && playing && !paused && countdown);
+    } 
+    return (!idle && playing && !paused && !countdown);
 }
