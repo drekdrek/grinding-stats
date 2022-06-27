@@ -1,53 +1,47 @@
 void render_ui() {
-    auto app = cast<CTrackMania>(GetApp());
 #if TMNEXT||MP4
-    auto map = app.RootMap;
+    auto map_info = GetApp().RootMap.MapInfo;
 #elif TURBO
-    auto map = app.Challenge;
+    auto map_info = GetApp().Challenge.MapInfo;
 #endif
-    auto network = cast<CTrackManiaNetwork>(app.Network);
-    time = network.PlaygroundClientScriptAPI.GameTime - (total_disabled_time);
-    UI::SetNextWindowPos(int(anchor.x), int(anchor.y), setting_lock_window_location ? UI::Cond::Always : UI::Cond::FirstUseEver);
+    running = is_timer_running();
+    UI::SetNextWindowPos(200, 200, false ? UI::Cond::Always : UI::Cond::FirstUseEver);
     int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
     if (!UI::IsOverlayShown()) {
         window_flags |= UI::WindowFlags::NoInputs;
     }
     UI::Begin("Grinding Stats", window_flags);
-    if (!setting_lock_window_location) {
-        anchor = UI::GetWindowPos();
-    }
-    UI::BeginGroup();
-        if (setting_show_map_name) {
+         UI::BeginGroup();  
+         if (setting_show_map_name) {
             UI::BeginTable("header",1,UI::TableFlags::SizingFixedFit);
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$ddd" + StripFormatCodes(map.MapInfo.Name));
+                UI::Text("\\$ddd" + StripFormatCodes(map_info.Name));
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$888" + StripFormatCodes(map.MapInfo.AuthorNickName));
+                UI::Text("\\$888" + StripFormatCodes(map_info.AuthorNickName));
             UI::EndTable();
         }
-        int columns = 2;
-        if (UI::BeginTable("table",columns,UI::TableFlags::SizingFixedFit)){
-            if (setting_show_total_time && !(!setting_show_duplicates && file.get_time() == 0)) {
+            UI::BeginTable("table",2,UI::TableFlags::SizingFixedFit);
+            if (setting_show_total_time && !(!setting_show_duplicates && total_time.get_offset() == session_time.get_offset())) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
                 UI::TableNextColumn();
-                render_time(file.get_time() + time - start_time);
+                UI::Text("\\$bbb" + total_time.get_time_string());
             }
-            if (setting_show_session_time || (setting_show_duplicates && file.get_time() == time-start_time)) {
+            if (setting_show_session_time || (setting_show_duplicates && total_time.get_time() == session_time.get_time())) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
                 UI::TableNextColumn();
-                render_time(time-start_time);
+                UI::Text("\\$bbb" + session_time.get_time_string());
             }
             if (setting_show_finishes_session || setting_show_finishes_total) {
-                string text = setting_show_finishes_session ? "\\$bbb" + finishes : "";
-                if (!(!setting_show_duplicates && finishes == file.get_finishes())) {
+                string text = setting_show_finishes_session ? "\\$bbb" + finishes.get_session_finishes() : "";
+                if (!(!setting_show_duplicates && finishes.get_session_finishes() == finishes.get_total_finishes())) {
                     text += setting_show_finishes_session && setting_show_finishes_total ? "\\$fff  /  " : "";
-                    text += setting_show_finishes_total ? "\\$bbb" + file.get_finishes() : "";
+                    text += setting_show_finishes_total ? "\\$bbb" + finishes.get_total_finishes() : "";
                 }
                 UI::TableNextRow();
                 UI::TableNextColumn();
@@ -56,10 +50,10 @@ void render_ui() {
                 UI::Text("\\$bbb" +text);
             }
             if (setting_show_resets_session || setting_show_resets_total) {
-                string text = setting_show_resets_session ? "\\$bbb" + resets : "";
-                if (!(!setting_show_duplicates && resets == file.get_resets())) {
+                string text = setting_show_resets_session ? "\\$bbb" + resets.get_session_resets() : "";
+                if (!(!setting_show_duplicates && resets.get_session_resets() == resets.get_total_resets())) {
                     text += setting_show_resets_session && setting_show_resets_total ? "\\$fff  /  " : "";
-                    text += setting_show_resets_total ? "\\$bbb" + file.get_resets() : "";
+                    text += setting_show_resets_total ? "\\$bbb" + resets.get_total_resets() : "";
                 }
                 UI::TableNextRow();
                 UI::TableNextColumn();
@@ -67,41 +61,11 @@ void render_ui() {
                 UI::TableNextColumn();
                 UI::Text(text);
             }
-#if TMNEXT
-            if (setting_show_respawns_session || setting_show_respawns_total) {
-                string text = setting_show_respawns_session ? "\\$bbb" + respawns : "";
-                if (!(!setting_show_duplicates && respawns == file.get_respawns())) {
-                    text += setting_show_respawns_session && setting_show_respawns_total ? "\\$fff  /  " : "";
-                    text += setting_show_respawns_total ? "\\$bbb" + file.get_respawns() : "";
-                }
-                UI::TableNextRow();
-                UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
-                UI::TableNextColumn();
-                UI::Text(text);
-            }
-#endif
-        }
-        UI::EndTable();
-    UI::EndGroup();
+            UI::EndTable();
+        UI::EndGroup();
     UI::End();
 }
-void render_time(int t) {
-    if (t > 0) {
-        int hour = int(Math::Floor((t) / 3600000));
-        int minute =  int(Math::Floor((t) / 60000 - hour * 60));
-        int second =  int(Math::Floor((t) / 1000 - hour * 3600 - minute * 60));
-        int millisecond = Text::ParseInt(Text::Format("%03d",(t) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
-        UI::Text("\\$bbb" + (hour > 0 || setting_show_hour_if_0 ? Time::Internal::PadNumber(hour,2) + ":" : "") + Time::Internal::PadNumber(minute,2) + ":" + Time::Internal::PadNumber(second,2) + "." + Time::Internal::PadNumber(millisecond,setting_show_thousands ? 3 : 2));
-    } else {
-        string hour = "--";
-        string minute = "--";
-        string second = "--";
-        string millisecond = "---";
-        UI::Text("\\$bbb" + minute + ":" + second + "." + millisecond.SubStr(0,setting_show_thousands ? 3 : 2));
-    }
-    
-}
+
 void Render() {
    
     if (!setting_enabled || setting_display == display_setting::Only_when_Openplanet_menu_is_open) return;
