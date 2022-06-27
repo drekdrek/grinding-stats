@@ -95,15 +95,18 @@ bool is_timer_running() {
 #if TMNEXT
         paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !multiplayer;
         auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
+        if (gui_player is null) return false;
         auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
         countdown = script_player.CurrentRaceTime < 0;
 #elif MP4
         paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed
         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
+        if (gui_player is null) return false;
         auto script_player = gui_player.ScriptAPI;
 #elif TURBO
         paused = playground.Interface.ManialinkScriptHandler.IsInGameMenuDisplayed;
         auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
+        if (gui_player is null) return false;
         auto script_player = gui_player;
 #endif
         if (gui_player !is null) {
