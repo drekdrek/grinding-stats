@@ -99,7 +99,7 @@ bool is_timer_running() {
         auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
         countdown = script_player.CurrentRaceTime < 0;
 #elif MP4
-        paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed
+        paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
         if (gui_player is null) return false;
         auto script_player = gui_player.ScriptAPI;
