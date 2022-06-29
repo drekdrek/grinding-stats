@@ -91,7 +91,16 @@ void map_handler() {
         auto challenge = app.Challenge;
         map_id = (challenge is null) ? "" : challenge.IdName;
 #endif
-        if (map_id != file.get_map_id()) {
+
+        if (app.Editor !is null) {
+            finishes.destroy();
+            resets.destroy();
+#if TMNEXT
+            respawns.destroy();
+#endif
+            session_time.destroy();
+            total_time.destroy();
+        } else if (map_id != file.get_map_id()) {
             OnDestroyed();
             finishes.destroy();
             resets.destroy();
