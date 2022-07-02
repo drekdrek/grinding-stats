@@ -63,9 +63,9 @@ bool setting_show_respawns_total = false;
 Timer session_time;
 Timer total_time;
 
-Respawns respawns;
-Finishes finishes;
-Resets resets;
+Respawns@ respawns = Respawns();
+Finishes@ finishes = Finishes();
+Resets@ resets = Resets();
 
 Files file;
 
@@ -113,10 +113,10 @@ void map_handler() {
             file = Files(map_id);
             session_time = Timer(0);
             total_time = Timer(file.get_time());
-            finishes = Finishes(file.get_finishes());
-            resets = Resets(file.get_resets());
+            @finishes = Finishes(file.get_finishes());
+            @resets = Resets(file.get_resets());
 #if TMNEXT
-            respawns = Respawns(file.get_respawns());
+            @respawns = Respawns(file.get_respawns());
 #endif
             timing = false;
             startnew(timer_handler);
