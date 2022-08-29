@@ -7,35 +7,33 @@ void render_ui() {
     running = is_timer_running();
     UI::SetNextWindowPos(200, 200, false ? UI::Cond::Always : UI::Cond::FirstUseEver);
     int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
-    if (!UI::IsOverlayShown()) {
-        window_flags |= UI::WindowFlags::NoInputs;
-    }
+    if (!UI::IsOverlayShown()) window_flags |= UI::WindowFlags::NoInputs;
     UI::Begin("Grinding Stats", window_flags);
-         UI::BeginGroup();  
+         UI::BeginGroup();
          if (setting_show_map_name) {
             UI::BeginTable("header",1,UI::TableFlags::SizingFixedFit);
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$ddd" + StripFormatCodes(map_info.Name));
+                UI::Text("\\$ddd" + format_string(map_info.Name));
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$888" + StripFormatCodes(map_info.AuthorNickName));
+                UI::Text("\\$888" + format_string(map_info.AuthorNickName));
             UI::EndTable();
         }
             UI::BeginTable("table",2,UI::TableFlags::SizingFixedFit);
-            if (setting_show_total_time && (!(!setting_show_duplicates && session_time.get_offset() == total_time.get_offset()))) {
+            if (setting_show_total_time && (!(!setting_show_duplicates && time.get_same()))) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::ClockO + " Total Time");
+                UI::Text("\\$ddd" + (running ? Icons::ClockO : Icons::PauseCircleO) + " Total Time");
                 UI::TableNextColumn();
-                UI::Text("\\$bbb" + total_time.get_time_string());
+                UI::Text("\\$bbb" + time.to_string(time.get_total_time()));
             }
             if (setting_show_session_time) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$ddd" + Icons::PlayCircleO + " Session Time");
+                UI::Text("\\$ddd" + (running ? Icons::PlayCircleO : Icons::PauseCircleO) + " Session Time");
                 UI::TableNextColumn();
-                UI::Text("\\$bbb" + session_time.get_time_string());
+                UI::Text("\\$bbb" + time.to_string(time.get_session_time()));
             }
             if (setting_show_finishes_session || setting_show_finishes_total) {
                 string text = setting_show_finishes_session ? "\\$bbb" + finishes.get_session_finishes() : "";
@@ -61,13 +59,14 @@ void render_ui() {
                 UI::TableNextColumn();
                 UI::Text(text);
             }
+#if TMNEXT
             if (setting_show_respawns_current || setting_show_respawns_session || setting_show_respawns_total) {
                 string text = setting_show_respawns_current ? "\\$bbb" + respawns.get_current_respawns() : "";
                 text += !(!setting_show_duplicates && respawns.get_current_respawns() == respawns.get_session_respawns()) && setting_show_respawns_current && setting_show_respawns_session ?
                     "\\$fff  /  \\$bbb" + respawns.get_session_respawns() :
                     !(!setting_show_duplicates && respawns.get_current_respawns() == respawns.get_session_respawns()) && setting_show_respawns_session ?
                         "\\$bbb" + respawns.get_session_respawns() :
-                        ""; 
+                        "";
                 text += !(!setting_show_duplicates && respawns.get_total_respawns() == respawns.get_session_respawns()) && setting_show_respawns_session && setting_show_respawns_total ?
                     "\\$fff  /  \\$bbb" + respawns.get_total_respawns() :
                     !(!setting_show_duplicates && respawns.get_total_respawns() == respawns.get_session_respawns()) && setting_show_respawns_total ?
@@ -79,13 +78,14 @@ void render_ui() {
                 UI::TableNextColumn();
                 UI::Text(text);
             }
+#endif
             UI::EndTable();
         UI::EndGroup();
     UI::End();
 }
 
 void Render() {
-   
+
     if (!setting_enabled || setting_display == display_setting::Only_when_Openplanet_menu_is_open) return;
     auto app = cast<CTrackMania>(GetApp());
 #if TMNEXT||MP4
@@ -104,6 +104,7 @@ void Render() {
     }
     }
     render_ui();
+    if (setting_show_debug) debug_render();
 }
 void RenderInterface() {
     if (!setting_enabled || setting_display != display_setting::Only_when_Openplanet_menu_is_open) return;
@@ -124,4 +125,14 @@ void RenderInterface() {
         }
     }
     render_ui();
+
 }
+
+void RenderSettings() {
+    files_render_settings();
+}
+
+string format_string(const string &in str) {
+    return setting_show_map_name_color ? ColoredString(str) : StripFormatCodes(str);
+}
+
