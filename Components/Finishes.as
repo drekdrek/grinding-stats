@@ -10,6 +10,10 @@ class Finishes {
 
     Finishes(uint total) {
         total_finishes = total;
+#if MP4 
+        total_finishes -= 1;
+        session_finishes -= 1;
+#endif
     }
     ~Finishes() {
         running = false;
