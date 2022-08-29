@@ -1,2 +1,5 @@
 *.zip
 *.op
+
+Debug*.as
+Dev*.as
