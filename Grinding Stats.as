@@ -20,6 +20,9 @@ bool setting_show_duplicates = false;
 [Setting name="Show map name/author" category="UI"]
 bool setting_show_map_name = true;
 
+[Setting name="Show map name/author with color codes" category="UI"]
+bool setting_show_map_name_color = true;
+
 [Setting name="Show thousands" category="UI"]
 bool setting_show_thousands = false;
 
@@ -46,7 +49,6 @@ bool setting_show_resets_total = true;
 uint setting_idle_speed = 2;
 [Setting name="Idle Detection Delay" category="Idle" description="The amount of time before Idling will begin."]
 uint setting_idle_time = 5;
-//respawns will be updated later, the component i made is slightly broken.
 
 [Setting name="Show Current Run's respawns" category="Stats"]
 bool setting_show_respawns_current = false;
@@ -54,14 +56,16 @@ bool setting_show_respawns_current = false;
 bool setting_show_respawns_session = false;
 [Setting name="Show Total respawns" category="Stats"]
 bool setting_show_respawns_total = false;
- 
+
+[Setting name="Show debug information" category="Debug"]
+bool setting_show_debug = false;
+
+[Setting name="Location of save Files" category="Files"]
+string setting_save_file_location = "";
 
 
 
-
-
-Timer session_time;
-Timer total_time;
+Timer@ time = Timer();
 
 Respawns@ respawns = Respawns();
 Finishes@ finishes = Finishes();
@@ -69,7 +73,7 @@ Resets@ resets = Resets();
 
 Files file;
 
-float start_idle = 0;
+
 bool running = true;
 bool timing = true;
 
@@ -78,6 +82,7 @@ void Main() {
 }
 
 void map_handler() {
+
     string map_id = "";
     auto app = GetApp();
     while (true) {
@@ -93,26 +98,30 @@ void map_handler() {
 #endif
 
         if (app.Editor !is null) {
-            finishes.destroy();
-            resets.destroy();
-#if TMNEXT
-            respawns.destroy();
-#endif
-            session_time.destroy();
-            total_time.destroy();
+            destroy();
         } else if (map_id != file.get_map_id()) {
-            OnDestroyed();
+            
+            destroy();
+            start(map_id);
+            
+        }
+    yield();
+    }
+}
+
+
+void destroy() {
+OnDestroyed();
             finishes.destroy();
             resets.destroy();
 #if TMNEXT
             respawns.destroy();
 #endif
-            session_time.destroy();
-            total_time.destroy();
-            
+            time.destroy();
+}
+void start(const string &in map_id) {
             file = Files(map_id);
-            session_time = Timer(0);
-            total_time = Timer(file.get_time());
+            @time = Timer(file.get_time());
             @finishes = Finishes(file.get_finishes());
             @resets = Resets(file.get_resets());
 #if TMNEXT
@@ -122,19 +131,14 @@ void map_handler() {
             startnew(timer_handler);
             finishes.start();
             resets.start();
+#if TMNEXT
             respawns.start();
-        }
-    yield();
-    }
+#endif
 }
 
-
-
-
-
 void OnDestroyed() {
-    
-    file.set_time(total_time.get_time());
+
+    file.set_time(time.get_total_time());
     file.set_finishes(finishes.get_total_finishes());
     file.set_resets(resets.get_total_resets());
     file.set_respawns(respawns.get_total_respawns());
