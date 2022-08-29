@@ -1,23 +1,26 @@
 //Timer.as
 class Timer {
 
-    uint64 start_time;
-    uint64 current_time;
-    uint64 time_dif;
-    uint64 time_offset;
-    bool running = false;
+    private uint64 start_time = Time::Now;
+    private uint64 current_time = Time::Now;
+    uint64 session_time = 0;
+    private uint64 session_offset = 0;
+    uint64 total_time = 0;
+    private uint64 total_offset = 0;
+    private bool running = false;
+    bool same = false;
 
-    Timer() {
-    }
+
+    Timer() {}
 
     Timer(uint64 offset) {
-        time_offset = offset;
-        start_time = 0;
-        current_time = 0;
-        time_dif = (current_time + time_offset) - start_time;
+        session_offset = 0;
+        total_offset = offset;
+        same = session_offset == total_offset ;
     }
+
     ~Timer() {
-        running = false;
+        destroy();
     }
     void destroy() {
         running = false;
@@ -26,10 +29,12 @@ class Timer {
     void start_timer() {
         while(running) {
             current_time = Time::Now;
-            time_dif = (current_time + time_offset) - start_time;
+            session_time = (current_time + session_offset) - start_time;
+            total_time = (current_time + total_offset) - start_time;
             yield();
         }
     }
+
     void start() {
         start_time = Time::Now;
         running = true;
@@ -37,25 +42,38 @@ class Timer {
     }
 
     void stop() {
-        time_offset = time_dif;
+        session_offset = session_time;
+        total_offset = total_time;
         running = false;
     }
 
-    uint get_time() {
-        return time_dif;
+    bool get_same() {
+        return same;
     }
-    uint get_offset() {
-        return time_offset;
+    private void set_same(bool b) {
+        same = b;
+    }
+    uint64 get_session_time() {
+        return session_time;
+    }
+    private void set_session_time(uint64 time) {
+        session_time = time;
+    }
+    uint64 get_total_time() {
+        return total_time;
+    }
+    private void set_total_time(uint64 time) {
+        total_time = time;
     }
 
-    string get_time_string() {
-        if (time_dif == 0) return "--:--:--";
-        int h = int(Math::Floor((time_dif) / 3600000));
-        int m =  int(Math::Floor((time_dif) / 60000 - h * 60));
-        int s =  int(Math::Floor((time_dif) / 1000 - h * 3600 - m * 60));
-        int ms = Text::ParseInt(Text::Format("%03d",(time_dif) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
+    string to_string(uint64 time) {
+        if (time == 0) return "--:--:--." + (setting_show_thousands ? "---":"--");
+        int h = int(Math::Floor((time) / 3600000));
+        int m =  int(Math::Floor((time) / 60000 - h * 60));
+        int s =  int(Math::Floor((time) / 1000 - h * 3600 - m * 60));
+        int ms = Text::ParseInt(Text::Format("%03d",(time) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
 
-       return "" + (h == 0 && !setting_show_hour_if_0 ? "" : Time::Internal::PadNumber(h,2) + ":") + Time::Internal::PadNumber(m,2) + ":" + Time::Internal::PadNumber(s,2) + "." + Time::Internal::PadNumber(ms,setting_show_thousands ? 3 : 2); 
+        return "" + (h == 0 && !setting_show_hour_if_0 ? "" : Time::Internal::PadNumber(h,2) + ":") + Time::Internal::PadNumber(m,2) + ":" + Time::Internal::PadNumber(s,2) + "." + Time::Internal::PadNumber(ms,setting_show_thousands ? 3 : 2);
     }
 }
 
@@ -65,23 +83,30 @@ void timer_handler() {
     while (timing) {
         if (!running && !handled) {
             handled = true;
-            session_time.stop();
-            total_time.stop();
+            time.stop();
         } else if (running && handled) {
             handled = false;
-            session_time.start();
-            total_time.start();
+            time.start();
         }
         yield();
     }
 }
 
+
+//mainly here for use in Debug.as//
+bool timer_idle = false;
+bool timer_paused = false;
+bool timer_playing = false;
+bool timer_multiplayer = false;
+bool timer_countdown = false;
+bool timer_spectating = false;
+float timer_start_idle = 0;
+uint64 timer_countdown_number = 0;
+#if TURBO
+int64 timer_gametime_turbo = 0;
+#endif
 bool is_timer_running() {
-    bool idle = false;
-    bool playing = false;
-    bool paused = false;
-    bool multiplayer = false;
-    bool countdown = false;
+
     auto app = GetApp();
 #if TMNEXT||MP4
     auto rootmap = app.RootMap;
@@ -90,42 +115,50 @@ bool is_timer_running() {
 #endif
     auto playground = app.CurrentPlayground;
     if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
-        multiplayer = app.PlaygroundScript is null;
+        timer_multiplayer = app.PlaygroundScript is null;
         auto terminal = playground.GameTerminals[0];
 #if TMNEXT
-        paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !multiplayer;
+        timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !timer_multiplayer;
         auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
         if (gui_player is null) return false;
         auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
-        countdown = script_player.CurrentRaceTime < 0;
-#elif MP4
-        paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
+        timer_countdown = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime < 0;
+        timer_countdown_number = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime;
+        timer_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
+#elif MP4.
+        timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
         if (gui_player is null) return false;
         auto script_player = gui_player.ScriptAPI;
 #elif TURBO
-        paused = playground.Interface.ManialinkScriptHandler.IsInGameMenuDisplayed;
+        if (timer_gametime_turbo != playground.Interface.ManialinkScriptHandler.GameTime) {
+            timer_gametime_turbo = playground.Interface.ManialinkScriptHandler.GameTime;
+
+            timer_paused = false;
+        } else {
+            timer_paused = true;
+        }
         auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
         if (gui_player is null) return false;
         auto script_player = gui_player;
 #endif
         if (gui_player !is null) {
-            playing = true;
+            timer_playing = true;
             if (script_player.Speed < int(setting_idle_speed) && script_player.Speed > -1 * int(setting_idle_speed)) {
-                if (start_idle == 0) {
-                    start_idle = Time::Now/10;
-                } else if (Time::Now/10 - start_idle > 100 * int(setting_idle_time)) {
-                    idle = true;
+                if (timer_start_idle == 0) {
+                    timer_start_idle = Time::Now/10;
+                } else if (Time::Now/10 - timer_start_idle > 100 * int(setting_idle_time)) {
+                    timer_idle = true;
                 }
             } else {
-                idle = false;
-                start_idle = 0;
+                timer_idle = false;
+                timer_start_idle = 0;
             }
         } else {
-            playing = false;
-            idle = false;
-            start_idle = 0;
+            timer_playing = false;
+            timer_idle = false;
+            timer_start_idle = 0;
         }
-    } 
-    return (!idle && playing && !paused && !countdown);
+    }
+    return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating);
 }
