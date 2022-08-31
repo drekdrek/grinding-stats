@@ -21,7 +21,10 @@ void render_ui() {
             UI::EndTable();
         }
             UI::BeginTable("table",2,UI::TableFlags::SizingFixedFit);
-            if (setting_show_total_time && (!(!setting_show_duplicates && time.get_same()))) {
+            if (setting_show_total_time &&
+                 (!time.get_same() ||
+                  (time.get_same() && !setting_show_session_time) ||
+                   (time.get_same() && setting_show_session_time && setting_show_duplicates))) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + (running ? Icons::ClockO : Icons::PauseCircleO) + " Total Time");
