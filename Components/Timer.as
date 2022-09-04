@@ -68,12 +68,8 @@ class Timer {
 
     string to_string(uint64 time) {
         if (time == 0) return "--:--:--." + (setting_show_thousands ? "---":"--");
-        int h = int(Math::Floor((time) / 3600000));
-        int m =  int(Math::Floor((time) / 60000 - h * 60));
-        int s =  int(Math::Floor((time) / 1000 - h * 3600 - m * 60));
-        int ms = Text::ParseInt(Text::Format("%03d",(time) % 1000).SubStr(0,(setting_show_thousands ? 3 : 2)));
-
-        return "" + (h == 0 && !setting_show_hour_if_0 ? "" : Time::Internal::PadNumber(h,2) + ":") + Time::Internal::PadNumber(m,2) + ":" + Time::Internal::PadNumber(s,2) + "." + Time::Internal::PadNumber(ms,setting_show_thousands ? 3 : 2);
+        string str = Time::Format(time,true,true,setting_show_hour_if_0,false);
+        return setting_show_thousands ? str: str.SubStr(0, str.Length - 1);
     }
 }
 
