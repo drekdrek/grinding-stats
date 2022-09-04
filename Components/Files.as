@@ -48,7 +48,6 @@ void files_render_settings() {
     
 }
 
-
 class Files {
     string folder_location = "";
     string map_id = "";
@@ -61,6 +60,7 @@ class Files {
     Files() {}
     Files(string id) {
         if (id == "" || id == "Unassigned") return;
+        
         folder_location = IO::FromDataFolder("") + "Grinding Stats";
         
 
@@ -95,6 +95,7 @@ class Files {
         resets = json_obj.HasKey("resets") ? json_obj["resets"] : 0;
         time = json_obj.HasKey("time") ? json_obj["time"] : 0;
         respawns = json_obj.HasKey("respawns") ? json_obj["respawns"] : 0;
+        print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
     }
     void write_file() {
         
@@ -106,6 +107,7 @@ class Files {
         json_obj["time"] = time;
         json_obj["respawns"] = respawns;
         Json::ToFile(json_file,json_obj);
+        print("Wrote finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " to " + json_file);
     }
 
     string get_map_id() {
