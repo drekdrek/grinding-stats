@@ -60,6 +60,9 @@ class Timer {
         session_time = time;
     }
     uint64 get_total_time() {
+        if (total_time == 0) {
+            total_time = (current_time + total_offset) - start_time;
+        }
         return total_time;
     }
     private void set_total_time(uint64 time) {
