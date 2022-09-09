@@ -3,6 +3,7 @@ bool are_you_sure_current = false;
 bool are_you_sure_all = false;
 uint are_you_sure_current_timeout = 0;
 uint are_you_sure_all_timeout = 0;
+[SettingsTab name="Files"]
 void files_render_settings() {
     if (are_you_sure_current && (Time::Now - are_you_sure_current_timeout) > 5000) {
         print(Time::Now - are_you_sure_current_timeout);
@@ -58,7 +59,7 @@ class Files {
     uint respawns = 0;
     Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns":0}');
     Files() {}
-    Files(string id) {
+    Files(const string &in id) {
         if (id == "" || id == "Unassigned") return;
         
         folder_location = IO::FromDataFolder("") + "Grinding Stats";

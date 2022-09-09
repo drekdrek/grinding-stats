@@ -131,10 +131,6 @@ void RenderInterface() {
 
 }
 
-void RenderSettings() {
-    files_render_settings();
-}
-
 string format_string(const string &in str) {
     return setting_show_map_name_color ? ColoredString(str) : StripFormatCodes(str);
 }
