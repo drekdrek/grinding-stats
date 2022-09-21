@@ -5,7 +5,3 @@ category = "Overlay"
 
 version = "2.0.7"
 siteid = 158
-#if MP4||TURBO
-[script]
-imports = ["Formatting.as","Time.as"]
-#endif
