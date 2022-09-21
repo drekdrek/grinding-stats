@@ -1,4 +1,4 @@
-//Respawns.as (currently only working for TMNEXT) //will be finished later, slightly broken
+//Respawns.as (currently only working for TMNEXT)
 class Respawns {
     private bool running = true;
     uint current_respawns = 0;
