@@ -60,10 +60,6 @@ bool setting_show_respawns_total = false;
 [Setting name="Show debug information" category="Debug"]
 bool setting_show_debug = false;
 
-[Setting name="Location of save Files" category="Files"]
-string setting_save_file_location = "";
-
-
 
 Timer@ time = Timer();
 
