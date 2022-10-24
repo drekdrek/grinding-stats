@@ -16,7 +16,7 @@ class Timer {
     Timer(uint64 offset) {
         session_offset = 0;
         total_offset = offset;
-        same = session_offset == total_offset ;
+        same = session_offset == total_offset;
     }
 
     ~Timer() {
@@ -99,6 +99,7 @@ bool timer_playing = false;
 bool timer_multiplayer = false;
 bool timer_countdown = false;
 bool timer_spectating = false;
+bool timer_focused = false;
 float timer_start_idle = 0;
 uint64 timer_countdown_number = 0;
 #if TURBO
@@ -124,11 +125,13 @@ bool is_timer_running() {
         timer_countdown = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime < 0;
         timer_countdown_number = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime;
         timer_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
+        timer_focused = app.InputPort.IsFocused;
 #elif MP4.
         timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
         if (gui_player is null) return false;
         auto script_player = gui_player.ScriptAPI;
+        timer_focused = app.InputPort.IsFocused;
 #elif TURBO
         if (timer_gametime_turbo != playground.Interface.ManialinkScriptHandler.GameTime) {
             timer_gametime_turbo = playground.Interface.ManialinkScriptHandler.GameTime;
@@ -140,6 +143,7 @@ bool is_timer_running() {
         auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
         if (gui_player is null) return false;
         auto script_player = gui_player;
+        timer_focused = true; // i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
 #endif
         if (gui_player !is null) {
             timer_playing = true;
@@ -159,5 +163,5 @@ bool is_timer_running() {
             timer_start_idle = 0;
         }
     }
-    return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating);
+    return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating && timer_focused);
 }
