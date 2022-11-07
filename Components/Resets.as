@@ -33,6 +33,22 @@ class Resets {
     private bool get_running() {return running;}
     private bool get_handled() {return handled;}
 
+    string to_string() {
+        string s = "";
+        if (setting_show_resets_session && 
+        !(session_resets == total_resets && !setting_show_duplicates)) {
+            s += "\\$bbb" + session_resets;
+        }
+        if (setting_show_resets_session && setting_show_resets_total &&
+         !(session_resets == total_resets && !setting_show_duplicates)) {
+            s += "\\$fff  /  ";
+        }
+        if (setting_show_resets_total) {
+            s += "\\$bbb" + total_resets;
+        }
+        return s;
+    }
+
     void reset_handler() {
         while(running){
             auto app = GetApp();
