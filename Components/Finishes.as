@@ -37,6 +37,22 @@ class Finishes {
     private bool get_handled() {return handled;}    
 
 
+    string to_string() {
+        string s = "";
+        if (setting_show_finishes_session && 
+        !(session_finishes == total_finishes && !setting_show_duplicates)) {
+            s += "\\$bbb" + session_finishes;
+        }
+        if (setting_show_finishes_session && setting_show_finishes_total &&
+         !(session_finishes == total_finishes && !setting_show_duplicates)) {
+            s += "\\$fff  /  ";
+        }
+        if (setting_show_finishes_total) {
+            s += "\\$bbb" + total_finishes;
+        }
+        return s;
+    }
+
     void finish_handler() {
         while(running){ 
             auto app = GetApp();

@@ -28,6 +28,34 @@ class Respawns {
     uint get_session_respawns() {return session_respawns;}
     private void set_session_respawns(uint s) {session_respawns = s;}
 
+    string to_string() {
+        if (setting_show_respawns_current || setting_show_respawns_session || setting_show_respawns_total) {
+
+            string s = "";
+            if (setting_show_respawns_current && 
+            !(current_respawns == session_respawns && current_respawns == total_respawns && !setting_show_duplicates)) { 
+                s += "\\$bbb" + current_respawns;
+            }
+            if (setting_show_respawns_current && setting_show_respawns_session &&
+            !(current_respawns == session_respawns && current_respawns == total_respawns && !setting_show_duplicates)) {
+                s += " \\$fff / ";
+            }
+            if (setting_show_respawns_session && && 
+            !(current_respawns == session_respawns && session_respawns == total_respawns && !setting_show_duplicates)) {
+                s += "\\$bbb" + session_respawns;
+            }
+            if ((setting_show_respawns_current || setting_show_respawns_session) && setting_show_respawns_total && 
+            !(current_respawns == session_respawns && session_respawns == total_respawns && !setting_show_duplicates)) {
+                s += " \\$fff / ";
+            }
+            if (setting_show_respawns_total) {
+                s += "\\$bbb" + total_respawns;
+            }
+            return s;
+
+        
+    }
+
     void respawn_handler() {
 #if TMNEXT
         while(running) {
