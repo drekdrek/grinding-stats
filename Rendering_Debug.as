@@ -1,4 +1,4 @@
-void timer_debug_render() {
+void debug_render() {
     int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
     UI::Begin("Grinding Stats", window_flags);
         UI::BeginGroup();
