@@ -1,4 +1,6 @@
 //Files.as
+
+
 bool are_you_sure_current = false;
 bool are_you_sure_all = false;
 uint are_you_sure_current_timeout = 0;
@@ -72,42 +74,52 @@ class Files {
         json_file = folder_location + '/' + map_id + '.json';
         read_file();
     }
-
-    void move_files_to_new_folder(const string &in new_folder) {
-        auto files = IO::IndexFolder(folder_location,true);
-        for (uint i = 0; i < files.Length; i++) {
-            IO::Move(files[i],new_folder);
-        }
-    }   
-
     void read_file() {
-        if (IO::FileExists(json_file)) {
-            IO::File file_obj(json_file);
-            file_obj.Open(IO::FileMode::Read);
-            auto content = file_obj.ReadToEnd();
-            file_obj.Close();
 
-            if (content == "" || content == "null") {json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns": 0}');} // if the file is empty or null set the 'json_obj' to an empty json object
-            else {
-                json_obj = Json::FromFile(json_file);
+        if (IO::FileExists(json_file)) {
+            auto content = Json::FromFile(json_file);
+            auto values = content.Get('finishes').GetType() | content.Get('resets').GetType() | content.Get('time').GetType() | content.Get('respawns').GetType();
+            if (content.GetType() != Json::Type::Null) {
+                if (values == 1) {
+                    read_file_new(content);
+                }
+                else if (values == 2) {
+                    read_file_legacy(content);
+                } 
+                else {
+                    UI::ShowNotification("Grinding Stats","Unable to parse the map's saved data.",UI::HSV(1.0f,1.0f,1.0f),15000);
+                }
             }
         }
-        finishes = json_obj.HasKey("finishes") ? json_obj["finishes"] : 0;
-        resets = json_obj.HasKey("resets") ? json_obj["resets"] : 0;
-        time = json_obj.HasKey("time") ? json_obj["time"] : 0;
-        respawns = json_obj.HasKey("respawns") ? json_obj["respawns"] : 0;
-        print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
     }
+    void read_file_new(const Json::Value &in content) {
+        finishes = Text::ParseUInt64(content.Get("finishes"));
+        resets = Text::ParseUInt64(content.Get('resets'));
+        time = Text::ParseUInt64(content.Get('time'));
+        respawns = Text::ParseUInt64(content.Get('respawns'));
+        print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
+    
+    }
+
+    void read_file_legacy(const Json::Value &in content) {
+
+        finishes = content.Get('finishes');
+        resets = content.Get('resets');
+        time = content.Get('time');
+        respawns = content.Get('respawns');
+        print("Read (legacy) finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
+    }
+
     void write_file() {
-        
         if (map_id == "" || map_id == "Unassigned") {
             return;
         }
-        json_obj["finishes"] = finishes;
-        json_obj["resets"] = resets;
-        json_obj["time"] = time;
-        json_obj["respawns"] = respawns;
-        Json::ToFile(json_file,json_obj);
+        auto content = Json::Object();
+        content["finishes"] = Text::Format("%6d",finishes);
+        content["resets"]   = Text::Format("%6d", resets);
+        content["time"]     = Text::Format("%11d", time);
+        content["respawns"] = Text::Format("%6d", respawns);
+        Json::ToFile(json_file,content);
         print("Wrote finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " to " + json_file);
     }
 
