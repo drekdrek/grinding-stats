@@ -22,7 +22,7 @@ void files_render_settings() {
             return;
         }
         if (!are_you_sure_current) {
-            UI::ShowNotification("Grinding Stats","Are you sure you want to reset the current map's data?",4000);
+            UI::ShowNotification("Grinding Stats","Are you sure you want to reset the current map's data?",5000);
             are_you_sure_current = true;
             are_you_sure_current_timeout = Time::Now;
             return;
@@ -36,12 +36,12 @@ void files_render_settings() {
     
     if (UI::Button("Reset all map data")) { 
         if (!are_you_sure_all) {
-            UI::ShowNotification("Grinding Stats","Are you sure you want to reset the current map's data?",4000);
+            UI::ShowNotification("Grinding Stats","Are you sure you want to reset ALL MAP DATA?",5000);
             are_you_sure_all = true;
             are_you_sure_all_timeout = Time::Now;
             return;
         } else {
-            UI::ShowNotification("Grinding Stats","Reset current map's data",4000);
+            UI::ShowNotification("Grinding Stats","Reset ALL MAP DATA",5000);
             file.reset_all();
             are_you_sure_all = false;
             return;
@@ -63,7 +63,6 @@ class Files {
     Files() {}
     Files(const string &in id) {
         if (id == "" || id == "Unassigned") return;
-        
         folder_location = IO::FromDataFolder("") + "Grinding Stats";
         
 
@@ -75,15 +74,22 @@ class Files {
         read_file();
     }
     void read_file() {
-
         if (IO::FileExists(json_file)) {
             auto content = Json::FromFile(json_file);
-            auto values = content.Get('finishes').GetType() | content.Get('resets').GetType() | content.Get('time').GetType() | content.Get('respawns').GetType();
+            uint value_types;
+            if (content.Get('map_id') is null) {
+                value_types = content.Get('finishes').GetType() | content.Get('resets').GetType() | content.Get('time').GetType() | content.Get('respawns').GetType();
+            } else {
+                read_file_legacy(content,true);
+                //value_types = content.Get('finishes').GetType() | content.Get('resets').GetType() | content.Get('time').GetType();
+                return;
+            }
+            
             if (content.GetType() != Json::Type::Null) {
-                if (values == 1) {
+                if (value_types == 1) {
                     read_file_new(content);
                 }
-                else if (values == 2) {
+                else if (value_types == 2) {
                     read_file_legacy(content);
                 } 
                 else {
@@ -97,17 +103,16 @@ class Files {
         resets = Text::ParseUInt64(content.Get('resets'));
         time = Text::ParseUInt64(content.Get('time'));
         respawns = Text::ParseUInt64(content.Get('respawns'));
-        print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
+        debug_print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
     
     }
 
-    void read_file_legacy(const Json::Value &in content) {
-
+    void read_file_legacy(const Json::Value &in content, bool is_old_dev = false) {
         finishes = content.Get('finishes');
         resets = content.Get('resets');
         time = content.Get('time');
-        respawns = content.Get('respawns');
-        print("Read (legacy) finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
+        respawns = is_old_dev ? 0 : content.Get('respawns');
+        debug_print("Read (legacy) finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
     }
 
     void write_file() {
@@ -120,7 +125,7 @@ class Files {
         content["time"]     = Text::Format("%11d", time);
         content["respawns"] = Text::Format("%6d", respawns);
         Json::ToFile(json_file,content);
-        print("Wrote finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " to " + json_file);
+        debug_print("Wrote finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " to " + json_file);
     }
 
     string get_map_id() {
@@ -171,5 +176,7 @@ class Files {
             IO::Delete(files[i]);
         }
     }
-
+    void debug_print(const string &in text) {
+        print(text);
+    }
 }
