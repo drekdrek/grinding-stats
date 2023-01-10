@@ -77,8 +77,12 @@ class Files {
         if (IO::FileExists(json_file)) {
             auto content = Json::FromFile(json_file);
             uint value_types;
-            if (content.Get('map_id') is null) {
-                value_types = content.Get('finishes').GetType() | content.Get('resets').GetType() | content.Get('time').GetType() | content.Get('respawns').GetType();
+            if (content.Get('map_id') is null && content.Get('respawns') !is null) {
+                value_types =
+                content.Get('finishes').GetType() |
+                 content.Get('resets').GetType() |
+                  content.Get('time').GetType() |
+                   content.Get('respawns').GetType();
             } else {
                 read_file_legacy(content,true);
                 //value_types = content.Get('finishes').GetType() | content.Get('resets').GetType() | content.Get('time').GetType();
@@ -104,7 +108,6 @@ class Files {
         time = Text::ParseUInt64(content.Get('time'));
         respawns = Text::ParseUInt64(content.Get('respawns'));
         debug_print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
-    
     }
 
     void read_file_legacy(const Json::Value &in content, bool is_old_dev = false) {
