@@ -61,6 +61,8 @@ bool setting_show_respawns_total = false;
 bool setting_show_debug = false;
 
 
+
+
 Timer@ time = Timer();
 
 Respawns@ respawns = Respawns();
@@ -69,11 +71,19 @@ Resets@ resets = Resets();
 
 Files file;
 
+bool recap_enabled = false;
+
+RecapElements recap;
 
 bool running = true;
 bool timing = true;
 
 void Main() {
+#if DEPENDENCY_NADEOSERVICES
+    NadeoServices::AddAudience("NadeoLiveServices");
+#endif
+
+    if (setting_recap_show_menu && !recap.started) recap.start(); 
     startnew(map_handler);
 }
 
