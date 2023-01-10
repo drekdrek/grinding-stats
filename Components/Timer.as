@@ -69,13 +69,15 @@ class Timer {
         total_time = time;
     }
 
+}
+
+namespace Timer {
     string to_string(uint64 time) {
         if (time == 0) return "--:--:--." + (setting_show_thousands ? "---":"--");
         string str = Time::Format(time,true,true,setting_show_hour_if_0,false);
         return setting_show_thousands ? str: str.SubStr(0, str.Length - 1);
     }
 }
-
 void timer_handler() {
     bool handled = true;
     timing = true;
