@@ -5,3 +5,7 @@ category = "Overlay"
 
 version = "2.0.10"
 siteid = 158
+
+[script]
+optional_dependencies = [ "NadeoServices" ]
+timeout = 5000
