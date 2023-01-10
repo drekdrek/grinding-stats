@@ -6,7 +6,7 @@ void debug_render() {
                 UI::TableNextColumn();
                 UI::Text("Timer ");
                 UI::TableNextColumn();
-                UI::Text(running ? "\\$0f0Running" : "\\$f00Stopped");
+                UI::Text(is_timer_running() ? "\\$0f0Running" : "\\$f00Stopped");
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("Idle");
