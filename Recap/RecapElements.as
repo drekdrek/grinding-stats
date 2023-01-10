@@ -168,6 +168,7 @@ class RecapElements {
                 filtered_elements.InsertLast(element);
         }
     }
+#if TMNEXT
     private void filter_campaign(RecapElements::campaign_filter campaign_filter) {
         if (campaigns.Length == 0 || current_campaign.Length == 0) {
             print("Fetching campaign data");
@@ -236,6 +237,7 @@ class RecapElements {
             }
         }
     }
+#endif
     private void filter_turbo(RecapElements::turbo_filter filter) {
         for(uint i = 0; i < elements.Length; i++) {
             RecapElement@ element = elements[i];

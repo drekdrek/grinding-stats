@@ -8,9 +8,9 @@ class RecapElement {
     uint finishes;
     uint resets;
     uint respawns;
-    #if MP4
+#if MP4
     string titlepack;
-    #endif
+#endif
 
 
     RecapElement() {
@@ -18,9 +18,9 @@ class RecapElement {
     }
 
     RecapElement(const string &in id) {
-        #if MP4
+#if MP4
         titlepack = "";
-        #endif
+#endif
         this.map_id = id;
         this.name = map_id;
         
