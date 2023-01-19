@@ -1,5 +1,4 @@
 void render_stats() {
-    running = is_timer_running();
 #if TMNEXT||MP4
     auto map_info = GetApp().RootMap.MapInfo;
 #elif TURBO
@@ -73,6 +72,7 @@ enum RenderMode {
 }
 
 void Render() {
+    running = is_timer_running();
     if (can_render(RenderMode::Normal)) {
 
     render_stats();
