@@ -1,4 +1,4 @@
-namespace RecapElements {
+namespace Recap {
     enum campaign_filter {
         current,
         all
@@ -11,7 +11,7 @@ namespace RecapElements {
         black
     }
 }
-class RecapElements {
+class Recap {
     array<string> totds;
     array<string> campaigns;
     array<string> current_campaign;
@@ -52,7 +52,7 @@ class RecapElements {
         }
         
     }
-    RecapElements() {
+    Recap() {
         elements = array<RecapElement@>();
         dirty = false;
     }
@@ -109,7 +109,7 @@ class RecapElements {
         count_total_time();
         filter_elements();
     }
-
+    
     private void load_files() {
         auto files = IO::IndexFolder(IO::FromDataFolder("")+"Grinding Stats",true);
         if (elements.Length != files.Length) {
@@ -142,15 +142,15 @@ class RecapElements {
             case recap_filter::all_with_name: this.filter_all(false); break;
 #endif
 #if TMNEXT
-            case recap_filter::current_campaign: this.filter_campaign(RecapElements::campaign_filter::current); break;
-            case recap_filter::all_nadeo_campaigns: this.filter_campaign(RecapElements::campaign_filter::all); break;
+            case recap_filter::current_campaign: this.filter_campaign(Recap::campaign_filter::current); break;
+            case recap_filter::all_nadeo_campaigns: this.filter_campaign(Recap::campaign_filter::all); break;
             case recap_filter::totd: this.filter_totd(); break;
 #elif TURBO
-            case recap_filter::turbo_white: this.filter_turbo(RecapElements::turbo_filter::white); break;
-            case recap_filter::turbo_green: this.filter_turbo(RecapElements::turbo_filter::green); break;
-            case recap_filter::turbo_blue: this.filter_turbo(RecapElements::turbo_filter::blue); break;
-            case recap_filter::turbo_red: this.filter_turbo(RecapElements::turbo_filter::red); break;
-            case recap_filter::turbo_black: this.filter_turbo(RecapElements::turbo_filter::black); break;
+            case recap_filter::turbo_white: this.filter_turbo(Recap::turbo_filter::white); break;
+            case recap_filter::turbo_green: this.filter_turbo(Recap::turbo_filter::green); break;
+            case recap_filter::turbo_blue: this.filter_turbo(Recap::turbo_filter::blue); break;
+            case recap_filter::turbo_red: this.filter_turbo(Recap::turbo_filter::red); break;
+            case recap_filter::turbo_black: this.filter_turbo(Recap::turbo_filter::black); break;
 #endif
             default: this.filter_all(true); break;
         }
@@ -169,7 +169,7 @@ class RecapElements {
         }
     }
 #if TMNEXT
-    private void filter_campaign(RecapElements::campaign_filter campaign_filter) {
+    private void filter_campaign(Recap::campaign_filter campaign_filter) {
         if (campaigns.Length == 0 || current_campaign.Length == 0) {
             print("Fetching campaign data");
             while (!NadeoServices::IsAuthenticated("NadeoLiveServices")) yield();
@@ -190,7 +190,7 @@ class RecapElements {
         
         for (uint i = 0; i < elements.Length; i++) {
             RecapElement@ element = elements[i];
-            if (campaign_filter == RecapElements::campaign_filter::all) {
+            if (campaign_filter == Recap::campaign_filter::all) {
                 for (uint j = 0; j < campaigns.Length; j++) {
                     if (campaigns[j] == element.map_id) {
                         filtered_elements.InsertLast(element);
@@ -238,7 +238,7 @@ class RecapElements {
         }
     }
 #endif
-    private void filter_turbo(RecapElements::turbo_filter filter) {
+    private void filter_turbo(Recap::turbo_filter filter) {
         for(uint i = 0; i < elements.Length; i++) {
             RecapElement@ element = elements[i];
             if(uint(Math::Floor((Text::ParseUInt64(element.stripped_name) - 1) / 40)) == uint(filter)) {
