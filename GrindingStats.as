@@ -1,5 +1,4 @@
-//Grinding Stats.as
-enum display_setting {
+enum displays {
     Only_when_Openplanet_menu_is_open,
     Always_except_when_interface_is_hidden,
     Always
@@ -12,7 +11,7 @@ bool setting_enabled = true;
 bool setting_lock_window_location = false;
 
 [Setting name="Display setting" category="UI"]
-display_setting setting_display = display_setting::Always_except_when_interface_is_hidden;
+displays setting_display = displays::Always_except_when_interface_is_hidden;
 
 [Setting name="Show Duplicates" category="UI" description="will show both total and session time, finishes and resets if they are the same "]
 bool setting_show_duplicates = false;
@@ -61,93 +60,19 @@ bool setting_show_respawns_total = false;
 bool setting_show_debug = false;
 
 
-
-
-Timer@ time = Timer();
-
-Respawns@ respawns = Respawns();
-Finishes@ finishes = Finishes();
-Resets@ resets = Resets();
-
-Files file;
+Data data;
+Recap recap;
 
 bool recap_enabled = false;
 
-RecapElements recap;
 
-bool running = true;
-bool timing = true;
-
-void Main() {
+void Main()
+{
+   print("main");
+    
 #if DEPENDENCY_NADEOSERVICES
     NadeoServices::AddAudience("NadeoLiveServices");
 #endif
-
     if (setting_recap_show_menu && !recap.started) recap.start(); 
-    startnew(map_handler);
-}
-
-void map_handler() {
-
-    string map_id = "";
-    auto app = GetApp();
-    while (true) {
-#if TMNEXT
-        auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
-        map_id = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
-#elif MP4
-        auto rootmap = app.RootMap;
-        map_id = (rootmap is null ) ? "" : rootmap.IdName;
-#elif TURBO
-        auto challenge = app.Challenge;
-        map_id = (challenge is null) ? "" : challenge.IdName;
-#endif
-
-        if (app.Editor !is null) {
-            destroy();
-        } else if (map_id != file.get_map_id()) {
-            
-            destroy();
-            start(map_id);
-            
-        }
-    yield();
-    }
-}
-
-
-void destroy() {
-OnDestroyed();
-            finishes.destroy();
-            resets.destroy();
-#if TMNEXT
-            respawns.destroy();
-#endif
-            time.destroy();
-}
-void start(const string &in map_id) {
-            file = Files(map_id);
-            @time = Timer(file.get_time());
-            @finishes = Finishes(file.get_finishes());
-            @resets = Resets(file.get_resets());
-#if TMNEXT
-            @respawns = Respawns(file.get_respawns());
-#endif
-            timing = false;
-            startnew(timer_handler);
-            finishes.start();
-            resets.start();
-#if TMNEXT
-            respawns.start();
-#endif
-}
-
-void OnDestroyed() {
-
-    file.set_time(time.get_total_time());
-    file.set_finishes(finishes.get_total_finishes());
-    file.set_resets(resets.get_total_resets());
-    file.set_respawns(respawns.get_total_respawns());
-    file.write_file();
-
+    
 }
