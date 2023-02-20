@@ -67,12 +67,9 @@ bool recap_enabled = false;
 
 
 void Main()
-{
-   print("main");
-    
+{    
 #if DEPENDENCY_NADEOSERVICES
     NadeoServices::AddAudience("NadeoLiveServices");
 #endif
     if (setting_recap_show_menu && !recap.started) recap.start(); 
-    
 }
