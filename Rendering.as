@@ -21,35 +21,35 @@ void render_stats() {
             }
             UI::BeginTable("table",2,UI::TableFlags::SizingFixedFit);
                 if (setting_show_total_time &&
-                 (!time.get_same() ||
-                  (time.get_same() && !setting_show_session_time) ||
-                   (time.get_same() && setting_show_session_time && setting_show_duplicates))) {
+                 (!data.timer.same ||
+                  (data.timer.same && !setting_show_session_time) ||
+                   (data.timer.same && setting_show_session_time && setting_show_duplicates))) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$ddd" + (is_timer_running() ? Icons::ClockO : Icons::PauseCircleO) + " Total Time");
+                UI::Text("\\$ddd" + (data.timer.isRunning() ? Icons::ClockO : Icons::PauseCircleO) + " Total Time");
                 UI::TableNextColumn();
-                UI::Text("\\$bbb" + Timer::to_string(time.get_total_time()));
+                UI::Text("\\$bbb" + Timer::to_string(data.timer.total));
             }
             if (setting_show_session_time) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
-                UI::Text("\\$ddd" + (is_timer_running() ? Icons::PlayCircleO : Icons::PauseCircleO) + " Session Time");
+                UI::Text("\\$ddd" + (data.timer.isRunning() ? Icons::PlayCircleO : Icons::PauseCircleO) + " Session Time");
                 UI::TableNextColumn();
-                UI::Text("\\$bbb" + Timer::to_string(time.get_session_time()));
+                UI::Text("\\$bbb" + Timer::to_string(data.timer.session));
             }
             if (setting_show_finishes_session || setting_show_finishes_total) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::Flag + " Finishes");
                 UI::TableNextColumn();
-                UI::Text("\\$bbb" + finishes.to_string());
+                UI::Text("\\$bbb" + data.finishes.toString());
             }
             if (setting_show_resets_session || setting_show_resets_total) {
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::Repeat + " Resets");
                 UI::TableNextColumn();
-                UI::Text(resets.to_string());
+                UI::Text(data.resets.toString());
             }
 #if TMNEXT
             if (setting_show_respawns_current || setting_show_respawns_total || setting_show_respawns_session) {
@@ -57,7 +57,7 @@ void render_stats() {
                 UI::TableNextColumn();
                 UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
                 UI::TableNextColumn();
-                UI::Text(respawns.to_string());
+                UI::Text(data.respawns.toString());
             }
 #endif
             UI::EndTable();
@@ -72,24 +72,19 @@ enum RenderMode {
 }
 
 void Render() {
-    running = is_timer_running();
-    if (can_render(RenderMode::Normal)) {
-
-    render_stats();
-    }
-    if (setting_show_debug) debug_render();
+    if (can_render(RenderMode::Normal)) render_stats();
 }
 void RenderInterface() {
     if (setting_recap_show_menu) RenderRecap();
-    if (can_render(RenderMode::Interface))
-    render_stats();
+
+    if (can_render(RenderMode::Interface)) render_stats();
 
 }
 
 
 bool can_render(RenderMode rendermode) {
-    if (rendermode == RenderMode::Normal && (!setting_enabled || setting_display == display_setting::Only_when_Openplanet_menu_is_open)) return false;
-    if (rendermode == RenderMode::Interface && (!setting_enabled || setting_display != display_setting::Only_when_Openplanet_menu_is_open)) return false;
+    if (rendermode == RenderMode::Normal && (!setting_enabled || setting_display == displays::Only_when_Openplanet_menu_is_open)) return false;
+    if (rendermode == RenderMode::Interface && (!setting_enabled || setting_display != displays::Only_when_Openplanet_menu_is_open)) return false;
     
     auto app = cast<CTrackMania>(GetApp());
 #if TMNEXT||MP4
@@ -99,7 +94,7 @@ bool can_render(RenderMode rendermode) {
 #endif
     if (map is null || map.MapInfo.MapUid == "" || app.Editor !is null) return false;
     if (app.CurrentPlayground is null || app.CurrentPlayground.Interface is null  ||
-     (setting_display == display_setting::Always_except_when_interface_is_hidden && !UI::IsGameUIVisible())) return false;
+     (setting_display == displays::Always_except_when_interface_is_hidden && !UI::IsGameUIVisible())) return false;
     return true;
 }
 
