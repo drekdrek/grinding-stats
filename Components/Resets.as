@@ -1,55 +1,29 @@
 //Resets.as
-class Resets {
-
-    private bool running;
-    private bool handled = false;
-    private uint session_resets = 0;
-    private uint total_resets = 0;
+class Resets : Component {
 
     Resets() {}
 
-    Resets(uint total) {
-        total_resets = total;
-    }
-    ~Resets() {
-        running = false;
-    }
-    void destroy() {
-        running = false;
-    }
-    void start() {
-        running = true;
-        startnew(CoroutineFunc(this.reset_handler));
+    Resets(uint64 total) {
+        super(total);
     }
 
-    private void set_session_resets(uint r) {session_resets = r;}
-    private void set_total_resets(uint r) {total_resets = r;}
-    private void set_running(bool g) {running = g;}
-    private void set_handled(bool h) {handled = h;}
-
-
-    uint get_session_resets(){return session_resets;}
-    uint get_total_resets()  {return total_resets;}
-    private bool get_running() {return running;}
-    private bool get_handled() {return handled;}
-
-    string to_string() {
+    string toString() override {
         string s = "";
         if (setting_show_resets_session && 
-        !(session_resets == total_resets && !setting_show_duplicates)) {
-            s += "\\$bbb" + session_resets;
+        !(session == total && !setting_show_duplicates)) {
+            s += "\\$bbb" + session;
         }
         if (setting_show_resets_session && setting_show_resets_total &&
-         !(session_resets == total_resets && !setting_show_duplicates)) {
+         !(session == total && !setting_show_duplicates)) {
             s += "\\$fff  /  ";
         }
         if (setting_show_resets_total) {
-            s += "\\$bbb" + total_resets;
+            s += "\\$bbb" + total;
         }
         return s;
     }
 
-    void reset_handler() {
+    void handler() override {
         while(running){
             auto app = GetApp();
             auto playground = app.CurrentPlayground;
@@ -62,8 +36,8 @@ class Resets {
                     auto post = (cast<CSmScriptPlayer>(gui_player.ScriptAPI)).Post;
                     if (!handled && post == CSmScriptPlayer::EPost::Char) {
                         handled = true;
-                        session_resets += 1;
-                        total_resets += 1;
+                        session += 1;
+                        total += 1;
                     }
                     if (handled && post != CSmScriptPlayer::EPost::Char)
                         handled = false;
@@ -74,8 +48,8 @@ class Resets {
                     auto race_state = gui_player.ScriptAPI.RaceState;
                     if (!handled && race_state == CTrackManiaPlayer::ERaceState::BeforeStart) {
                         handled = true;
-                        session_resets += 1;
-                        total_resets += 1;
+                        session += 1;
+                        total += 1;
                     }
                     if (handled && race_state != CTrackManiaPlayer::ERaceState::BeforeStart)
                         handled = false;
@@ -87,8 +61,8 @@ class Resets {
                     auto race_state = gui_player.RaceState;
                     if (!handled && race_state == CTrackManiaPlayer::ERaceState::BeforeStart && ui_sequence == CGamePlaygroundUIConfig::EUISequence::Playing) {
                         handled = true;
-                        session_resets += 1;
-                        total_resets += 1;
+                        session += 1;
+                        total += 1;
                     }
                     if (handled && race_state != CTrackManiaPlayer::ERaceState::BeforeStart && (race_state != CTrackManiaPlayer::ERaceState::Finished && !network.PlaygroundClientScriptAPI.IsSpectator))
                         handled = false;

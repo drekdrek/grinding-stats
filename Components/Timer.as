@@ -1,100 +1,24 @@
 //Timer.as
-class Timer {
+class Timer : Component {
 
     private uint64 start_time = Time::Now;
     private uint64 current_time = Time::Now;
-    uint64 session_time = 0;
     private uint64 session_offset = 0;
-    uint64 total_time = 0;
     private uint64 total_offset = 0;
-    private bool running = false;
     bool same = false;
 
 
     Timer() {}
 
-    Timer(uint64 offset) {
+    Timer(uint64 _total_offset) {
+        
         session_offset = 0;
-        total_offset = offset;
+        total_offset = _total_offset;   
         same = session_offset == total_offset;
+        total = _total_offset;
     }
 
-    ~Timer() {
-        destroy();
-    }
-    void destroy() {
-        running = false;
-    }
-
-    void start_timer() {
-        while(running) {
-            current_time = Time::Now;
-            session_time = (current_time + session_offset) - start_time;
-            total_time = (current_time + total_offset) - start_time;
-            yield();
-        }
-    }
-
-    void start() {
-        start_time = Time::Now;
-        running = true;
-        startnew(CoroutineFunc(start_timer));
-    }
-
-    void stop() {
-        session_offset = session_time;
-        total_offset = total_time;
-        running = false;
-    }
-
-    bool get_same() {
-        return same;
-    }
-    private void set_same(bool b) {
-        same = b;
-    }
-    uint64 get_session_time() {
-        return session_time;
-    }
-    private void set_session_time(uint64 time) {
-        session_time = time;
-    }
-    uint64 get_total_time() {
-        if (total_time == 0) {
-            total_time = (current_time + total_offset) - start_time;
-        }
-        return total_time;
-    }
-    private void set_total_time(uint64 time) {
-        total_time = time;
-    }
-
-}
-
-namespace Timer {
-    string to_string(uint64 time) {
-        if (time == 0) return "--:--:--." + (setting_show_thousands ? "---":"--");
-        string str = Time::Format(time,true,true,setting_show_hour_if_0,false);
-        return setting_show_thousands ? str: str.SubStr(0, str.Length - 1);
-    }
-}
-void timer_handler() {
-    bool handled = true;
-    timing = true;
-    while (timing) {
-        if (!running && !handled) {
-            handled = true;
-            time.stop();
-        } else if (running && handled) {
-            handled = false;
-            time.start();
-        }
-        yield();
-    }
-}
-
-
-//mainly here for use in Debug.as//
+    bool isRunning() {
 bool timer_idle = false;
 bool timer_paused = false;
 bool timer_playing = false;
@@ -107,8 +31,6 @@ uint64 timer_countdown_number = 0;
 #if TURBO
 int64 timer_gametime_turbo = 0;
 #endif
-bool is_timer_running() {
-
     auto app = GetApp();
 #if TMNEXT||MP4
     auto rootmap = app.RootMap;
@@ -166,4 +88,36 @@ bool is_timer_running() {
         }
     }
     return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating && timer_focused);
+}
+
+
+    void start_timer() {
+        while(running) {
+            current_time = Time::Now;
+            session = (current_time + session_offset) - start_time;
+            total = (current_time + total_offset) - start_time;
+            yield();
+        }
+    }
+
+    void start() override{
+        start_time = Time::Now;
+        running = true;
+        startnew(CoroutineFunc(start_timer));
+    }
+
+    void stop() {
+        session_offset = session;
+        total_offset = total;
+        running = false;
+    }
+
+}
+
+namespace Timer {
+    string to_string(uint64 time) {
+        if (time == 0) return "--:--:--." + (setting_show_thousands ? "---":"--");
+        string str = Time::Format(time,true,true,setting_show_hour_if_0,false);
+        return setting_show_thousands ? str: str.SubStr(0, str.Length - 1);
+    }
 }

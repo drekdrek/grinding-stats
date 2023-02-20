@@ -1,59 +1,29 @@
 //Finishes.as
-class Finishes {
-
-    private bool running = true;
-    private bool handled = false;
-    uint session_finishes = 0;
-    uint total_finishes = 0;
+class Finishes : Component{
 
     Finishes() {}
 
-    Finishes(uint total) {
-        total_finishes = total;
-#if MP4 
-        total_finishes -= 1;
-        session_finishes -= 1;
-#endif
+    Finishes(uint64 total) {
+        super(total);
     }
-    ~Finishes() {
-        running = false;
-    }
-    void destroy() {
-        running = false;
-    }
-    void start() {
-        running = true;
-        startnew(CoroutineFunc(finish_handler));
-    }
-    private void set_session_finishes(uint f) {session_finishes = f;}
-    private void set_total_finishes(uint f) {total_finishes = f;}
-    private void set_running(bool g) {running = g;}
-    private void set_handled(bool h) {handled = h;}
 
-
-    uint get_session_finishes(){return session_finishes;}
-    uint get_total_finishes()  {return total_finishes;}
-    private bool get_running() {return running;}
-    private bool get_handled() {return handled;}    
-
-
-    string to_string() {
+    string toString() override {
         string s = "";
         if (setting_show_finishes_session && 
-        !(session_finishes == total_finishes && !setting_show_duplicates)) {
-            s += "\\$bbb" + session_finishes;
+        !(session == total && !setting_show_duplicates)) {
+            s += "\\$bbb" + session;
         }
         if (setting_show_finishes_session && setting_show_finishes_total &&
-         !(session_finishes == total_finishes && !setting_show_duplicates)) {
+         !(session == total && !setting_show_duplicates)) {
             s += "\\$fff  /  ";
         }
         if (setting_show_finishes_total) {
-            s += "\\$bbb" + total_finishes;
+            s += "\\$bbb" + total;
         }
         return s;
     }
-
-    void finish_handler() {
+    
+    void handler() override {
         while(running){ 
             auto app = GetApp();
             auto playground = app.CurrentPlayground;
@@ -66,8 +36,8 @@ class Finishes {
                 if (gui_player !is null) {
                     if (!handled && ui_sequence == CGamePlaygroundUIConfig::EUISequence::Finish) {
                         handled = true;
-                        session_finishes += 1;
-                        total_finishes += 1;
+                        session += 1;
+                        total += 1;
                     } 
                     if (handled && ui_sequence != CGamePlaygroundUIConfig::EUISequence::Finish)
                         handled = false;
@@ -78,8 +48,8 @@ class Finishes {
                     auto race_state = gui_player.ScriptAPI.RaceState;
                     if (!handled && race_state == CTrackManiaPlayer::ERaceState::Finished) {
                         handled = true;
-                        session_finishes += 1;
-                        total_finishes += 1;
+                        session += 1;
+                        total += 1;
                     }
                     if (handled && race_state != CTrackManiaPlayer::ERaceState::Finished) 
                         handled = false;
@@ -90,8 +60,8 @@ class Finishes {
                     auto race_state = gui_player.RaceState;
                     if (!handled && race_state == CTrackManiaPlayer::ERaceState::Finished && !network.PlaygroundClientScriptAPI.IsSpectator) {
                         handled = true;
-                        session_finishes += 1;
-                        total_finishes += 1;
+                        session += 1;
+                        total += 1;
                     }
                     if (handled && race_state != CTrackManiaPlayer::ERaceState::Finished)
                         handled = false;

@@ -1,49 +1,30 @@
 //Respawns.as (currently only working for TMNEXT)
-class Respawns {
-    private bool running = true;
-    uint current_respawns = 0;
-    uint session_respawns = 0;
-    uint total_respawns = 0;
+class Respawns : Component {
+    uint current;
 
     Respawns() {}
 
     Respawns(uint total) {
-        total_respawns = total;
+        super(total);
+        current = 0;
     }
-    ~Respawns() {
-        running = false;
-    }
-    void destroy() {
-        running = false; 
-    }
-    void start() {
-        running = true;
-        startnew(CoroutineFunc(respawn_handler));
-    }
-    
-    uint get_total_respawns() {return total_respawns;}
-    private void set_total_respawns(uint t) {total_respawns = t;}
-    uint get_current_respawns() {return current_respawns;}
-    private void set_current_respawns(uint c) {current_respawns = c;}
-    uint get_session_respawns() {return session_respawns;}
-    private void set_session_respawns(uint s) {session_respawns = s;}
 
-    string to_string() {
-        if (!setting_show_duplicates && (current_respawns == session_respawns && current_respawns == total_respawns)) {
-            return "\\$bbb" + current_respawns;
+    string toString() override {
+        if (!setting_show_duplicates && (current == session && current == total)) {
+            return "\\$bbb" + current;
         }
         if (!setting_show_duplicates && 
-        (current_respawns != session_respawns && session_respawns == total_respawns) ||
-        (current_respawns == session_respawns && session_respawns != total_respawns)) {
-            return "\\$bbb" + current_respawns + " \\$fff / " 
-              + "\\$bbb" + total_respawns;
+        (current != session && session == total) ||
+        (current == session && session != total)) {
+            return "\\$bbb" + current + " \\$fff / " 
+              + "\\$bbb" + total;
         }
-        return "\\$bbb" + current_respawns + " \\$fff / " 
-              + "\\$bbb" + session_respawns + " \\$fff / "
-              + "\\$bbb" + total_respawns;
+        return "\\$bbb" + current + " \\$fff / " 
+              + "\\$bbb" + session + " \\$fff / "
+              + "\\$bbb" + total;
 }
 
-    void respawn_handler() {
+    void handler() override {
 #if TMNEXT
         while(running) {
             auto app = GetApp();
@@ -55,13 +36,13 @@ class Respawns {
                     auto script = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
                     auto post = script.Post;
 
-                    if (script.Score.NbRespawnsRequested > current_respawns && post != CSmScriptPlayer::EPost::Char) {
-                        current_respawns += 1;
-                        session_respawns += 1;
-                        total_respawns += 1;   
+                    if (script.Score.NbRespawnsRequested > current && post != CSmScriptPlayer::EPost::Char) {
+                        current += 1;
+                        session += 1;
+                        total += 1;   
                     }
                     if (script.Score.NbRespawnsRequested == 0) {
-                        current_respawns = 0;
+                        current = 0;
                     }
                 }
             }
