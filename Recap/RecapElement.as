@@ -75,12 +75,14 @@ class RecapElement {
             if (map_id == infos[i].MapUid) {
                 string color = "";
                 uint series = uint(Math::Floor((Text::ParseUInt64(infos[i].NameForUi) - 1) / 40));
-                switch(series) {
-                    case 0: color = "\\$FFF"; break;
-                    case 1: color = "\\$6F6"; break;
-                    case 2: color = "\\$36C"; break;
-                    case 3: color = "\\$C33"; break;
-                    case 4: color = "\\$666"; break;
+                if (setting_recap_show_colors) {
+                    switch(series) {
+                        case 0: color = "\\$FFF"; break;
+                        case 1: color = "\\$6F6"; break;
+                        case 2: color = "\\$36C"; break;
+                        case 3: color = "\\$C33"; break;
+                        case 4: color = "\\$666"; break;
+                    }
                 }
                 name = color + infos[i].NameForUi;
             }
