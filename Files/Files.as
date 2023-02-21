@@ -59,6 +59,7 @@ class Files {
     uint finishes = 0;
     uint resets = 0;
     uint time = 0;
+    bool loaded = false;
     uint respawns = 0;
     Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns":0}');
     Files() {}
@@ -103,6 +104,7 @@ class Files {
                 }
             }
         }
+        loaded = true;
     }
     void read_file_new(const Json::Value &in content) {
         finishes = Text::ParseUInt64(content.Get("finishes"));
