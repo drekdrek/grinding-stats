@@ -17,7 +17,6 @@ class Timer : Component {
     Timer() {}
 
     Timer(uint64 _total_offset) {
-        
         session_offset = 0;
         total_offset = _total_offset;   
         same = session_offset == total_offset;
@@ -26,70 +25,65 @@ class Timer : Component {
 
 
     bool isRunning() {
-bool timer_idle = false;
-bool timer_paused = false;
-bool timer_playing = false;
-bool timer_multiplayer = false;
-bool timer_countdown = false;
-bool timer_spectating = false;
-bool timer_focused = false;
-    auto app = GetApp();
+        bool timer_idle = false;
+        bool timer_paused = false;
+        bool timer_playing = false;
+        bool timer_multiplayer = false;
+        bool timer_countdown = false;
+        bool timer_spectating = false;
+        bool timer_focused = false;
+        auto app = GetApp();
 #if TMNEXT||MP4
-    auto rootmap = app.RootMap;
+        auto rootmap = app.RootMap;
 #elif TURBO
-    auto rootmap = app.Challenge;
+        auto rootmap = app.Challenge;
 #endif
-    auto playground = app.CurrentPlayground;
-    if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
-        timer_multiplayer = app.PlaygroundScript is null;
-        auto terminal = playground.GameTerminals[0];
+        auto playground = app.CurrentPlayground;
+        if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
+            timer_multiplayer = app.PlaygroundScript is null;
+            auto terminal = playground.GameTerminals[0];
 #if TMNEXT
-        timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !timer_multiplayer;
-        auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
-        if (gui_player is null) return false;
-        auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
-        timer_countdown = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime < 0;
-        timer_countdown_number = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime;
-        timer_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
-        timer_focused = app.InputPort.IsFocused;
+            timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !timer_multiplayer;
+            auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
+            if (gui_player is null) return false;
+            auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
+            timer_countdown = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime < 0;
+            timer_countdown_number = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime;
+            timer_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
+            timer_focused = app.InputPort.IsFocused;
 #elif MP4
-        timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
-        auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
-        if (gui_player is null) return false;
-        auto script_player = gui_player.ScriptAPI;
-        timer_focused = app.InputPort.IsFocused;
+            timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
+            auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
+            if (gui_player is null) return false;
+            auto script_player = gui_player.ScriptAPI;
+            timer_focused = app.InputPort.IsFocused;
 #elif TURBO
-        if (timer_gametime_turbo != playground.Interface.ManialinkScriptHandler.GameTime) {
-            timer_gametime_turbo = playground.Interface.ManialinkScriptHandler.GameTime;
-
-            timer_paused = false;
-        } else {
-            timer_paused = true;
-        }
-        auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
-        if (gui_player is null) return false;
-        auto script_player = gui_player;
-        timer_focused = true; // i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
+            timer_paused = playground.Interface.InterfaceRoot.IsFocused;
+            auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
+            if (gui_player is null) return false;
+            auto script_player = gui_player;
+            timer_focused = true; // i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
 #endif
-        if (gui_player !is null) {
-            timer_playing = true;            
-            if (Math::Abs(script_player.Speed) < setting_idle_speed) {
-                if (timer_start_idle == 0) timer_start_idle = Time::Now;
-                if ((Time::Now - timer_start_idle) > (1000 * setting_idle_time)) {
-                    timer_idle = true;
+            if (gui_player !is null) {
+                timer_playing = true;            
+                if (Math::Abs(script_player.Speed) < int(setting_idle_speed)) {
+                    if (timer_start_idle == 0) timer_start_idle = Time::Now;
+                    if ((Time::Now - timer_start_idle) > (1000 * setting_idle_time)) {
+                        timer_idle = true;
+                    }
+                } else {
+                    timer_start_idle = 0;
+                    timer_idle = false;
                 }
             } else {
-                timer_start_idle = 0;
+                timer_playing = false;
                 timer_idle = false;
+                timer_start_idle = 0;
             }
-        } else {
-            timer_playing = false;
-            timer_idle = false;
-            timer_start_idle = 0;
         }
+        print(!timer_idle + " " + timer_playing + " " + !timer_paused + " " + !timer_countdown + " " + !timer_spectating + " " + timer_focused);
+        return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating && timer_focused);
     }
-    return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating && timer_focused);
-}
 
 
     void count_time() {
@@ -110,12 +104,7 @@ bool timer_focused = false;
     void handler() override {
         bool handled = true;
         timing = true;
-        bool is_running_cache;
         while(timing) {
-            if (isRunning() != is_running_cache) {
-                 is_running_cache = isRunning();
-                 print(is_running_cache);
-            }
             if (!isRunning() && !handled) {
                 handled = true;
                 stop();
