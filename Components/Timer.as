@@ -118,7 +118,7 @@ int64 timer_gametime_turbo = 0;
                 handled = false;
                 start_time = Time::Now;
                 running = true;
-                startnew(CoroutineFunc(start_timer));
+                startnew(CoroutineFunc(count_time));
             }
             yield();
         }
