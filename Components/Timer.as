@@ -6,6 +6,7 @@ class Timer : Component {
     private uint64 session_offset = 0;
     private uint64 total_offset = 0;
     bool same = false;
+    bool timing = false;
 
 
     Timer() {}
@@ -91,7 +92,7 @@ int64 timer_gametime_turbo = 0;
 }
 
 
-    void start_timer() {
+    void count_time() {
         while(running) {
             current_time = Time::Now;
             session = (current_time + session_offset) - start_time;
@@ -100,17 +101,29 @@ int64 timer_gametime_turbo = 0;
         }
     }
 
-    void start() override{
-        start_time = Time::Now;
-        running = true;
-        startnew(CoroutineFunc(start_timer));
-    }
-
     void stop() {
         session_offset = session;
         total_offset = total;
         running = false;
     }
+
+    void handler() override {
+        bool handled = true;
+        timing = true;
+        while(timing) {
+            if (!isRunning() && !handled) {
+                handled = true;
+                stop();
+            } else if (isRunning() && handled) {
+                handled = false;
+                start_time = Time::Now;
+                running = true;
+                startnew(CoroutineFunc(start_timer));
+            }
+            yield();
+        }
+    }   
+
 
 }
 
