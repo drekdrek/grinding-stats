@@ -10,27 +10,11 @@ class Data {
     Files files;
 
     private bool cloud_save_failed = false;
-    private bool timing = false;
     Data()  {
         startnew(CoroutineFunc(map_handler));
         if (!IO::FolderExists(folder_location)) IO::CreateFolder(folder_location);
-
     }
 
-    void timer_handler() {
-    bool handled = true;
-    timing = true;
-    while(timing) {
-        if (!timer.isRunning() && !handled) {
-            handled = true;
-            timer.stop();
-        } else if (timer.isRunning() && handled) {
-            handled = false;
-            timer.start();
-        }
-        yield();
-    }
-}
 
     
     void map_handler() {
@@ -50,7 +34,7 @@ class Data {
         if (mapId != mapUid && app.Editor is null) { 
             //the map has changed and we are not in the editor.
             //the map has changed //we should save and then load the new map's data
-            timing = false;
+            timer.timing = false;
             auto saving = startnew(CoroutineFunc(save));
             while (saving.IsRunning()) yield();
             mapUid = mapId;
@@ -69,8 +53,7 @@ class Data {
 
 
     void start() {
-        print('start');
-        startnew(CoroutineFunc(timer_handler));
+        timer.start();
         finishes.start();
         resets.start();
         respawns.start();
@@ -79,11 +62,10 @@ class Data {
 
     void load() {
         if (mapUid == "" || mapUid == "Unassigned") return;
-        
+
         {
             files = Files(mapUid);
-            while (files.time == 0) yield();
-            
+            while (!files.loaded) yield();
             finishes = Finishes(files.finishes);
             resets = Resets(files.resets);
             timer = Timer(files.time);
