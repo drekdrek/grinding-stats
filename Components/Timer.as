@@ -7,6 +7,11 @@ class Timer : Component {
     private uint64 total_offset = 0;
     bool same = false;
     bool timing = false;
+    uint64 timer_start_idle = 0;
+    uint64 timer_countdown_number = 0;
+#if TURBO
+    int64 timer_gametime_turbo = 0;
+#endif
 
 
     Timer() {}
@@ -19,6 +24,7 @@ class Timer : Component {
         total = _total_offset;
     }
 
+
     bool isRunning() {
 bool timer_idle = false;
 bool timer_paused = false;
@@ -27,11 +33,6 @@ bool timer_multiplayer = false;
 bool timer_countdown = false;
 bool timer_spectating = false;
 bool timer_focused = false;
-float timer_start_idle = 0;
-uint64 timer_countdown_number = 0;
-#if TURBO
-int64 timer_gametime_turbo = 0;
-#endif
     auto app = GetApp();
 #if TMNEXT||MP4
     auto rootmap = app.RootMap;
@@ -51,7 +52,7 @@ int64 timer_gametime_turbo = 0;
         timer_countdown_number = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime;
         timer_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
         timer_focused = app.InputPort.IsFocused;
-#elif MP4.
+#elif MP4
         timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
         auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
         if (gui_player is null) return false;
@@ -71,16 +72,15 @@ int64 timer_gametime_turbo = 0;
         timer_focused = true; // i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
 #endif
         if (gui_player !is null) {
-            timer_playing = true;
-            if (script_player.Speed < int(setting_idle_speed) && script_player.Speed > -1 * int(setting_idle_speed)) {
-                if (timer_start_idle == 0) {
-                    timer_start_idle = Time::Now/10;
-                } else if (Time::Now/10 - timer_start_idle > 100 * int(setting_idle_time)) {
+            timer_playing = true;            
+            if (Math::Abs(script_player.Speed) < setting_idle_speed) {
+                if (timer_start_idle == 0) timer_start_idle = Time::Now;
+                if ((Time::Now - timer_start_idle) > (1000 * setting_idle_time)) {
                     timer_idle = true;
                 }
             } else {
-                timer_idle = false;
                 timer_start_idle = 0;
+                timer_idle = false;
             }
         } else {
             timer_playing = false;
@@ -110,7 +110,12 @@ int64 timer_gametime_turbo = 0;
     void handler() override {
         bool handled = true;
         timing = true;
+        bool is_running_cache;
         while(timing) {
+            if (isRunning() != is_running_cache) {
+                 is_running_cache = isRunning();
+                 print(is_running_cache);
+            }
             if (!isRunning() && !handled) {
                 handled = true;
                 stop();
@@ -123,8 +128,6 @@ int64 timer_gametime_turbo = 0;
             yield();
         }
     }   
-
-
 }
 
 namespace Timer {
