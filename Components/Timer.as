@@ -81,7 +81,6 @@ class Timer : Component {
                 timer_start_idle = 0;
             }
         }
-        print(!timer_idle + " " + timer_playing + " " + !timer_paused + " " + !timer_countdown + " " + !timer_spectating + " " + timer_focused);
         return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating && timer_focused);
     }
 
