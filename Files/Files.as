@@ -58,7 +58,7 @@ class Files {
     string json_file = "";
     uint finishes = 0;
     uint resets = 0;
-    uint time = 0;
+    uint64 time = 0;
     bool loaded = false;
     uint respawns = 0;
     Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns":0}');
@@ -154,10 +154,10 @@ class Files {
     void set_resets(uint r) {
         resets = r;
     }
-    void set_time(uint t) {
+    void set_time(uint64 t) {
         time = t;   
     }
-    uint get_time() {
+    uint64 get_time() {
         return time;
     }
     uint get_finishes() {
