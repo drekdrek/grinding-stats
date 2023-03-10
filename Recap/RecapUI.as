@@ -91,9 +91,9 @@ void RenderRecap() {
         UI::EndMenuBar();
         }
 #if TURBO
-uint columns = 4;
-#elif MP4||TMNEXT
 uint columns = 5;
+#elif MP4||TMNEXT
+uint columns = 6;
 #endif
         if (UI::BeginTable("Items",columns,UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY)) {
             //headers
@@ -103,11 +103,13 @@ uint columns = 5;
                                          UI::TableColumnFlags::PreferSortDescending | UI::TableColumnFlags::NoHide,150);
             UI::TableSetupColumn("Finishes",UI::TableColumnFlags::WidthFixed,100);
             UI::TableSetupColumn("Resets",UI::TableColumnFlags::WidthFixed,100);
+            UI::TableSetupColumn("Last Played", UI::TableColumnFlags::WidthFixed,100);
 #if TMNEXT
             UI::TableSetupColumn("Respawns",UI::TableColumnFlags::WidthFixed,100);
 #elif MP4
             UI::TableSetupColumn("Title pack",UI::TableColumnFlags::WidthFixed|UI::TableColumnFlags::NoResize,100);
 #endif
+            
             UI::TableHeadersRow();
 
             //sorting
@@ -125,6 +127,7 @@ uint columns = 5;
                         string resets;
                         string respawns;
                         string stripped_name;
+                        string time_modified;
 #if MP4
                         string titlepack;
 #endif
@@ -137,6 +140,7 @@ uint columns = 5;
                         finishes = "" + element.finishes;
                         resets = "" + element.resets;
                         respawns = "" + element.respawns;
+                        time_modified = Time::FormatString("%F %r",element.modified_time);
 #if MP4
                         titlepack = element.titlepack;
 #endif
@@ -148,6 +152,7 @@ uint columns = 5;
                         finishes = "" + recap.total_finishes;
                         resets = "" + recap.total_resets;
                         respawns = "" + recap.total_respawns;
+                        time_modified = "--:--:--";
                     }
                         UI::TableNextRow();
                         UI::TableSetColumnIndex(0);
@@ -164,13 +169,16 @@ uint columns = 5;
                         UI::Text(finishes);
                         UI::TableSetColumnIndex(3);
                         UI::Text(resets);
-#if TMNEXT
                         UI::TableSetColumnIndex(4);
+                        UI::Text(time_modified);
+#if TMNEXT
+                        UI::TableSetColumnIndex(5);
                         UI::Text(respawns);
 #elif MP4
-                        UI::TableSetColumnIndex(4);
+                        UI::TableSetColumnIndex(5);
                         UI::Text(titlepack);
 #endif
+                        
                 }
             }
         UI::EndTable();

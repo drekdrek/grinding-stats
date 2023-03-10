@@ -78,7 +78,8 @@ class Recap {
                     case 1: filtered_elements.Sort(function(a,b) {return a.time_uint < b.time_uint;});break;
                     case 2: filtered_elements.Sort(function(a,b) {return a.finishes < b.finishes;});break;
                     case 3: filtered_elements.Sort(function(a,b) {return a.resets < b.resets;});break;
-                    case 4: filtered_elements.Sort(function(a,b) {return a.respawns < b.respawns;});break;
+                    case 4: filtered_elements.Sort(function(a,b) {return a.modified_time < b.modified_time;});break;
+                    case 5: filtered_elements.Sort(function(a,b) {return a.respawns < b.respawns;});break;
                 }
             }
             else if (spec.SortDirection == UI::SortDirection::Descending) {
@@ -87,7 +88,9 @@ class Recap {
                     case 1: filtered_elements.Sort(function(a,b) {return a.time_uint > b.time_uint;});break;
                     case 2: filtered_elements.Sort(function(a,b) {return a.finishes > b.finishes;});break;
                     case 3: filtered_elements.Sort(function(a,b) {return a.resets > b.resets;});break;
-                    case 4: filtered_elements.Sort(function(a,b) {return a.respawns > b.respawns;});break;
+                    case 4: filtered_elements.Sort(function(a,b) {return a.modified_time > b.modified_time;});break;
+                    case 5: filtered_elements.Sort(function(a,b) {return a.respawns > b.respawns;});break;
+                   
                 }
             }
             yield();

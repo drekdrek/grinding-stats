@@ -15,4 +15,8 @@ class RecapFiles : Files {
 
         return;
     }
+
+        int64 get_modified_time() {
+        return IO::FileModifiedTime(json_file);
+    }
 }
