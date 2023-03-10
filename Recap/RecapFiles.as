@@ -1,5 +1,7 @@
 class RecapFiles : Files {
 
+    RecapFiles() {}
+
     RecapFiles(const string &in id) {
         super(id);
     }

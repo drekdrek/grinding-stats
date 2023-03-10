@@ -1,13 +1,14 @@
 class RecapElement {
-    Files file;
+    RecapFiles file;
     string map_id;
     string name;
     string stripped_name;
     string time;
-    uint time_uint;
-    uint finishes;
-    uint resets;
-    uint respawns;
+    uint64 time_uint;
+    uint64 finishes;
+    uint64 resets;
+    uint64 respawns;
+    int64 modified_time;
 #if MP4
     string titlepack;
 #endif
@@ -31,6 +32,7 @@ class RecapElement {
         finishes = file.get_finishes();
         resets = file.get_resets();
         respawns = file.get_respawns();
+        modified_time =  file.get_modified_time();
         startnew(CoroutineFunc(get_name_from_api));
         
     }
