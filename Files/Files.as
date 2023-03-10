@@ -115,12 +115,24 @@ class Files {
     }
 
     void read_file_legacy(const Json::Value &in content, bool is_old_dev = false) {
+
+        
+        time = is_file_time_corrupt(content) ? 0 : content.Get('time');
         finishes = content.Get('finishes');
         resets = content.Get('resets');
-        time = content.Get('time');
         respawns = is_old_dev ? 0 : content.Get('respawns');
         debug_print("Read (legacy) finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
     }
+
+
+    bool is_file_time_corrupt(const Json::Value &in content) {
+        int64 signed_time = content.Get('time');
+        if (signed_time < 0) return true;
+        if (signed_time > 100000000 && finishes == 0 && resets == 0) return true; 
+        
+        return false;
+    }
+
 
     void write_file() {
         if (map_id == "" || map_id == "Unassigned") {
