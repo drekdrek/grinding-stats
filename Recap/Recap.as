@@ -23,6 +23,7 @@ class Recap {
     uint total_finishes = 0;
     uint total_resets = 0;
     uint total_respawns = 0;
+    MedalTotals@ medal_totals = MedalTotals();
 
     private void count_total_time() {
         total_time = 0;
@@ -50,8 +51,20 @@ class Recap {
         for (uint i = 0; i < filtered_elements.Length; i++) {
             total_respawns += filtered_elements[i].respawns;
         }
-        
     }
+
+    private void count_totals_for_medals() {
+        medal_totals.count_totals(filtered_elements);
+    }
+
+    private void count_totals() {
+        count_total_finishes();
+        count_total_resets();
+        count_total_respawns();
+        count_total_time();
+        count_totals_for_medals();
+    }
+
     Recap() {
         elements = array<RecapElement@>();
         dirty = false;
@@ -78,8 +91,19 @@ class Recap {
                     case 1: filtered_elements.Sort(function(a,b) {return a.time_uint < b.time_uint;});break;
                     case 2: filtered_elements.Sort(function(a,b) {return a.finishes < b.finishes;});break;
                     case 3: filtered_elements.Sort(function(a,b) {return a.resets < b.resets;});break;
+#if TMNEXT
+                    case 4: filtered_elements.Sort(function(a,b) {return a.respawns < b.respawns;});break;
+                    case 5: filtered_elements.Sort(function(a,b) {return a.time_to_bronze.sort_val < b.time_to_bronze.sort_val;});break;
+                    case 6: filtered_elements.Sort(function(a,b) {return a.time_to_silver.sort_val < b.time_to_silver.sort_val;});break;
+                    case 7: filtered_elements.Sort(function(a,b) {return a.time_to_gold.sort_val < b.time_to_gold.sort_val;});break;
+                    case 8: filtered_elements.Sort(function(a,b) {return a.time_to_author.sort_val < b.time_to_author.sort_val;});break;
+                    case 9: filtered_elements.Sort(function(a,b) {return a.modified_time < b.modified_time;});break;
+#elif MP4
+                    case 4: filtered_elements.Sort(function(a,b) {return a.titlepack < b.titlepack;});break;
+                    case 5: filtered_elements.Sort(function(a,b) {return a.modified_time < b.modified_time;});break;
+#else
                     case 4: filtered_elements.Sort(function(a,b) {return a.modified_time < b.modified_time;});break;
-                    case 5: filtered_elements.Sort(function(a,b) {return a.respawns < b.respawns;});break;
+#endif
                 }
             }
             else if (spec.SortDirection == UI::SortDirection::Descending) {
@@ -88,9 +112,19 @@ class Recap {
                     case 1: filtered_elements.Sort(function(a,b) {return a.time_uint > b.time_uint;});break;
                     case 2: filtered_elements.Sort(function(a,b) {return a.finishes > b.finishes;});break;
                     case 3: filtered_elements.Sort(function(a,b) {return a.resets > b.resets;});break;
+#if TMNEXT
+                    case 4: filtered_elements.Sort(function(a,b) {return a.respawns > b.respawns;});break;
+                    case 5: filtered_elements.Sort(function(a,b) {return a.time_to_bronze.sort_val > b.time_to_bronze.sort_val;});break;
+                    case 6: filtered_elements.Sort(function(a,b) {return a.time_to_silver.sort_val > b.time_to_silver.sort_val;});break;
+                    case 7: filtered_elements.Sort(function(a,b) {return a.time_to_gold.sort_val > b.time_to_gold.sort_val;});break;
+                    case 8: filtered_elements.Sort(function(a,b) {return a.time_to_author.sort_val > b.time_to_author.sort_val;});break;
+                    case 9: filtered_elements.Sort(function(a,b) {return a.modified_time > b.modified_time;});break;
+#elif MP4
+                    case 4: filtered_elements.Sort(function(a,b) {return a.titlepack > b.titlepack;});break;
+                    case 5: filtered_elements.Sort(function(a,b) {return a.modified_time > b.modified_time;});break;
+#else
                     case 4: filtered_elements.Sort(function(a,b) {return a.modified_time > b.modified_time;});break;
-                    case 5: filtered_elements.Sort(function(a,b) {return a.respawns > b.respawns;});break;
-                   
+#endif
                 }
             }
             yield();
@@ -106,19 +140,16 @@ class Recap {
         current_campaign = array<string>();
         totds = array<string>();
         await(startnew(CoroutineFunc(load_files)));
-        count_total_finishes();
-        count_total_resets();
-        count_total_respawns();
-        count_total_time();
+        count_totals();
         filter_elements();
     }
     
     private void load_files() {
-        auto files = IO::IndexFolder(IO::FromDataFolder("")+"Grinding Stats",true);
+        auto files = IO::IndexFolder(folder_location, true);
         if (elements.Length != files.Length) {
             elements = array<RecapElement@>();
         } else {return;}
-        uint path_length = (IO::FromDataFolder('') + "Grinding Stats/").Length;
+        uint path_length = (folder_location + '/').Length;
         //loading files will be done in batches of 100
         uint batches = uint(Math::Ceil(files.Length / 100.0));
         for (uint i = 0; i < batches; i++) {
@@ -131,10 +162,7 @@ class Recap {
             yield();
         }
         dirty = true;
-        count_total_finishes();
-        count_total_resets();
-        count_total_respawns();
-        count_total_time();
+        count_totals();
         recap.filter_elements();
     }
     void filter_elements() {
@@ -159,10 +187,7 @@ class Recap {
         }
         this.dirty = true;
 
-        count_total_finishes();
-        count_total_resets();
-        count_total_respawns();
-        count_total_time();
+        count_totals();
     }
     private void filter_all(bool uploaded) {
         for (uint i = 0; i < elements.Length; i++) {

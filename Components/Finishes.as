@@ -11,14 +11,14 @@ class Finishes : Component{
         string s = "";
         if (setting_show_finishes_session && 
         !(session == total && !setting_show_duplicates)) {
-            s += "\\$bbb" + session;
+            s += COLOR_GRAY + session;
         }
         if (setting_show_finishes_session && setting_show_finishes_total &&
          !(session == total && !setting_show_duplicates)) {
-            s += "\\$fff  /  ";
+            s += COLOR_WHITE + '  /  ';
         }
         if (setting_show_finishes_total) {
-            s += "\\$bbb" + total;
+            s += COLOR_GRAY + total;
         }
         return s;
     }

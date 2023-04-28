@@ -8,15 +8,18 @@ class RecapElement {
     uint64 finishes;
     uint64 resets;
     uint64 respawns;
+
+    FileMedalTime time_to_bronze;
+    FileMedalTime time_to_silver;
+    FileMedalTime time_to_gold;
+    FileMedalTime time_to_author;
+
     int64 modified_time;
 #if MP4
     string titlepack;
 #endif
 
-
-    RecapElement() {
-        
-    }
+    RecapElement() {}
 
     RecapElement(const string &in id) {
 #if MP4
@@ -32,6 +35,12 @@ class RecapElement {
         finishes = file.get_finishes();
         resets = file.get_resets();
         respawns = file.get_respawns();
+
+        time_to_bronze = file.get_time_to_bronze();
+        time_to_silver = file.get_time_to_silver();
+        time_to_gold = file.get_time_to_gold();
+        time_to_author = file.get_time_to_author();
+
         modified_time =  file.get_modified_time();
         startnew(CoroutineFunc(get_name_from_api));
         

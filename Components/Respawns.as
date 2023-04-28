@@ -10,18 +10,50 @@ class Respawns : Component {
     }
 
     string toString() override {
-        if (!setting_show_duplicates && (current == session && current == total)) {
-            return "\\$bbb" + current;
+        // session / total display
+        if (!setting_show_respawns_current) {
+            if (
+                !setting_show_respawns_session
+                || (!setting_show_duplicates && session == total)
+            ) {
+                return COLOR_GRAY + total;
+            }
+            if (!setting_show_respawns_total) {
+                return COLOR_GRAY + session;
+            }
+            return COLOR_GRAY + session + COLOR_WHITE + "  /  " + COLOR_GRAY + total;
         }
+
+        // display one value only
+        if (
+            (!setting_show_respawns_session && !setting_show_respawns_total) // if only current enabled
+            || (!setting_show_respawns_session && !setting_show_duplicates && current == total) // session disabled and current and total are same
+            || (!setting_show_respawns_total && !setting_show_duplicates && current == session) // total disabled and current and session are same
+            || (!setting_show_duplicates && current == session && current == total) // all 3 are the same
+        ) {
+            return COLOR_GRAY + current;
+        }
+
+        // current / total display
+        if (!setting_show_respawns_session) {
+            return COLOR_GRAY + current + COLOR_WHITE + "  /  " + COLOR_GRAY + total;
+        }
+
+        // current / session display
+        if (!setting_show_respawns_total) {
+            return COLOR_GRAY + current + COLOR_WHITE + "  /  " + COLOR_GRAY + session;
+        }
+
+        // 2 out of 3 are the same (and not showing duplicates)
         if (!setting_show_duplicates && 
         (current != session && session == total) ||
         (current == session && session != total)) {
-            return "\\$bbb" + current + " \\$fff / " 
-              + "\\$bbb" + total;
+            return COLOR_GRAY + current + COLOR_WHITE + "  /  " + COLOR_GRAY + total;
         }
-        return "\\$bbb" + current + " \\$fff / " 
-              + "\\$bbb" + session + " \\$fff / "
-              + "\\$bbb" + total;
+
+        return COLOR_GRAY + current + COLOR_WHITE + "  /  " 
+              + COLOR_GRAY + session + COLOR_WHITE + "  /  "
+              + COLOR_GRAY + total;
 }
 
     void handler() override {
