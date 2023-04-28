@@ -79,8 +79,8 @@ class FileMedalTime {
 
         return COLOR_GREEN + (
             medal_time_type == MedalTimeType::MedalAchievementTimeUnknown
-            ? '+'
-            : Medal::to_string(_time.value)
+                ? '+'
+                : Medal::to_string(_time.value)
         );
     }
 }

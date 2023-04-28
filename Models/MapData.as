@@ -40,8 +40,8 @@ class MapData {
         if (local_pb > 0) {
             map_times.personal_best = local_pb;
             startnew(CoroutineFunc(data.medals.lock_earlier_medals));
-            load_online_pb();
         }
+        load_online_pb();
     }
 
     private void load_online_pb() {

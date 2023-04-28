@@ -82,10 +82,10 @@ class MedalTotals {
         auto remaining_items = _item_count - medal_count;
 
         if (remaining_items == 0) {
-            return COLOR_BRIGHT_GREEN + ' (100%)';
+            return COLOR_LIGHT_GREEN + ' (100%)';
         } else {
             auto acq_perc = Math::Round((float(medal_count) / _item_count) * 100);
-            return COLOR_BRIGHT_ORANGE + ' (' + medal_count + '/' + _item_count + ' - ' + acq_perc + '%)';
+            return COLOR_LIGHT_ORANGE + ' (' + medal_count + '/' + _item_count + ' - ' + acq_perc + '%)';
         }
     }
 
@@ -93,7 +93,7 @@ class MedalTotals {
         uint medal_count, uint unknown_medal_count, uint total_time
     ) {
         auto all_medals_acq = _item_count == (medal_count + unknown_medal_count);
-        auto color_prefix = all_medals_acq ? COLOR_BRIGHT_GREEN : '';
+        auto color_prefix = all_medals_acq ? COLOR_LIGHT_GREEN : '';
 
         if (all_medals_acq && total_time == 0) {
             return color_prefix + '+';
