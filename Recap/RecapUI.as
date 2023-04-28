@@ -58,6 +58,7 @@ string recap_filter_string(recap_filter filter) {
 
 recap_filter current_recap = recap_filter::all;
 void RenderRecap() {
+    UI::PushStyleVar(UI::StyleVar::Alpha, float(1.022));
     if(UI::Begin("Grinding Stats Recap",setting_recap_show_menu,UI::WindowFlags::NoCollapse | UI::WindowFlags::MenuBar)) {
         //menu bar
         if (UI::BeginMenuBar()) {
@@ -92,7 +93,9 @@ void RenderRecap() {
         }
 #if TURBO
 uint columns = 5;
-#elif MP4||TMNEXT
+#elif TMNEXT
+uint columns = 10;
+#elif MP4
 uint columns = 6;
 #endif
         if (UI::BeginTable("Items",columns,UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY)) {
@@ -103,13 +106,32 @@ uint columns = 6;
                                          UI::TableColumnFlags::PreferSortDescending | UI::TableColumnFlags::NoHide,150);
             UI::TableSetupColumn("Finishes",UI::TableColumnFlags::WidthFixed,100);
             UI::TableSetupColumn("Resets",UI::TableColumnFlags::WidthFixed,100);
-            UI::TableSetupColumn("Last Played", UI::TableColumnFlags::WidthFixed,100);
 #if TMNEXT
             UI::TableSetupColumn("Respawns",UI::TableColumnFlags::WidthFixed,100);
+            UI::TableSetupColumn(
+                "Bronze" + recap.medal_totals.bronze_perc,
+                UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::PreferSortDescending,
+                150
+            );
+            UI::TableSetupColumn(
+                "Silver" + recap.medal_totals.silver_perc,
+                UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::PreferSortDescending,
+                150
+            );
+            UI::TableSetupColumn(
+                "Gold" + recap.medal_totals.gold_perc,
+                UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::PreferSortDescending,
+                150
+            );
+            UI::TableSetupColumn(
+                "Author" + recap.medal_totals.author_perc,
+                UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::PreferSortDescending,
+                150
+            );
 #elif MP4
             UI::TableSetupColumn("Title pack",UI::TableColumnFlags::WidthFixed|UI::TableColumnFlags::NoResize,100);
 #endif
-            
+            UI::TableSetupColumn("Last Played", UI::TableColumnFlags::WidthFixed, 100);
             UI::TableHeadersRow();
 
             //sorting
@@ -126,6 +148,10 @@ uint columns = 6;
                         string finishes;
                         string resets;
                         string respawns;
+                        string time_to_bronze;
+                        string time_to_silver;
+                        string time_to_gold;
+                        string time_to_author;
                         string stripped_name;
                         string time_modified;
 #if MP4
@@ -140,6 +166,10 @@ uint columns = 6;
                         finishes = "" + element.finishes;
                         resets = "" + element.resets;
                         respawns = "" + element.respawns;
+                        time_to_bronze = element.time_to_bronze.to_string();
+                        time_to_silver = element.time_to_silver.to_string();
+                        time_to_gold = element.time_to_gold.to_string();
+                        time_to_author = element.time_to_author.to_string();
                         time_modified = Time::FormatString("%F %r",element.modified_time);
 #if MP4
                         titlepack = element.titlepack;
@@ -152,6 +182,10 @@ uint columns = 6;
                         finishes = "" + recap.total_finishes;
                         resets = "" + recap.total_resets;
                         respawns = "" + recap.total_respawns;
+                        time_to_bronze = recap.medal_totals.bronze_totals;
+                        time_to_silver = recap.medal_totals.silver_totals;
+                        time_to_gold = recap.medal_totals.gold_totals;
+                        time_to_author = recap.medal_totals.author_totals;
                         time_modified = "--:--:--";
                     }
                         UI::TableNextRow();
@@ -169,22 +203,35 @@ uint columns = 6;
                         UI::Text(finishes);
                         UI::TableSetColumnIndex(3);
                         UI::Text(resets);
+#if TMNEXT
+                        UI::TableSetColumnIndex(4);
+                        UI::Text(respawns);
+                        UI::TableSetColumnIndex(5);
+                        UI::Text(time_to_bronze);
+                        UI::TableSetColumnIndex(6);
+                        UI::Text(time_to_silver);
+                        UI::TableSetColumnIndex(7);
+                        UI::Text(time_to_gold);
+                        UI::TableSetColumnIndex(8);
+                        UI::Text(time_to_author);
+                        UI::TableSetColumnIndex(9);
+                        UI::Text(time_modified);
+#elif MP4
+                        UI::TableSetColumnIndex(4);
+                        UI::Text(titlepack);
+                        UI::TableSetColumnIndex(5);
+                        UI::Text(time_modified);
+#else
                         UI::TableSetColumnIndex(4);
                         UI::Text(time_modified);
-#if TMNEXT
-                        UI::TableSetColumnIndex(5);
-                        UI::Text(respawns);
-#elif MP4
-                        UI::TableSetColumnIndex(5);
-                        UI::Text(titlepack);
 #endif
-                        
                 }
             }
         UI::EndTable();
         }
     }
     UI::End();
+    UI::PopStyleVar();
 }
 
 void add_selectable(recap_filter filter) {

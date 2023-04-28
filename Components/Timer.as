@@ -121,7 +121,7 @@ class Timer : Component {
 namespace Timer {
     string to_string(uint64 time) {
         if (time == 0) return "--:--:--." + (setting_show_thousands ? "---":"--");
-        string str = Time::Format(time,true,true,setting_show_hour_if_0,false);
-        return setting_show_thousands ? str: str.SubStr(0, str.Length - 1);
+        string str = Time::Format(time, setting_show_fractions_of_second, true, setting_show_hour_if_0, false);
+        return (!setting_show_fractions_of_second || setting_show_thousands) ? str : str.SubStr(0, str.Length - 1);
     }
 }

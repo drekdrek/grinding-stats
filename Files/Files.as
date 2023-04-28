@@ -53,29 +53,31 @@
 
 class Files {
     bool created = false;
-    string folder_location = "";
+    bool loaded = false;
+
     string map_id = "";
     string json_file = "";
+
     uint finishes = 0;
     uint resets = 0;
     uint64 time = 0;
-    bool loaded = false;
     uint respawns = 0;
-    Json::Value json_obj = Json::Parse('{"finishes": 0,"resets": 0,"time": 0,"respawns":0}');
+    FileMedalTime@ time_to_bronze = FileMedalTime();
+    FileMedalTime@ time_to_silver = FileMedalTime();
+    FileMedalTime@ time_to_gold = FileMedalTime();
+    FileMedalTime@ time_to_author = FileMedalTime();
+
     Files() {}
+
     Files(const string &in id) {
         if (id == "" || id == "Unassigned") return;
-        folder_location = IO::FromDataFolder("") + "Grinding Stats";
-        
-
-
-        if (!IO::FolderExists(folder_location)) IO::CreateFolder(folder_location);
 
         map_id = id;
         json_file = folder_location + '/' + map_id + '.json';
         read_file();
         created = true;
     }
+
     void read_file() {
         if (IO::FileExists(json_file)) {
             auto content = Json::FromFile(json_file);
@@ -106,24 +108,54 @@ class Files {
         }
         loaded = true;
     }
+
     void read_file_new(const Json::Value &in content) {
         finishes = Text::ParseUInt64(content.Get("finishes"));
         resets = Text::ParseUInt64(content.Get('resets'));
         time = Text::ParseUInt64(content.Get('time'));
         respawns = Text::ParseUInt64(content.Get('respawns'));
         debug_print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
+
+        if (content.HasKey('timeToBronze'))
+            time_to_bronze.decode_time(content.Get('timeToBronze'));
+        if (content.HasKey('timeToSilver'))
+            time_to_silver.decode_time(content.Get('timeToSilver'));
+        if (content.HasKey('timeToGold'))
+            time_to_gold.decode_time(content.Get('timeToGold'));
+        if (content.HasKey('timeToAuthor'))
+            time_to_author.decode_time(content.Get('timeToAuthor'));
+        debug_print(
+            "Read bronze " + time_to_bronze.time
+            + " silver " + time_to_silver.time
+            + " gold " + time_to_gold.time
+            + " author " + time_to_author.time
+        );
     }
 
     void read_file_legacy(const Json::Value &in content, bool is_old_dev = false) {
-
-        
         time = is_file_time_corrupt(content) ? 0 : content.Get('time');
         finishes = content.Get('finishes');
         resets = content.Get('resets');
         respawns = is_old_dev ? 0 : content.Get('respawns');
         debug_print("Read (legacy) finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " from " + json_file);
-    }
 
+        if (!is_old_dev) {
+            if (content.HasKey('timeToBronze'))
+                time_to_bronze.decode_time(content.Get('timeToBronze'));
+            if (content.HasKey('timeToSilver'))
+                time_to_silver.decode_time(content.Get('timeToSilver'));
+            if (content.HasKey('timeToGold'))
+                time_to_gold.decode_time(content.Get('timeToGold'));
+            if (content.HasKey('timeToAuthor'))
+                time_to_author.decode_time(content.Get('timeToAuthor'));
+            debug_print(
+                "Read (legacy) bronze " + time_to_bronze.time
+                + " silver " + time_to_silver.time
+                + " gold " + time_to_gold.time
+                + " author " + time_to_author.time
+            );
+        }
+    }
 
     bool is_file_time_corrupt(const Json::Value &in content) {
         int64 signed_time = content.Get('time');
@@ -132,7 +164,6 @@ class Files {
         
         return false;
     }
-
 
     void write_file() {
         if (map_id == "" || map_id == "Unassigned") {
@@ -143,19 +174,27 @@ class Files {
         content["resets"]   = Text::Format("%6d", resets);
         content["time"]     = Text::Format("%11d", time);
         content["respawns"] = Text::Format("%6d", respawns);
+#if TMNEXT
+        content["timeToBronze"] = time_to_bronze.encode_time();
+        content["timeToSilver"] = time_to_silver.encode_time();
+        content["timeToGold"] = time_to_gold.encode_time();
+        content["timeToAuthor"] = time_to_author.encode_time();
+#endif
         Json::ToFile(json_file,content);
         
         debug_print("Wrote finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + " to " + json_file);
+#if TMNEXT
+        debug_print(
+            "Wrote bronze " + time_to_bronze.time
+            + " silver " + time_to_silver.time
+            + " gold " + time_to_gold.time
+            + " author " + time_to_author.time
+        );
+#endif
     }
 
     string get_map_id() {
         return map_id;
-    }
-    string get_folder_location() {
-        return folder_location;
-    }
-    void set_folder_location(const string &in loc) {
-        folder_location = loc;
     }
     void set_map_id(const string &in i) {
         map_id = i;
@@ -184,16 +223,42 @@ class Files {
     void set_respawns(uint r) {
         respawns = r;
     }
+    void set_time_to_bronze(FileMedalTime &in t) {
+        time_to_bronze = t;
+    }
+    FileMedalTime get_time_to_bronze() {
+        return time_to_bronze;
+    }
+    void set_time_to_silver(FileMedalTime &in t) {
+        time_to_silver = t;
+    }
+    FileMedalTime get_time_to_silver() {
+        return time_to_silver;
+    }
+    void set_time_to_gold(FileMedalTime &in t) {
+        time_to_gold = t;
+    }
+    FileMedalTime get_time_to_gold() {
+        return time_to_gold;
+    }
+    void set_time_to_author(FileMedalTime &in t) {
+        time_to_author = t;
+    }
+    FileMedalTime get_time_to_author() {
+        return time_to_author;
+    }
+
     void reset_file() {
         print(json_file);
         IO::Delete(json_file);
     }
     void reset_all() {
-        auto files = IO::IndexFolder(folder_location,true);
+        auto files = IO::IndexFolder(folder_location, true);
         for (uint i = 0; i < files.Length; i++) {
             IO::Delete(files[i]);
         }
     }
+    
     void debug_print(const string &in text) {
         print(text);
     }
