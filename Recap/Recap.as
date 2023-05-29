@@ -15,6 +15,7 @@ class Recap {
     array<string> totds;
     array<string> campaigns;
     array<string> current_campaign;
+    array<string> custom;
     array<RecapElement@> elements;
     array<RecapElement@> filtered_elements;
     bool dirty;
@@ -50,7 +51,7 @@ class Recap {
         for (uint i = 0; i < filtered_elements.Length; i++) {
             total_respawns += filtered_elements[i].respawns;
         }
-        
+
     }
     Recap() {
         elements = array<RecapElement@>();
@@ -90,7 +91,7 @@ class Recap {
                     case 3: filtered_elements.Sort(function(a,b) {return a.resets > b.resets;});break;
                     case 4: filtered_elements.Sort(function(a,b) {return a.modified_time > b.modified_time;});break;
                     case 5: filtered_elements.Sort(function(a,b) {return a.respawns > b.respawns;});break;
-                   
+
                 }
             }
             yield();
@@ -105,6 +106,7 @@ class Recap {
         campaigns = array<string>();
         current_campaign = array<string>();
         totds = array<string>();
+        custom = array<string>();
         await(startnew(CoroutineFunc(load_files)));
         count_total_finishes();
         count_total_resets();
@@ -112,7 +114,7 @@ class Recap {
         count_total_time();
         filter_elements();
     }
-    
+
     private void load_files() {
         auto files = IO::IndexFolder(IO::FromDataFolder("")+"Grinding Stats",true);
         if (elements.Length != files.Length) {
@@ -148,6 +150,7 @@ class Recap {
             case recap_filter::current_campaign: this.filter_campaign(Recap::campaign_filter::current); break;
             case recap_filter::all_nadeo_campaigns: this.filter_campaign(Recap::campaign_filter::all); break;
             case recap_filter::totd: this.filter_totd(); break;
+            case recap_filter::custom: this.filter_custom(); break;
 #elif TURBO
             case recap_filter::turbo_white: this.filter_turbo(Recap::turbo_filter::white); break;
             case recap_filter::turbo_green: this.filter_turbo(Recap::turbo_filter::green); break;
@@ -184,13 +187,13 @@ class Recap {
             uint total_campaigns = maps['campaignList'].Length;
             for (uint campaign = 0; campaign < total_campaigns; campaign++) {
                 for (uint j = 0; j < maps['campaignList'][campaign]['playlist'].Length; j++) {
-                    if (campaign == 0) 
+                    if (campaign == 0)
                         current_campaign.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
                     campaigns.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
                 }
             }
         }
-        
+
         for (uint i = 0; i < elements.Length; i++) {
             RecapElement@ element = elements[i];
             if (campaign_filter == Recap::campaign_filter::all) {
@@ -208,7 +211,7 @@ class Recap {
                         continue;
                     }
                 }
-            
+
             }
         }
     }
@@ -220,7 +223,7 @@ class Recap {
             auto req = NadeoServices::Get("NadeoLiveServices",url);
             req.Start();
             while (!req.Finished()) yield();
-        
+
             Json::Value@ maps = Json::Parse(req.String());
             for (uint month = 0; month < maps['monthList'].Length; month++) {
                 for (uint j = 0; j < maps['monthList'][month]['days'].Length; j++) {
@@ -229,7 +232,7 @@ class Recap {
                 yield();
             }
         }
-        
+
         for (uint i = 0; i < elements.Length; i++) {
             RecapElement@ element = elements[i];
             for (uint j = 0; j < totds.Length; j++) {
@@ -240,6 +243,25 @@ class Recap {
             }
         }
     }
+    private void filter_custom() {
+        if (custom.Length == 0) {
+            string[] custom_maps = setting_custom_recap.Split("\n");
+            for (uint i = 0; i < custom_maps.Length; i++) {
+                custom.InsertLast(custom_maps[i]);
+            }
+        }
+
+        for (uint i = 0; i < elements.Length; i++) {
+            RecapElement@ element = elements[i];
+            for (uint j = 0; j < custom.Length; j++) {
+                if (custom[j] == element.map_id) {
+                    filtered_elements.InsertLast(element);
+                    continue;
+                }
+            }
+        }
+    }
+
 #endif
     private void filter_turbo(Recap::turbo_filter filter) {
         for(uint i = 0; i < elements.Length; i++) {
