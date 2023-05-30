@@ -56,6 +56,9 @@ bool setting_show_respawns_session = false;
 [Setting name="Show Total respawns" category="Stats"]
 bool setting_show_respawns_total = false;
 
+[Setting name="Custom Grinding Recap" multiline category="Recap" description="Tracks in this list will be included in custom Recap. Enter UID of track per line."]
+string setting_custom_recap = "";
+
 [Setting name="Show debug information" category="Debug"]
 bool setting_show_debug = false;
 
@@ -67,9 +70,9 @@ bool recap_enabled = false;
 
 
 void Main()
-{    
+{
 #if DEPENDENCY_NADEOSERVICES
     NadeoServices::AddAudience("NadeoLiveServices");
 #endif
-    if (setting_recap_show_menu && !recap.started) recap.start(); 
+    if (setting_recap_show_menu && !recap.started) recap.start();
 }

@@ -21,17 +21,18 @@ enum recap_filter {
     turbo_red,
     turbo_black,
 #endif
-    totd
+    totd,
+    custom
     }
 
 string recap_filter_string(recap_filter filter) {
     switch(filter){
         case recap_filter::all:
             return "All Tracks";
-#if MP4 
+#if MP4
         case recap_filter::all_with_name:
             return "All Tracks uploaded to TM² Exchange";
-#elif TMNEXT 
+#elif TMNEXT
         case recap_filter::all_with_name:
             return "All Tracks uploaded to NadeoServices";
         case recap_filter::current_campaign:
@@ -40,6 +41,8 @@ string recap_filter_string(recap_filter filter) {
             return "All seasonal campaigns";
         case recap_filter::totd:
             return "All TOTDs";
+        case recap_filter::custom:
+            return "Custom";
 #elif TURBO
         case recap_filter::turbo_white:
             return "White Tracks (1-40)";
@@ -74,6 +77,7 @@ void RenderRecap() {
                 add_selectable(recap_filter::current_campaign);
                 add_selectable(recap_filter::all_nadeo_campaigns);
                 add_selectable(recap_filter::totd);
+                add_selectable(recap_filter::custom);
 #elif TURBO
                 add_selectable(recap_filter::turbo_white);
                 add_selectable(recap_filter::turbo_green);
@@ -87,13 +91,13 @@ void RenderRecap() {
             if (UI::RadioButton("Show colored names", setting_recap_show_colors)) {
                 setting_recap_show_colors = !setting_recap_show_colors;
             }
-                    
+
         UI::EndMenuBar();
         }
 #if TURBO
-uint columns = 5;
-#elif MP4||TMNEXT
 uint columns = 6;
+#elif MP4||TMNEXT
+uint columns = 7;
 #endif
         if (UI::BeginTable("Items",columns,UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY)) {
             //headers
@@ -109,7 +113,7 @@ uint columns = 6;
 #elif MP4
             UI::TableSetupColumn("Title pack",UI::TableColumnFlags::WidthFixed|UI::TableColumnFlags::NoResize,100);
 #endif
-            
+            UI::TableSetupColumn("Custom Recap",UI::TableColumnFlags::WidthFixed, 100);
             UI::TableHeadersRow();
 
             //sorting
@@ -160,7 +164,7 @@ uint columns = 6;
                         if (UI::IsItemHovered() && Meta::IsDeveloperMode()) {
                             UI::BeginTooltip();
                                 if (map_id == stripped_name) UI::Text(stripped_name);
-                                else UI::Text(map_id + "\n" + "'" + StripFormatCodes(name) + "'"); 
+                                else UI::Text(map_id + "\n" + "'" + StripFormatCodes(name) + "'");
                             UI::EndTooltip();
                         }
                         UI::TableSetColumnIndex(1);
@@ -178,7 +182,14 @@ uint columns = 6;
                         UI::TableSetColumnIndex(5);
                         UI::Text(titlepack);
 #endif
-                        
+                        if (i != 0) {
+                            UI::TableSetColumnIndex(6);
+                            if (setting_custom_recap.Contains(map_id)) {
+                                if (UI::Button(Icons::Minus, vec2(30, 20))) remove_custom_map(map_id);
+                            } else {
+                                if (UI::Button(Icons::Plus, vec2(30, 20))) add_custom_map(map_id);
+                            }
+                        }
                 }
             }
         UI::EndTable();
@@ -192,5 +203,17 @@ void add_selectable(recap_filter filter) {
         if (current_recap == filter) return;
         current_recap = filter;
         startnew(CoroutineFunc(recap.filter_elements));
-    } 
+    }
+}
+
+void add_custom_map(const string &in UID) {
+    if (setting_custom_recap != "") setting_custom_recap += "\n";
+    setting_custom_recap += UID;
+    setting_custom_recap = setting_custom_recap.Replace("\n\n", "\n");
+}
+
+void remove_custom_map(const string &in UID) {
+    setting_custom_recap = setting_custom_recap.Replace(UID, "");
+    setting_custom_recap = setting_custom_recap.Replace("\n\n", "\n");
+    if (setting_custom_recap == "\n") setting_custom_recap = "";
 }
