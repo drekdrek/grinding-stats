@@ -111,12 +111,12 @@ uint columns = 7;
                                          UI::TableColumnFlags::PreferSortDescending | UI::TableColumnFlags::NoHide,150);
             UI::TableSetupColumn("Finishes",UI::TableColumnFlags::WidthFixed,100);
             UI::TableSetupColumn("Resets",UI::TableColumnFlags::WidthFixed,100);
-            UI::TableSetupColumn("Last Played", UI::TableColumnFlags::WidthFixed,100);
 #if TMNEXT
             UI::TableSetupColumn("Respawns",UI::TableColumnFlags::WidthFixed,100);
 #elif MP4
             UI::TableSetupColumn("Title pack",UI::TableColumnFlags::WidthFixed|UI::TableColumnFlags::NoResize,100);
 #endif
+            UI::TableSetupColumn("Last Played", UI::TableColumnFlags::WidthFixed,100);
             UI::TableSetupColumn("Custom Recap",UI::TableColumnFlags::WidthFixed, 100);
             UI::TableHeadersRow();
 
@@ -160,7 +160,6 @@ uint columns = 7;
                         finishes = "" + recap.total_finishes;
                         resets = "" + recap.total_resets;
                         respawns = "" + recap.total_respawns;
-                        time_modified = "--:--:--";
                     }
                         UI::TableNextRow();
                         UI::TableSetColumnIndex(0);
@@ -177,15 +176,19 @@ uint columns = 7;
                         UI::Text(finishes);
                         UI::TableSetColumnIndex(3);
                         UI::Text(resets);
-                        UI::TableSetColumnIndex(4);
-                        UI::Text(time_modified);
 #if TMNEXT
-                        UI::TableSetColumnIndex(5);
+                        UI::TableSetColumnIndex(4);
                         UI::Text(respawns);
 #elif MP4
-                        UI::TableSetColumnIndex(5);
+                        UI::TableSetColumnIndex(4);
                         UI::Text(titlepack);
 #endif
+#if TURBO 
+                        UI::TableSetColumnIndex(4);
+#else 
+                        UI::TableSetColumnIndex(5);
+#endif
+                        UI::Text(time_modified);
                         if (i != 0) {
                             UI::TableSetColumnIndex(6);
                             if (setting_custom_recap.Contains(map_id)) {
