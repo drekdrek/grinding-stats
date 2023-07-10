@@ -179,7 +179,7 @@ class Recap {
         if (campaigns.Length == 0 || current_campaign.Length == 0) {
             print("Fetching campaign data");
             while (!NadeoServices::IsAuthenticated("NadeoLiveServices")) yield();
-            string url = NadeoServices::BaseURL() + "/api/token/campaign/official?length=20&offset=0&royal=false";
+            string url = NadeoServices::BaseURLLive() + "/api/token/campaign/official?length=20&offset=0&royal=false";
             auto req = NadeoServices::Get("NadeoLiveServices",url);
             req.Start();
             while (!req.Finished()) yield();
@@ -219,7 +219,7 @@ class Recap {
         if (totds.Length == 0) {
             print("Fetching totd data");
             while (!NadeoServices::IsAuthenticated("NadeoLiveServices")) yield();
-            string url = NadeoServices::BaseURL() + "/api/token/campaign/month?length=100&offset=0";
+            string url = NadeoServices::BaseURLLive() + "/api/token/campaign/month?length=100&offset=0";
             auto req = NadeoServices::Get("NadeoLiveServices",url);
             req.Start();
             while (!req.Finished()) yield();
