@@ -3,7 +3,7 @@ name = "Grinding Stats"
 author = "Drek"
 category = "Overlay"
 
-version = "2.0.12"
+version = "2.0.13"
 siteid = 158
 
 [script]
