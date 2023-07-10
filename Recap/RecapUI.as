@@ -13,6 +13,7 @@ enum recap_filter {
     all_with_name,
 #if TMNEXT
     current_campaign,
+    previous_campaign,
     all_nadeo_campaigns,
 #elif TURBO
     turbo_white,
@@ -37,6 +38,8 @@ string recap_filter_string(recap_filter filter) {
             return "All Tracks uploaded to NadeoServices";
         case recap_filter::current_campaign:
             return "Current seasonal campaign";
+        case recap_filter::previous_campaign:
+            return "Previous seasonal campaign";
         case recap_filter::all_nadeo_campaigns:
             return "All seasonal campaigns";
         case recap_filter::totd:
@@ -75,6 +78,7 @@ void RenderRecap() {
 #endif
 #if TMNEXT
                 add_selectable(recap_filter::current_campaign);
+                add_selectable(recap_filter::previous_campaign);
                 add_selectable(recap_filter::all_nadeo_campaigns);
                 add_selectable(recap_filter::totd);
                 add_selectable(recap_filter::custom);

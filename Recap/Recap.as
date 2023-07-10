@@ -1,6 +1,7 @@
 namespace Recap {
     enum campaign_filter {
         current,
+        previous,
         all
     }
     enum turbo_filter {
@@ -14,6 +15,7 @@ namespace Recap {
 class Recap {
     array<string> totds;
     array<string> campaigns;
+    array<string> previous_campaign;
     array<string> current_campaign;
     array<string> custom;
     array<RecapElement@> elements;
@@ -105,6 +107,7 @@ class Recap {
         elements = array<RecapElement@>();
         campaigns = array<string>();
         current_campaign = array<string>();
+        previous_campaign = array<string>();
         totds = array<string>();
         custom = array<string>();
         await(startnew(CoroutineFunc(load_files)));
@@ -149,6 +152,7 @@ class Recap {
 #if TMNEXT
             case recap_filter::current_campaign: this.filter_campaign(Recap::campaign_filter::current); break;
             case recap_filter::all_nadeo_campaigns: this.filter_campaign(Recap::campaign_filter::all); break;
+            case recap_filter::previous_campaign: this.filter_campaign(Recap::campaign_filter::previous); break;
             case recap_filter::totd: this.filter_totd(); break;
             case recap_filter::custom: this.filter_custom(); break;
 #elif TURBO
@@ -189,6 +193,8 @@ class Recap {
                 for (uint j = 0; j < maps['campaignList'][campaign]['playlist'].Length; j++) {
                     if (campaign == 0)
                         current_campaign.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
+                    if (campaign == 1) 
+                        previous_campaign.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
                     campaigns.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
                 }
             }
@@ -204,7 +210,7 @@ class Recap {
                     }
                 }
 
-            } else {
+            } else if (campaign_filter == Recap::campaign_filter::current) {
                 for (uint j = 0; j < current_campaign.Length; j++) {
                     if (current_campaign[j] == element.map_id) {
                         filtered_elements.InsertLast(element);
@@ -212,6 +218,13 @@ class Recap {
                     }
                 }
 
+            } else if (campaign_filter == Recap::campaign_filter::previous) {
+                for (uint j = 0; j < previous_campaign.Length; j++) {
+                    if (previous_campaign[j] == element.map_id) {
+                        filtered_elements.InsertLast(element);
+                        continue;
+                    }
+                }
             }
         }
     }
