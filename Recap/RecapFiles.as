@@ -3,7 +3,12 @@ class RecapFiles : Files {
     RecapFiles() {}
 
     RecapFiles(const string &in id) {
-        super(id);
+        try {
+            super(id);
+        } catch {
+            warn("unable to load file with id: " + id + " skipping...");
+        }
+        
     }
 
     void debug_print(const string &in text) override {
@@ -16,7 +21,7 @@ class RecapFiles : Files {
         return;
     }
 
-        int64 get_modified_time() {
+    int64 get_modified_time() {
         return IO::FileModifiedTime(json_file);
     }
 }
