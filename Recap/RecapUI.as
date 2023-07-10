@@ -183,9 +183,9 @@ uint columns = 7;
                         UI::TableSetColumnIndex(4);
                         UI::Text(titlepack);
 #endif
-#if TURBO 
+#if TURBO
                         UI::TableSetColumnIndex(4);
-#else 
+#else
                         UI::TableSetColumnIndex(5);
 #endif
                         UI::Text(time_modified);
