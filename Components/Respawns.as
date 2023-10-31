@@ -10,18 +10,28 @@ class Respawns : Component {
     }
 
     string toString() override {
-        if (!setting_show_duplicates && (current == session && current == total)) {
-            return "\\$bbb" + current;
+        string s = "";
+        if (setting_show_respawns_current) {
+            s += "\\$bbb" + current;
         }
-        if (!setting_show_duplicates && 
-        (current != session && session == total) ||
-        (current == session && session != total)) {
-            return "\\$bbb" + current + " \\$fff / " 
-              + "\\$bbb" + total;
+		if (setting_show_respawns_current && setting_show_respawns_session &&
+		!(!setting_show_duplicates && session == current)) {
+			s += "\\$fff  /  ";
+		}
+        if (setting_show_respawns_session && !(!setting_show_duplicates &&
+		session == current && setting_show_respawns_current)) {
+            s += "\\$bbb" + session;
         }
-        return "\\$bbb" + current + " \\$fff / " 
-              + "\\$bbb" + session + " \\$fff / "
-              + "\\$bbb" + total;
+		if ((setting_show_respawns_current || setting_show_respawns_session) &&
+		setting_show_respawns_total && !(!setting_show_duplicates &&
+		(total == session && setting_show_respawns_session))) {
+			s += "\\$fff  /  ";
+		}
+		if (setting_show_respawns_total && !(!setting_show_duplicates &&
+		total == session && setting_show_respawns_session)) {
+			s += "\\$bbb" + total;
+		}
+		return s;
 }
 
     void handler() override {
