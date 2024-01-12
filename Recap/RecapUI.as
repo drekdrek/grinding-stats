@@ -207,7 +207,11 @@ uint columns = 7;
 #endif
                         UI::Text(time_modified);
                         if (i != 0) {
+#if TURBO
+                            UI::TableSetColumnIndex(5);
+#else
                             UI::TableSetColumnIndex(6);
+#endif
                             if (setting_custom_recap.Contains(map_id)) {
                                 if (UI::Button(Icons::Minus, vec2(30, 20))) remove_custom_map(map_id);
                             } else {
