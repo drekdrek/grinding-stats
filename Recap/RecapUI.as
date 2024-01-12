@@ -1,10 +1,10 @@
 bool setting_recap_show_menu = false;
+bool load_recap = false;
 bool setting_recap_show_colors = setting_show_map_name_color;
 
 void RenderMenu() {
     if (UI::MenuItem(Icons::List + " Grinding Stats Recap","",setting_recap_show_menu)) {
         setting_recap_show_menu = !setting_recap_show_menu;
-        if (setting_recap_show_menu) recap.start();
     }
 }
 
@@ -103,7 +103,24 @@ uint columns = 6;
 #elif MP4||TMNEXT
 uint columns = 7;
 #endif
-        if (UI::BeginTable("Items",columns,UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY)) {
+        if (!load_recap) {
+            auto windowWidth = UI::GetWindowSize();
+            string text = "This will take a while depending on how many files you have.";
+            vec2  textWidth = Draw::MeasureString(text);
+            UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2, windowWidth.y / 2 + 25));
+            UI::Text(text);
+            text = "It will lag/freeze the game while loading.";
+            textWidth = Draw::MeasureString(text);
+            UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2, windowWidth.y / 2 + 40));
+            UI::Text(text);
+            UI::SetCursorPos(vec2(windowWidth.x / 2 - 200 / 2, windowWidth.y / 2 - 25));
+            if(UI::Button("Load Recap", vec2(200, 50))) {
+                load_recap = true;
+                recap.start();   
+            }
+        }
+
+        if (load_recap && UI::BeginTable("Items",columns,UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY)) {
             //headers
 
             UI::TableSetupColumn("Name",UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::NoHide,200);
