@@ -35,6 +35,8 @@ string recap_filter_string(recap_filter filter) {
     switch(filter){
         case recap_filter::all:
             return "All Tracks";
+        case recap_filter::custom:
+            return "Custom";
 #if MP4
         case recap_filter::all_with_name:
             return "All Tracks uploaded to TM² Exchange";
@@ -57,8 +59,6 @@ string recap_filter_string(recap_filter filter) {
             return "All seasonal campaigns";
         case recap_filter::totd:
             return "All TOTDs";
-        case recap_filter::custom:
-            return "Custom";
 #elif TURBO
         case recap_filter::turbo_white:
             return "White Tracks (1-40)";
@@ -108,6 +108,7 @@ void RenderRecap() {
                 add_selectable(recap_filter::turbo_red);
                 add_selectable(recap_filter::turbo_black);
 #endif
+                add_selectable(recap_filter::custom);
             UI::EndCombo();
             }
             //bool UI::RadioButton(const string&in label, bool active)
@@ -231,10 +232,10 @@ uint columns = 7;
 #else
                             UI::TableSetColumnIndex(6);
 #endif
-                            if (setting_custom_recap.Contains(map_id)) {
-                                if (UI::Button(Icons::Minus, vec2(30, 20))) remove_custom_map(map_id);
-                            } else {
-                                if (UI::Button(Icons::Plus, vec2(30, 20))) add_custom_map(map_id);
+                            bool is_cust_map = setting_custom_recap.Contains(map_id);
+                            if(UI::Checkbox("", is_cust_map) != is_cust_map) {
+                                if(is_cust_map) remove_custom_map(map_id);
+                                else add_custom_map(map_id);
                             }
                         }
                 }

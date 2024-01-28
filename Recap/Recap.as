@@ -146,6 +146,7 @@ class Recap {
         filtered_elements = array<RecapElement@>();
         switch(current_recap) {
             case recap_filter::all: this.filter_all(true); break;
+            case recap_filter::custom: this.filter_custom(); break;
 #if TMNEXT || MP4
             case recap_filter::all_with_name: this.filter_all(false); break;
 #endif
