@@ -15,6 +15,11 @@ enum recap_filter {
     current_campaign,
     previous_campaign,
     all_nadeo_campaigns,
+#elif MP4
+    canyon,
+    stadium,
+    valley,
+    lagoon,
 #elif TURBO
     turbo_white,
     turbo_green,
@@ -33,6 +38,14 @@ string recap_filter_string(recap_filter filter) {
 #if MP4
         case recap_filter::all_with_name:
             return "All Tracks uploaded to TM² Exchange";
+        case recap_filter::canyon:
+            return "TM² Canyon Titlepack";
+        case recap_filter::stadium:
+            return "TM² Stadium Titlepack";
+        case recap_filter::valley:
+            return "TM² Valley Titlepack";
+        case recap_filter::lagoon:
+            return "TM² Lagoon Titlepack";
 #elif TMNEXT
         case recap_filter::all_with_name:
             return "All Tracks uploaded to NadeoServices";
@@ -76,12 +89,19 @@ void RenderRecap() {
 #if TMNEXT || MP4
                 add_selectable(recap_filter::all_with_name);
 #endif
+
+#endif
 #if TMNEXT
                 add_selectable(recap_filter::current_campaign);
                 add_selectable(recap_filter::previous_campaign);
                 add_selectable(recap_filter::all_nadeo_campaigns);
                 add_selectable(recap_filter::totd);
                 add_selectable(recap_filter::custom);
+#elif MP4
+                add_selectable(recap_filter::canyon);
+                add_selectable(recap_filter::stadium);
+                add_selectable(recap_filter::valley);
+                add_selectable(recap_filter::lagoon);
 #elif TURBO
                 add_selectable(recap_filter::turbo_white);
                 add_selectable(recap_filter::turbo_green);
@@ -116,7 +136,7 @@ uint columns = 7;
             UI::SetCursorPos(vec2(windowWidth.x / 2 - 200 / 2, windowWidth.y / 2 - 25));
             if(UI::Button("Load Recap", vec2(200, 50))) {
                 load_recap = true;
-                recap.start();   
+                recap.start();
             }
         }
 

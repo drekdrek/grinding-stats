@@ -15,7 +15,7 @@ class RecapElement {
 
 
     RecapElement() {
-        
+
     }
 
     RecapElement(const string &in id) {
@@ -24,7 +24,7 @@ class RecapElement {
 #endif
         this.map_id = id;
         this.name = map_id;
-        
+
         this.stripped_name = StripFormatCodes(name);
         file = RecapFiles(id);
         time = Timer::to_string(file.get_time());
@@ -34,7 +34,7 @@ class RecapElement {
         respawns = file.get_respawns();
         modified_time =  file.get_modified_time();
         startnew(CoroutineFunc(get_name_from_api));
-        
+
     }
 
     void get_name_from_api() {
@@ -49,7 +49,7 @@ class RecapElement {
         while (req.IsProcessing) yield();
         if (req.HasFailed || req.IsCanceled || !req.HasSucceeded) {
             if (req.ErrorCode != "C-AK-03-01") {
-                
+
                 throw("req failed or canceled. mapId=" + map_id + " errorType=" + req.ErrorType + "; errorCode=" + req.ErrorCode + "; errorDescription=" + req.ErrorDescription);
             }
         }
@@ -61,7 +61,7 @@ class RecapElement {
 #elif MP4
         auto req = Net::HttpRequest();
         req.Method = Net::HttpMethod::Get;
-        req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/multi/' + this.map_id;
+        req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/uid/' + this.map_id;
         req.Start();
         while (!req.Finished()) yield();
         Json::Value@ map = Json::Parse(req.String());
@@ -88,7 +88,7 @@ class RecapElement {
                 }
                 name = color + infos[i].NameForUi;
             }
-            
+
         }
 #endif
         //removes spaces and backslashes from names for sorting purposes

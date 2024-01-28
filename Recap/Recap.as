@@ -155,6 +155,11 @@ class Recap {
             case recap_filter::previous_campaign: this.filter_campaign(Recap::campaign_filter::previous); break;
             case recap_filter::totd: this.filter_totd(); break;
             case recap_filter::custom: this.filter_custom(); break;
+#elif MP4
+            case recap_filter::canyon: this.filter_titlePack("TMCanyon"); break;
+            case recap_filter::stadium: this.filter_titlePack("TMStadium"); break;
+            case recap_filter::valley: this.filter_titlePack("TMValley"); break;
+            case recap_filter::lagoon: this.filter_titlePack("TMLagoon"); break;
 #elif TURBO
             case recap_filter::turbo_white: this.filter_turbo(Recap::turbo_filter::white); break;
             case recap_filter::turbo_green: this.filter_turbo(Recap::turbo_filter::green); break;
@@ -193,7 +198,7 @@ class Recap {
                 for (uint j = 0; j < maps['campaignList'][campaign]['playlist'].Length; j++) {
                     if (campaign == 0)
                         current_campaign.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
-                    if (campaign == 1) 
+                    if (campaign == 1)
                         previous_campaign.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
                     campaigns.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
                 }
@@ -275,7 +280,17 @@ class Recap {
         }
     }
 
-#endif
+#elif MP4
+    private void filter_titlePack(const string&in titlepack) {
+        for(uint i = 0; i < elements.Length; i++) {
+            RecapElement@ element = elements[i];
+            if(element.titlepack == titlepack) {
+                filtered_elements.InsertLast(element);
+            }
+        }
+    }
+
+#elif TURBO
     private void filter_turbo(Recap::turbo_filter filter) {
         for(uint i = 0; i < elements.Length; i++) {
             RecapElement@ element = elements[i];
@@ -284,4 +299,4 @@ class Recap {
             }
         }
     }
-}
+#endif
