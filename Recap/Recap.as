@@ -171,6 +171,12 @@ class Recap {
         }
         this.dirty = true;
 
+#if MP4
+        // Loads map names from tm2 exchange in batches to avoid API not responding
+        startnew(CoroutineFunc(get_all_tm2_names_from_api));
+#endif
+
+
         count_total_finishes();
         count_total_resets();
         count_total_respawns();
@@ -286,6 +292,45 @@ class Recap {
             RecapElement@ element = elements[i];
             if(element.titlepack == titlepack) {
                 filtered_elements.InsertLast(element);
+            }
+        }
+    }
+
+    private void get_all_tm2_names_from_api() {
+        uint req_uid_limit = 8, cur_uid = 0;
+        while(cur_uid < elements.Length) {
+            string map_uids = elements[cur_uid++].map_id;
+            for(uint i = 1; i < req_uid_limit && cur_uid < elements.Length; i++, cur_uid++) map_uids += "," + elements[cur_uid].map_id;
+
+            auto req = Net::HttpRequest();
+            req.Method = Net::HttpMethod::Get;
+            req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/multi/' + map_uids;
+            req.Start();
+            while (!req.Finished()) yield();
+
+            string resp_str = req.String();
+
+            if(req.ResponseCode() == 200 && resp_str != "") {
+                Json::Value@ maps = Json::Parse(resp_str);
+
+                for(uint i = 1; i <= maps.Length; i++) {
+                    Json::Value@ map = maps[maps.Length - i];
+                    RecapElement@ elem = elements[cur_uid - i];
+
+                    if(elem.map_id != map['TrackUID']) continue;
+
+                    elem.name = format_string(map['GbxMapName']);
+                    elem.titlepack = map['TitlePack'];
+
+                    //removes spaces and backslashes from names for sorting purposes
+                    elem.stripped_name = StripFormatCodes(elem.name).Replace('\\','');
+                    for (int j = 0; j < elem.stripped_name.Length; j++) {
+                        if (elem.stripped_name.StartsWith(" "))
+                            elem.stripped_name = elem.stripped_name.SubStr(2);
+                        else
+                            break;
+                    }
+                }
             }
         }
     }

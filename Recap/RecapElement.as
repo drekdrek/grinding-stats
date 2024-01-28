@@ -33,8 +33,9 @@ class RecapElement {
         resets = file.get_resets();
         respawns = file.get_respawns();
         modified_time =  file.get_modified_time();
+#if TMNEXT || TURBO
         startnew(CoroutineFunc(get_name_from_api));
-
+#endif
     }
 
     void get_name_from_api() {
