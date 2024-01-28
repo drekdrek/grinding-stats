@@ -90,7 +90,6 @@ void RenderRecap() {
                 add_selectable(recap_filter::all_with_name);
 #endif
 
-#endif
 #if TMNEXT
                 add_selectable(recap_filter::current_campaign);
                 add_selectable(recap_filter::previous_campaign);
