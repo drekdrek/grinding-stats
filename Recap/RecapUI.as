@@ -233,7 +233,7 @@ uint columns = 7;
                             UI::TableSetColumnIndex(6);
 #endif
                             bool is_cust_map = setting_custom_recap.Contains(map_id);
-                            if(UI::Checkbox("", is_cust_map) != is_cust_map) {
+                            if(UI::Checkbox(map_id, is_cust_map) != is_cust_map) {
                                 if(is_cust_map) remove_custom_map(map_id);
                                 else add_custom_map(map_id);
                             }
