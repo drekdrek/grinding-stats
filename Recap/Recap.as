@@ -268,25 +268,6 @@ class Recap {
             }
         }
     }
-    private void filter_custom() {
-        if (custom.Length == 0) {
-            string[] custom_maps = setting_custom_recap.Split("\n");
-            for (uint i = 0; i < custom_maps.Length; i++) {
-                custom.InsertLast(custom_maps[i]);
-            }
-        }
-
-        for (uint i = 0; i < elements.Length; i++) {
-            RecapElement@ element = elements[i];
-            for (uint j = 0; j < custom.Length; j++) {
-                if (custom[j] == element.map_id) {
-                    filtered_elements.InsertLast(element);
-                    continue;
-                }
-            }
-        }
-    }
-
 #elif MP4
     private void filter_titlePack(const string&in titlepack) {
         for(uint i = 0; i < elements.Length; i++) {
@@ -346,4 +327,22 @@ class Recap {
         }
     }
 #endif
+    private void filter_custom() {
+        if (custom.Length == 0) {
+            string[] custom_maps = setting_custom_recap.Split("\n");
+            for (uint i = 0; i < custom_maps.Length; i++) {
+                custom.InsertLast(custom_maps[i]);
+            }
+        }
+
+        for (uint i = 0; i < elements.Length; i++) {
+            RecapElement@ element = elements[i];
+            for (uint j = 0; j < custom.Length; j++) {
+                if (custom[j] == element.map_id) {
+                    filtered_elements.InsertLast(element);
+                    continue;
+                }
+            }
+        }
+    }
 }
