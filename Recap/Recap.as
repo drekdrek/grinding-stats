@@ -155,7 +155,6 @@ class Recap {
             case recap_filter::all_nadeo_campaigns: this.filter_campaign(Recap::campaign_filter::all); break;
             case recap_filter::previous_campaign: this.filter_campaign(Recap::campaign_filter::previous); break;
             case recap_filter::totd: this.filter_totd(); break;
-            case recap_filter::custom: this.filter_custom(); break;
 #elif MP4
             case recap_filter::canyon: this.filter_titlePack("Canyon"); break;
             case recap_filter::stadium: this.filter_titlePack("TMStadium"); break;
