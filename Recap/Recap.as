@@ -157,7 +157,7 @@ class Recap {
             case recap_filter::totd: this.filter_totd(); break;
             case recap_filter::custom: this.filter_custom(); break;
 #elif MP4
-            case recap_filter::canyon: this.filter_titlePack("TMCanyon"); break;
+            case recap_filter::canyon: this.filter_titlePack("Canyon"); break;
             case recap_filter::stadium: this.filter_titlePack("TMStadium"); break;
             case recap_filter::valley: this.filter_titlePack("TMValley"); break;
             case recap_filter::lagoon: this.filter_titlePack("TMLagoon"); break;
