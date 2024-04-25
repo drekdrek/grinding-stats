@@ -92,8 +92,12 @@ void Main()
 
             const string[]@ parts = index[i].Split("/");
             const string base_name = parts[parts.Length - 1];
+            const string new_file = IO::FromStorageFolder(base_name);
 
-            IO::Move(index[i], IO::FromStorageFolder(base_name));
+            if (IO::FileExists(new_file))
+                IO::Delete(new_file);
+
+            IO::Move(index[i], new_file);
         }
 
         if (IO::IndexFolder(old_folder, false).Length == 0)
