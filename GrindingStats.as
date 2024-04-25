@@ -84,7 +84,7 @@ void Main()
         if (App.Editor is null && App.CurrentPlayground !is null) {
             UI::ShowNotification(
                 "Grinding Stats",
-                "Plugin updated, but it looks like you're in a map.\nPlease exit to the menu to finish the update.",
+                "Plugin updated, but it looks like you're in a map.\nPlease exit to the menu to finish the update.\nTime in the current session will not be counted.",
                 vec4(1.0f, 0.5f, 0.0f, 0.5f),
                 15000
             );
