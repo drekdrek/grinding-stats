@@ -1,5 +1,5 @@
 class Data {
-    private string folder_location = IO::FromDataFolder("") + "Grinding Stats";
+    private string folder_location = IO::FromStorageFolder("");
     string mapUid = "";
     string file = "";
 

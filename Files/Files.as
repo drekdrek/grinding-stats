@@ -65,7 +65,7 @@ class Files {
     Files() {}
     Files(const string &in id) {
         if (id == "" || id == "Unassigned") return;
-        folder_location = IO::FromDataFolder("") + "Grinding Stats";
+        folder_location = IO::FromStorageFolder("");
         
 
 

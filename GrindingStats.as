@@ -74,5 +74,37 @@ void Main()
 #if DEPENDENCY_NADEOSERVICES
     NadeoServices::AddAudience("NadeoLiveServices");
 #endif
+
+    const string old_folder = IO::FromDataFolder("GrindingStats");
+    if (IO::FolderExists(old_folder)) {
+        trace("found old storage folder - moving files to PluginStorage");
+
+        const uint64 max_frame_time = 50;
+        uint64 last_yield = Time::Now;
+
+        const string[]@ index = IO::IndexFolder(old_folder, false);
+        for (uint i = 0; i < index.Length; i++) {
+            uint64 now = Time::Now;
+            if (now - last_yield > max_frame_time) {
+                last_yield = now;
+                yield();
+            }
+
+            const string[]@ parts = index[i].Split("/");
+            const string base_name = parts[parts.Length - 1];
+
+            IO::Move(index[i], IO::FromStorageFolder(base_name));
+        }
+
+        if (IO::IndexFolder(old_folder, false).Length == 0)
+            IO::DeleteFolder(old_folder);
+        else {
+            warn("moving files from old folder failed");
+            return;
+        }
+
+        trace("moving files from old storage done");
+    }
+
     if (setting_recap_show_menu && !recap.started) recap.start();
 }
