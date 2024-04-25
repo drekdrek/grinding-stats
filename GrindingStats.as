@@ -75,7 +75,7 @@ void Main()
     NadeoServices::AddAudience("NadeoLiveServices");
 #endif
 
-    const string old_folder = IO::FromDataFolder("GrindingStats");
+    const string old_folder = IO::FromDataFolder("Grinding Stats");
     if (IO::FolderExists(old_folder)) {
         trace("found old storage folder - moving files to PluginStorage");
 
