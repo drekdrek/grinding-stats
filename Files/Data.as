@@ -78,6 +78,13 @@ class Data {
 
 
     void save() {
+        if (timer.total < 5000 && finishes.total == 0) {
+            timer.total = 0;
+            resets.total = 0;
+            respawns.total = 0;
+            return;
+        }
+
         if (mapUid == "" || mapUid == "Unassigned") return;
         {//saving to file
               files.time = timer.total;
