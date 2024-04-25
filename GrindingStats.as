@@ -79,6 +79,20 @@ void Main()
     if (IO::FolderExists(old_folder)) {
         trace("found old storage folder - moving files to PluginStorage");
 
+        CTrackMania@ App = cast<CTrackMania@>(GetApp());
+
+        if (App.Editor is null && App.CurrentPlayground !is null) {
+            UI::ShowNotification(
+                "Grinding Stats",
+                "Plugin updated, but it looks like you're in a map.\nPlease exit to the menu to finish the update.",
+                vec4(1.0f, 0.5f, 0.0f, 0.5f),
+                15000
+            );
+
+            while (App.Editor is null && App.CurrentPlayground !is null)
+                yield();
+        }
+
         const uint64 max_frame_time = 50;
         uint64 last_yield = Time::Now;
 
@@ -94,8 +108,10 @@ void Main()
             const string base_name = parts[parts.Length - 1];
             const string new_file = IO::FromStorageFolder(base_name);
 
-            if (IO::FileExists(new_file))
+            if (IO::FileExists(new_file)) {
                 IO::Delete(new_file);
+                yield();
+            }
 
             IO::Move(index[i], new_file);
         }
