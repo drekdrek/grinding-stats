@@ -75,55 +75,10 @@ void Main()
     NadeoServices::AddAudience("NadeoLiveServices");
 #endif
 
-    const string old_folder = IO::FromDataFolder("Grinding Stats");
-    if (IO::FolderExists(old_folder)) {
-        trace("found old storage folder - moving files to PluginStorage");
-
-        CTrackMania@ App = cast<CTrackMania@>(GetApp());
-
-        if (App.Editor is null && App.CurrentPlayground !is null) {
-            UI::ShowNotification(
-                "Grinding Stats",
-                "Plugin updated, but it looks like you're in a map.\nPlease exit to the menu to finish the update.\nTime in the current session will not be counted.",
-                vec4(1.0f, 0.5f, 0.0f, 0.5f),
-                15000
-            );
-
-            while (App.Editor is null && App.CurrentPlayground !is null)
-                yield();
-        }
-
-        const uint64 max_frame_time = 50;
-        uint64 last_yield = Time::Now;
-
-        const string[]@ index = IO::IndexFolder(old_folder, false);
-        for (uint i = 0; i < index.Length; i++) {
-            uint64 now = Time::Now;
-            if (now - last_yield > max_frame_time) {
-                last_yield = now;
-                yield();
-            }
-
-            const string[]@ parts = index[i].Split("/");
-            const string base_name = parts[parts.Length - 1];
-            const string new_file = IO::FromStorageFolder(base_name);
-
-            if (IO::FileExists(new_file)) {
-                IO::Delete(new_file);
-                yield();
-            }
-
-            IO::Move(index[i], new_file);
-        }
-
-        if (IO::IndexFolder(old_folder, false).Length == 0)
-            IO::DeleteFolder(old_folder);
-        else {
-            warn("moving files from old folder failed");
-            return;
-        }
-
-        trace("moving files from old storage done");
+    auto old_path = IO::FromDataFolder("Grinding Stats");
+    auto new_path = IO::FromStorageFolder("data");//.SubStr(0, IO::FromStorageFolder("").Length - 1); // remove trailing slash
+    if (IO::FolderExists(old_path)) {
+        IO::Move(old_path, new_path);
     }
 
     if (setting_recap_show_menu && !recap.started) recap.start();

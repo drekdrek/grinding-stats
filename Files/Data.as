@@ -1,5 +1,5 @@
 class Data {
-    private string folder_location = IO::FromStorageFolder("");
+    private string folder_location = IO::FromStorageFolder("data");
     string mapUid = "";
     string file = "";
 
@@ -15,8 +15,6 @@ class Data {
         if (!IO::FolderExists(folder_location)) IO::CreateFolder(folder_location);
     }
 
-
-    
     void map_handler() {
         string mapId = "";
         auto app = GetApp();

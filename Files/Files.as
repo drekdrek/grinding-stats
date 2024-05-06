@@ -65,11 +65,8 @@ class Files {
     Files() {}
     Files(const string &in id) {
         if (id == "" || id == "Unassigned") return;
-        folder_location = IO::FromStorageFolder("");
+        folder_location = IO::FromStorageFolder("data");
         
-
-
-        if (!IO::FolderExists(folder_location)) IO::CreateFolder(folder_location);
 
         map_id = id;
         json_file = folder_location + '/' + map_id + '.json';
