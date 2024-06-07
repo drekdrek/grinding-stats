@@ -74,5 +74,12 @@ void Main()
 #if DEPENDENCY_NADEOSERVICES
     NadeoServices::AddAudience("NadeoLiveServices");
 #endif
+
+    auto old_path = IO::FromDataFolder("Grinding Stats");
+    auto new_path = IO::FromStorageFolder("data");//.SubStr(0, IO::FromStorageFolder("").Length - 1); // remove trailing slash
+    if (IO::FolderExists(old_path)) {
+        IO::Move(old_path, new_path);
+    }
+
     if (setting_recap_show_menu && !recap.started) recap.start();
 }

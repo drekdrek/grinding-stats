@@ -1,5 +1,5 @@
 class Data {
-    private string folder_location = IO::FromDataFolder("") + "Grinding Stats";
+    private string folder_location = IO::FromStorageFolder("data");
     string mapUid = "";
     string file = "";
 
@@ -15,8 +15,6 @@ class Data {
         if (!IO::FolderExists(folder_location)) IO::CreateFolder(folder_location);
     }
 
-
-    
     void map_handler() {
         string mapId = "";
         auto app = GetApp();
@@ -78,6 +76,13 @@ class Data {
 
 
     void save() {
+        if (timer.total < 5000 && finishes.total == 0) {
+            timer.total = 0;
+            resets.total = 0;
+            respawns.total = 0;
+            return;
+        }
+
         if (mapUid == "" || mapUid == "Unassigned") return;
         {//saving to file
               files.time = timer.total;

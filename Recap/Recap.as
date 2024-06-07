@@ -119,11 +119,11 @@ class Recap {
     }
 
     private void load_files() {
-        auto files = IO::IndexFolder(IO::FromDataFolder("")+"Grinding Stats",true);
+        auto files = IO::IndexFolder(IO::FromStorageFolder(""),true);
         if (elements.Length != files.Length) {
             elements = array<RecapElement@>();
         } else {return;}
-        uint path_length = (IO::FromDataFolder('') + "Grinding Stats/").Length;
+        uint path_length = (IO::FromStorageFolder("")).Length;
         //loading files will be done in batches of 100
         uint batches = uint(Math::Ceil(files.Length / 100.0));
         for (uint i = 0; i < batches; i++) {
