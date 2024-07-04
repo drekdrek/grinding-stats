@@ -4,6 +4,11 @@ enum displays {
     Always
 }
 
+enum data_source {
+    Local_File,
+    Cloud
+}
+
 [Setting name="Enabled" category="UI"]
 bool setting_enabled = true;
 
@@ -12,6 +17,9 @@ bool setting_lock_window_location = false;
 
 [Setting name="Display setting" category="UI"]
 displays setting_display = displays::Always_except_when_interface_is_hidden;
+
+[Setting name="Data source" category="UI"] //its not really a UI setting but it is here for now
+data_source setting_data_source = data_source::Local_File;
 
 [Setting name="Show Duplicates" category="UI" description="will show both total and session time, finishes and resets if they are the same "]
 bool setting_show_duplicates = false;
@@ -24,13 +32,11 @@ bool setting_show_map_name_color = true;
 
 [Setting name="Show thousands" category="UI"]
 bool setting_show_thousands = false;
-
 [Setting name="Show Hour if 0" category="UI"]
 bool setting_show_hour_if_0 = false;
 
 [Setting name="Show Total time" category="Stats"]
 bool setting_show_total_time = true;
-
 [Setting name="Show Session time" category="Stats"]
 bool setting_show_session_time = true;
 
@@ -61,18 +67,3 @@ string setting_custom_recap = "";
 
 [Setting name="Show debug information" category="Debug"]
 bool setting_show_debug = false;
-
-
-Data data;
-Recap recap;
-
-bool recap_enabled = false;
-
-
-void Main()
-{
-#if DEPENDENCY_NADEOSERVICES
-    NadeoServices::AddAudience("NadeoLiveServices");
-#endif
-    if (setting_recap_show_menu && !recap.started) recap.start();
-}

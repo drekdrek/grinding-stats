@@ -1,0 +1,205 @@
+namespace Medal {
+    enum Type {
+        Bronze,
+        Silver,
+        Gold,
+        Author,
+        Trackmaster,
+        S_Bronze,
+        S_Silver,
+        S_Gold,
+        S_Trackmaster,
+        Champion
+    }
+}
+
+class BaseMedal {
+    Medal::Type medal;
+    uint64 target_time;
+    uint64 current_time;
+    
+    bool achieved = false;
+    uint64 achieved_time = 0;
+
+    Medal() {
+
+    }
+
+    Medal(Json::Value medal) {
+        print(Json::Write(medal));
+        int medal_type = medal.Get("medal");
+        this.medal = Medal::Type(medal_type);
+        this.achieved = medal.Get("achieved", false);
+        this.achieved_time = Text::ParseUInt64(medal.Get("achieved_time", "0"));
+    }
+
+    uint get_pb_time() {
+        auto network = cast<CTrackManiaNetwork>(GetApp().Network);
+        #if TMNEXT
+            auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
+            mapId = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
+        #elif MP4
+            auto rootmap = app.RootMap;
+            mapId = (rootmap is null ) ? "" : rootmap.IdName;
+        #elif TURBO
+            auto challenge = app.Challenge;
+            mapId = (challenge is null) ? "" : challenge.IdName;
+        #endif
+        #if TMNEXT
+            if (network.ClientManiaAppPlayground !is null) {
+                auto user_mgr = network.ClientManiaAppPlayground.UserMgr;
+                MwId user_id;
+                if (user_mgr.Users.Length > 0) {
+                    user_id = user_mgr.Users[0].Id;
+                } else {
+                    user_id.Value = uint(-1);
+                }
+
+                auto score_mgr = app.Network.ClientManiaAppPlayground.ScoreMgr;
+                uint pb_time = score_mgr.Map_GetRecord_v2(user_id, mapId, "PersonalBest", "", "TimeAttack", "");
+                return pb_time;
+            }
+        #elif MP4
+            if (network.TmRaceRules !is null && network.TmRaceRules.ScoreMgr !is null) {
+                auto score_mgr = network.TmRaceRules.ScoreMgr;
+                uint pb_time = score_mgr.Map_GetRecord_v2(data_mgr.MenuUserId, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+                return pb_time;
+            } else {
+                int score = -1;
+                // when playing on a server, TmRaceRules.ScoreMgr is unfortunately inaccessible
+				if(app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
+					// this is using *saved replays* to load the PB; if the replay has been deleted (or never saved), it won't appear
+					for(uint i = 0; i < app.ReplayRecordInfos.Length; i++) {
+						if(app.ReplayRecordInfos[i] !is null
+							 && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid
+							 && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
+							auto record = app.ReplayRecordInfos[i];
+							if(score < 0 || record.BestTime < uint(score)) {
+								score = int(record.BestTime);
+							}
+						}
+						// to prevent lag spikes when updating medals, scan at most 256 per tick
+						if(i & 0xff == 0xff) {
+							yield();
+							// since we're yielding, it's possible for a race condition to occur, and things to get yanked out
+							// from under our feet; look for this case and bail if it happens
+							if(app.CurrentProfile is null || app.CurrentProfile.AccountSettings is null
+									|| app.ReplayRecordInfos.Length <= i) {
+								warn("Game state changed while scanning records. Retrying in 500ms...");
+								break;
+							}
+						}
+					}
+				}
+				
+				/* this is session-best, check this as well */
+				if(app.CurrentPlayground !is null
+						&& app.CurrentPlayground.GameTerminals.Length > 0
+						&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer) !is null
+						&& cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score !is null) {
+					int sessScore = int(cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score.BestTime);
+					if(sessScore > 0 && (score < 0 || sessScore < score)) {
+						score = sessScore;
+					}
+				}
+            }
+
+        #elif TURBO
+            if (network.TmRaceRules !is null) {
+                auto data_mgr = network.TmRaceRules.DataMgr;
+                data_mgr.RetrieveRecordsNoMedals(map.MapInfo.MapUid, data_mgr.MenuUserId);
+				yield();
+				if(dataMgr.Ready) {
+                }
+            }
+        #endif
+
+        return 0;
+    }
+
+
+
+    void get_medal_time() {
+    auto app = cast<CTrackMania>(GetApp());
+    CGameCtnChallenge@ map;
+    #if TMNEXT||MP4
+        map = app.RootMap;
+    #elif TURBO
+        map = app.Challenge;
+    #endif
+        if (map !is null) {
+            if (this.medal == Medal::Type::Bronze) {
+                target_time = map.TMObjective_BronzeTime;;
+            } else if (this.medal == Medal::Type::Silver) {
+                target_time = map.TMObjective_SilverTime;
+            } else if (this.medal == Medal::Type::Gold) {
+                target_time = map.TMObjective_GoldTime;
+            } else if (this.medal == Medal::Type::Author || this.medal == Medal::Type::Trackmaster) {
+                target_time = map.TMObjective_AuthorTime;
+            }
+        }
+        #if TURBO 
+        else if (this.medal <= Medal::Type::S_Trackmaster) {
+            //stolen from Phlarx's Ulitmate Medals :)
+            int map_number = Text::ParseInt(map.MapName);
+            bool is_campaign = map_number != 0 && map.MapInfo.AuthorLogin == "Nadeo";
+            if (super is null || !is_campaign) {
+                target_time = -1;
+            }
+            uint super = TurboSPM::GetSuperTime(map_number).m_time;
+            uint delta = map.TMObjective_AuthorTime - super;
+            if (this.medal == Medal::Type::S_Bronze) {
+                target_time = super + (delta+1)/2;
+            } else if (this.medal == Medal::Type::S_Silver) {
+                target_time = super + (delta+2)/4;
+            } else if (this.medal == Medal::Type::S_Gold) {
+                target_time = super + (delta+4)/8;
+            } else if (this.medal == Medal::Type::S_Trackmaster) {
+                target_time = super;
+            }
+        } 
+        #endif
+        #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
+        else {
+            //champion medal
+            if (Meta::GetPluginFromID("ChampionMedals").Enabled) {
+                target_time = ChampionMedals::GetCMTime();
+            }
+        }
+        #endif
+    }
+
+    void handler() {
+        //very similar to the finish handler
+        if (this.achieved) {
+            return;
+        }
+        //first check before looping
+        auto pb = get_pb_time();
+
+        if (pb < target_time) {
+            this.achieved_time = pb;
+            this.achieved = true;
+        }
+
+        while (!achieved) {
+            //when the player finishes, store the time when they finished, and check if they have achieved the medal
+            //get pb value
+            pb = get_pb_time();
+            if (pb < target_time) {
+            this.achieved_time = pb;
+            this.achieved = true;
+            }   
+        }
+    }
+
+    Json::Value get_medal_value() {
+        Json::Value medal;
+        medal["medal"] = ""+this.medal;
+        medal["achieved"] = this.achieved;
+        medal["achieved_time"] = this.achieved_time;
+        return medal;
+    }
+
+
+}

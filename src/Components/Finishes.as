@@ -1,5 +1,4 @@
-//Finishes.as
-class Finishes : Component{
+class Finishes : BaseComponent {
 
     Finishes() {}
 
@@ -8,23 +7,35 @@ class Finishes : Component{
     }
 
     string toString() override {
-        string s = "";
-        if (setting_show_finishes_session && 
-        !(session == total && !setting_show_duplicates)) {
-            s += "\\$bbb" + session;
+        string_constructor = array<string>();
+        if (setting_show_duplicates) {
+
+            if (setting_show_finishes_session)
+                string_constructor.InsertLast("\\$bbb" + session);
+            if (setting_show_finishes_total)
+                string_constructor.InsertLast("\\$bbb" + total);
+
+        } else {
+
+            if (setting_show_finishes_session)
+                string_constructor.InsertLast("\\$bbb" + session);
+
+            if (setting_show_finishes_total  && total != session)
+                string_constructor.InsertLast("\\$bbb" + total);
         }
-        if (setting_show_finishes_session && setting_show_finishes_total &&
-         !(session == total && !setting_show_duplicates)) {
-            s += "\\$fff  /  ";
+
+
+        if (string_constructor.Length == 2) {
+            return string_constructor[0] + "\\$fff  /  " + string_constructor[1];
         }
-        if (setting_show_finishes_total) {
-            s += "\\$bbb" + total;
+        if (string_constructor.Length == 1) {
+            return string_constructor[0];
         }
-        return s;
+        return "";
     }
-    
+
     void handler() override {
-        while(running){ 
+        while(running){
             auto app = GetApp();
             auto playground = app.CurrentPlayground;
             auto network = cast<CTrackManiaNetwork>(app.Network);
@@ -38,7 +49,7 @@ class Finishes : Component{
                         handled = true;
                         session += 1;
                         total += 1;
-                    } 
+                    }
                     if (handled && ui_sequence != CGamePlaygroundUIConfig::EUISequence::Finish)
                         handled = false;
                 }
@@ -51,7 +62,7 @@ class Finishes : Component{
                         session += 1;
                         total += 1;
                     }
-                    if (handled && race_state != CTrackManiaPlayer::ERaceState::Finished) 
+                    if (handled && race_state != CTrackManiaPlayer::ERaceState::Finished)
                         handled = false;
                 }
 #elif TURBO
@@ -69,7 +80,8 @@ class Finishes : Component{
 #endif
             }
             yield();
-            
+
         }
     }
 }
+

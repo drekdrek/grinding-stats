@@ -1,37 +1,34 @@
-//Timer.as
-class Timer : Component {
+class Timer : BaseComponent {
 
     private uint64 start_time = Time::Now;
     private uint64 current_time = Time::Now;
     private uint64 session_offset = 0;
     private uint64 total_offset = 0;
+    private bool timing = true;
     bool same = false;
-    bool timing = false;
-    uint64 timer_start_idle = 0;
-    uint64 timer_countdown_number = 0;
-#if TURBO
-    int64 timer_gametime_turbo = 0;
-#endif
 
+    private uint64 timer_start_idle = 0;
 
     Timer() {}
 
     Timer(uint64 _total_offset) {
         session_offset = 0;
-        total_offset = _total_offset;   
+        total_offset = _total_offset;
         same = session_offset == total_offset;
         total = _total_offset;
     }
 
 
     bool isRunning() {
-        bool timer_idle = false;
-        bool timer_paused = false;
-        bool timer_playing = false;
-        bool timer_multiplayer = false;
-        bool timer_countdown = false;
-        bool timer_spectating = false;
-        bool timer_focused = false;
+        bool is_idle = false;
+        bool is_paused = false;
+        bool is_playing = false;
+        bool is_multiplayer = false;
+        bool is_countdown = false;
+        bool is_spectating = false;
+        bool is_focused = false;
+
+
         auto app = GetApp();
 #if TMNEXT||MP4
         auto rootmap = app.RootMap;
@@ -40,53 +37,52 @@ class Timer : Component {
 #endif
         auto playground = app.CurrentPlayground;
         if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
-            timer_multiplayer = app.PlaygroundScript is null;
+            is_multiplayer = app.PlaygroundScript is null;
             auto terminal = playground.GameTerminals[0];
 #if TMNEXT
-            timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !timer_multiplayer;
+            is_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !is_multiplayer;
             auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
             if (gui_player is null) return false;
             auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
-            timer_countdown = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime < 0;
-            timer_countdown_number = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime;
-            timer_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
-            timer_focused = app.InputPort.IsFocused;
+            is_countdown = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime < 0;
+            is_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
+            is_focused = app.InputPort.IsFocused;
 #elif MP4
-            timer_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
+            is_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
             auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
             if (gui_player is null) return false;
             auto script_player = gui_player.ScriptAPI;
-            timer_focused = app.InputPort.IsFocused;
+            is_focused = app.InputPort.IsFocused;
 #elif TURBO
-            timer_paused = playground.Interface.InterfaceRoot.IsFocused;
+            is_paused = playground.Interface.InterfaceRoot.IsFocused;
             auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
             if (gui_player is null) return false;
             auto script_player = gui_player;
-            timer_focused = true; // i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
+            is_focused = true; // i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
 #endif
             if (gui_player !is null) {
-                timer_playing = true;            
+                is_playing = true;
                 if (Math::Abs(script_player.Speed) < int(setting_idle_speed)) {
+
                     if (timer_start_idle == 0) timer_start_idle = Time::Now;
                     if ((Time::Now - timer_start_idle) > (1000 * setting_idle_time)) {
-                        timer_idle = true;
+                        is_idle = true;
                     }
                 } else {
                     timer_start_idle = 0;
-                    timer_idle = false;
+                    is_idle = false;
                 }
             } else {
-                timer_playing = false;
-                timer_idle = false;
+                is_playing = false;
+                is_idle = false;
                 timer_start_idle = 0;
             }
         }
-        return (!timer_idle && timer_playing && !timer_paused && !timer_countdown && !timer_spectating && timer_focused);
+        return (!is_idle && is_playing && !is_paused && !is_countdown && !is_spectating && is_focused);
     }
 
-
-    void count_time() {
-        while(running) {
+    void keep_time() {
+        while(timing) {
             current_time = Time::Now;
             session = (current_time + session_offset) - start_time;
             total = (current_time + total_offset) - start_time;
@@ -97,31 +93,37 @@ class Timer : Component {
     void stop() {
         session_offset = session;
         total_offset = total;
-        running = false;
+        timing = false;
+    }
+
+    void start() override {
+        running = true;
+        startnew(CoroutineFunc(handler));
+        startnew(CoroutineFunc(keep_time));
     }
 
     void handler() override {
-        bool handled = true;
-        timing = true;
-        while(timing) {
-            if (!isRunning() && !handled) {
+        while(running) {
+            bool is_running = isRunning();
+            if (!is_running && !handled) {
                 handled = true;
                 stop();
-            } else if (isRunning() && handled) {
+            } else if (is_running && handled) {
                 handled = false;
                 start_time = Time::Now;
-                running = true;
-                startnew(CoroutineFunc(count_time));
+                timing = true;
+                startnew(CoroutineFunc(keep_time));
             }
             yield();
         }
-    }   
-}
+    }
 
-namespace Timer {
-    string to_string(uint64 time) {
+    string toString(uint64 time) {
         if (time == 0) return "--:--:--." + (setting_show_thousands ? "---":"--");
-        string str = Time::Format(time,true,true,setting_show_hour_if_0,false);
+        string str = "\\$bbb" +  Time::Format(time,true,true,setting_show_hour_if_0,false);
         return setting_show_thousands ? str: str.SubStr(0, str.Length - 1);
     }
+
+
+
 }

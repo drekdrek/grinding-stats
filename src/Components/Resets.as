@@ -1,6 +1,4 @@
-//Resets.as
-class Resets : Component {
-
+class Resets : BaseComponent {
     Resets() {}
 
     Resets(uint64 total) {
@@ -8,19 +6,31 @@ class Resets : Component {
     }
 
     string toString() override {
-        string s = "";
-        if (setting_show_resets_session && 
-        !(session == total && !setting_show_duplicates)) {
-            s += "\\$bbb" + session;
+        string_constructor = array<string>();
+
+        if (setting_show_duplicates) {
+
+            if (setting_show_resets_session) 
+                string_constructor.InsertLast("\\$ddd" + session);
+            if (setting_show_resets_total) 
+                string_constructor.InsertLast("\\$bbb" + total);
+
+        } else {
+
+            if (setting_show_resets_session)
+                string_constructor.InsertLast("\\$bbb" + session);
+
+            if (setting_show_resets_total  && total != session) 
+                string_constructor.InsertLast("\\$bbb" + total);
         }
-        if (setting_show_resets_session && setting_show_resets_total &&
-         !(session == total && !setting_show_duplicates)) {
-            s += "\\$fff  /  ";
+
+        if (string_constructor.Length == 2) {
+            return string_constructor[0] + "\\$fff  /  " + string_constructor[1];
         }
-        if (setting_show_resets_total) {
-            s += "\\$bbb" + total;
+        if (string_constructor.Length == 1) {
+            return string_constructor[0];
         }
-        return s;
+        return "";
     }
 
     void handler() override {
