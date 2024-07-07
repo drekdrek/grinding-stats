@@ -1,32 +1,35 @@
-namespace Medal {
-    enum Type {
-        Bronze,
-        Silver,
-        Gold,
-#if TMNEXT || MP4
-        Author,
-#elif TURBO
-        Trackmaster,
-        S_Bronze,
-        S_Silver,
-        S_Gold,
-        S_Trackmaster,
-#endif
-#if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
-        Champion
-#endif
-    }
-}
 
 class BaseMedal {
-    Medal::Type medal;
-    uint64 target_time;
-    uint64 current_time;
-    
-    bool achieved = false;
-    uint64 achieved_time = 0;
+	Medals::Type type;
+	uint64 target = 0;
+	uint64 achieved_time = 0;
 
-    BaseMedal(Medal::Type medal) {
-        this.medal = medal;
-    }
+	bool achieved = false;
+
+	BaseMedal(Medals::Type type, uint64 target = 0) {
+		this.target = target;
+		this.type = type;
+	}
+	BaseMedal(int type, uint64 target = 0) {
+		this.target = target;
+		this.type = Medals::Type(type);
+	}
+
+	void check_pb(uint pb) {
+		// print("Checking medal " + Medals::to_string(type) + " with target " +
+		// target + " and pb " + pb);
+		if (achieved)
+			return;
+		if (target != 0) {
+			if (pb == 0)
+				return;
+			if (pb <= target) {
+				// print("Achieved medal " + Medals::to_string(type) + " with
+				// target " + target + " and pb " + pb);
+				achieved = true;
+				// the most wonderful line of code ever
+				achieved_time = data.localData.timerComponent.total;
+			}
+		}
+	}
 }
