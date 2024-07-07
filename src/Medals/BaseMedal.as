@@ -6,13 +6,19 @@ class BaseMedal {
 
 	bool achieved = false;
 
-	BaseMedal(Medals::Type type, uint64 target = 0) {
+	BaseMedal(Medals::Type type, bool achieved, uint64 achieved_time,
+			  uint64 target = 0) {
 		this.target = target;
 		this.type = type;
+		this.achieved = achieved;
+		this.achieved_time = achieved_time;
 	}
-	BaseMedal(int type, uint64 target = 0) {
+	BaseMedal(int type, bool achieved, uint64 achieved_time,
+			  uint64 target = 0) {
 		this.target = target;
 		this.type = Medals::Type(type);
+		this.achieved = achieved;
+		this.achieved_time = achieved_time;
 	}
 
 	void check_pb(uint pb) {

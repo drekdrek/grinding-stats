@@ -5,7 +5,7 @@ abstract class AbstractData {
   protected uint64 finishes = 0;
   protected uint64 resets = 0;
   protected uint64 respawns = 0;
-  protected Json::Value medals = Json::Array();
+  protected string medals_string = "";
 
 	Finishes @finishesComponent = Finishes(0);
 	Resets @resetsComponent = Resets(0);
@@ -37,7 +37,8 @@ abstract class AbstractData {
 		finishes = other.finishes;
 		resets = other.resets;
 		respawns = other.respawns;
-		medals = other.medals;
+		medals_string = other.medals_string;
+		save();
 		load();
 	}
 
@@ -62,14 +63,11 @@ abstract class AbstractData {
 	uint64 get_finishes() { return finishes; }
 	uint64 get_resets() { return resets; }
 	uint64 get_respawns() { return respawns; }
-	Json::Value get_medals() {
-		// return medals.get_medals();
-		return Json::Array();
-	}
+	string get_medals_string() { return medals_string; }
 
 	void set_time(uint64 _time) { time = _time; }
 	void set_finishes(uint64 _finishes) { finishes = _finishes; }
 	void set_resets(uint64 _resets) { resets = _resets; }
 	void set_respawns(uint64 _respawns) { respawns = _respawns; }
-	void set_medals(Json::Value _medals) { medals = _medals; }
+	void set_medals_string(const string &in _medals_string) { medals_string = _medals_string; }
 }
