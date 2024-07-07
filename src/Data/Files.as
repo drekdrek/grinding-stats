@@ -8,10 +8,14 @@ class Files : AbstractData {
 		super(id);
 		if (id == "" || id == "Unassigned")
 			return;
+		if (!IO::FolderExists(folder_location))
+			IO::CreateFolder(folder_location);
+
 		file_location = folder_location + "/" + id + ".json";
 	}
 
 	void load() override {
+
 		if (IO::FileExists(file_location)) {
 			auto content = Json::FromFile(file_location);
 			finishes = Text::ParseUInt64(content.Get("finishes", "0"));
