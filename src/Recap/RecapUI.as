@@ -1,10 +1,14 @@
 bool setting_recap_show_menu = false;
 bool load_recap = false;
 bool setting_recap_show_colors = setting_show_map_name_color;
+int total_files = 0;
+uint render_amount = 100;
 
 void RenderMenu() {
 	if (UI::MenuItem(Icons::List + " Grinding Stats Recap", "",
 					 setting_recap_show_menu)) {
+		total_files =
+			IO::IndexFolder(IO::FromStorageFolder("data"), true).Length;
 		setting_recap_show_menu = !setting_recap_show_menu;
 	}
 }
@@ -137,22 +141,27 @@ void RenderRecap() {
 #endif
 		if (!load_recap) {
 			auto windowWidth = UI::GetWindowSize();
-			string text =
-				"This will take a while depending on how many files you have.";
+			string text = "You have " + total_files +
+						  " files in your Grinding Stats data "
+						  "folder.\nThis will take a while depending on how "
+						  "many files you "
+						  "have.\nIt will lag/freeze the game while loading.";
 			vec2 textWidth = Draw::MeasureString(text);
 			UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2,
 								  windowWidth.y / 2 + 25));
-			UI::Text(text);
-			text = "It will lag/freeze the game while loading.";
-			textWidth = Draw::MeasureString(text);
-			UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2,
-								  windowWidth.y / 2 + 40));
 			UI::Text(text);
 			UI::SetCursorPos(
 				vec2(windowWidth.x / 2 - 200 / 2, windowWidth.y / 2 - 25));
 			if (UI::Button("Load Recap", vec2(200, 50))) {
 				load_recap = true;
 				recap.start();
+			}
+		}
+		if (recap.filtered_elements.Length == 0) {
+			UI::SetCursorPos(vec2(10, 60));
+			UI::Text("Recap Log");
+			for (uint i = 0; i < recap.log.Length; i++) {
+				UI::Text(recap.log[i]);
 			}
 		}
 
@@ -198,7 +207,10 @@ void RenderRecap() {
 				recap.SortItems(sortSpecs);
 
 			// drawing items
-			UI::ListClipper clipper(recap.filtered_elements.Length + 1);
+			UI::ListClipper clipper(recap.filtered_elements.Length + 1 <
+											render_amount
+										? recap.filtered_elements.Length + 1
+										: render_amount);
 			while (clipper.Step()) {
 				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd;
 					 i++) {

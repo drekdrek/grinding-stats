@@ -46,10 +46,10 @@ class DataManager {
 	}
   private void load() {
 		localData.load();
-		if (setting_data_source == data_source::Cloud) {
-			cloudData.load();
-			DataConflict::handle_conflict(localData, cloudData);
-		}
+		// if (setting_data_source == data_source::Cloud) { // not implemented yet
+		// 	cloudData.load();
+		// 	DataConflict::handle_conflict(localData, cloudData);
+		// }
 	}
 
 	Timer @get_timer() { return localData.timerComponent; }

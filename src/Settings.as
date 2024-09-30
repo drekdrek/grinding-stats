@@ -6,7 +6,7 @@ enum displays {
 
 enum data_source {
     Local_File,
-    Cloud
+    // Cloud // not implemented yet
 }
 
 [Setting name="Enabled" category="UI"]
@@ -64,6 +64,3 @@ bool setting_show_respawns_total = false;
 
 [Setting name="Custom Grinding Recap" multiline category="Recap" description="Tracks in this list will be included in custom Recap. Enter UID of track per line."]
 string setting_custom_recap = "";
-
-[Setting name="Show debug information" category="Debug"]
-bool setting_show_debug = false;

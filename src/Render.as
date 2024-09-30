@@ -30,7 +30,6 @@ bool should_render(RenderMode rendermode) {
 }
 
 void Render() {
-	data.localData.medalsComponent.debug_render_medals();
 	if (should_render(RenderMode::Normal))
 		render_stats_ui();
 }
@@ -57,11 +56,7 @@ void render_stats_ui() {
 		window_flags |= UI::WindowFlags::NoInputs;
 	UI::Begin("Grinding Stats", window_flags);
 	UI::BeginGroup();
-	UI::BeginTable("DEV", 1, UI::TableFlags::SizingFixedFit);
-	UI::TableNextRow();
-	UI::TableNextColumn();
-	UI::Text("\\$f00DEV BUILD");
-	UI::EndTable();
+
 	if (setting_show_map_name) {
 		UI::BeginTable("header", 1, UI::TableFlags::SizingFixedFit);
 		UI::TableNextRow();

@@ -45,6 +45,7 @@ class Recap {
 	uint total_finishes = 0;
 	uint total_resets = 0;
 	uint total_respawns = 0;
+	array<string> log;
 
   private void count_total_time() {
 		total_time = 0;
@@ -184,9 +185,9 @@ class Recap {
 		uint path_length = (IO::FromStorageFolder("data")).Length;
 		// loading files will be done in batches of 50
 		uint batches = uint(Math::Ceil(files.Length / 50.0));
-		for (uint i = 0; i < batches; i++) {
+		for (uint i = 0; i < 10; i++) {
 			// 50 or less if there is less than 50 left
-			uint amt = Math::Min(50, files.Length - (i * 50));
+			uint amt = Math::Min(50, Math::Max(0, files.Length - (i * 50)));
 			for (uint j = 0; j < amt; j++) {
 				string[] @matches =
 					Regex::Search(files[i * 50 + j],
@@ -194,8 +195,12 @@ class Recap {
 				string map_id = matches[1];
 
 				elements.InsertLast(RecapElement(map_id));
+				log.InsertLast("Loaded " + map_id);
+				if (log.Length > 5) {
+					log.RemoveAt(0);
+				}
 			}
-			yield();
+			sleep(100); // delay to avoid crashing
 		}
 		dirty = true;
 		count_total_finishes();

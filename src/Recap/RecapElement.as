@@ -46,7 +46,6 @@ class RecapElement {
 		MwId mwId = app.ManiaPlanetScriptAPI.MasterServer_MSUsers[0].Id;
 		CGameDataFileManagerScript @DataFileMgr =
 			app.MenuManager.MenuCustom_CurrentManiaApp.DataFileMgr;
-		print(this.map_id);
 		name = map_id;
 		auto req = DataFileMgr.Map_NadeoServices_GetFromUid(mwId, this.map_id);
 		while (req.IsProcessing)
