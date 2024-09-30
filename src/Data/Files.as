@@ -38,6 +38,13 @@ class Files : AbstractData {
 	}
 
 	void save() override {
+		if (timerComponent.total < 5000 && finishesComponent.total == 0) {
+			timerComponent.total = 0;
+			resetsComptimerComponent.total = 0;
+			respawnsComptimerComponent.total = 0;
+			return;
+		}
+
 		if (mapUid == "" || mapUid == "Unassigned")
 			return;
 		auto content = Json::Object();
