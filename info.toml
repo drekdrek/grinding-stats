@@ -2,10 +2,10 @@
 name = "Grinding Stats"
 author = "Drek"
 category = "Overlay"
-
-version = "2.0.14"
+version = "2.1.0"
 siteid = 158
+module = "GrindingStats"
 
 [script]
-optional_dependencies = [ "NadeoServices" ]
+optional_dependencies = ["NadeoServices","ChampionMedals","DuckMedals","WarriorMedals"]
 timeout = 5000
