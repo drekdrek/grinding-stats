@@ -15,7 +15,6 @@ class Respawns : BaseComponent {
 		string_constructor = array<string>();
 
 		if (setting_show_duplicates) {
-
 			if (setting_show_respawns_current)
 				string_constructor.InsertLast("\\$bbb" + current);
 			if (setting_show_respawns_session)
@@ -23,14 +22,26 @@ class Respawns : BaseComponent {
 			if (setting_show_respawns_total)
 				string_constructor.InsertLast("\\$bbb" + total);
 		} else {
+
 			if (setting_show_respawns_current)
 				string_constructor.InsertLast("\\$bbb" + current);
 
-			if (setting_show_respawns_session && session != current)
+			if (setting_show_respawns_session &&
+				(current != session || !setting_show_respawns_current))
 				string_constructor.InsertLast("\\$bbb" + session);
 
-			if (setting_show_respawns_total && total != session)
-				string_constructor.InsertLast("\\$bbb" + total);
+			if (setting_show_respawns_total) {
+				bool showTotal = true;
+				if (total == current && setting_show_respawns_current) {
+					showTotal = false;
+				}
+				if (total == session && setting_show_respawns_session) {
+					showTotal = false;
+				}
+				if (showTotal) {
+					string_constructor.InsertLast("\\$bbb" + total);
+				}
+			}
 		}
 		if (string_constructor.Length == 3) {
 			return string_constructor[0] + "\\$fff  /  " +
