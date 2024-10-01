@@ -189,9 +189,9 @@ class Recap {
 			// 50 or less if there is less than 50 left
 			uint amt = Math::Min(50, Math::Max(0, files.Length - (i * 50)));
 			for (uint j = 0; j < amt; j++) {
+
 				string[] @matches =
-					Regex::Search(files[i * 50 + j],
-								  "\\/Grinding Stats\\/data\\/(.+)\\.json");
+					Regex::Search(files[i * 50 + j], "\\/data\\/(.+)\\.json");
 				string map_id = matches[1];
 
 				elements.InsertLast(RecapElement(map_id));
