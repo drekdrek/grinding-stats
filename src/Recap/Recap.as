@@ -185,7 +185,7 @@ class Recap {
 		uint path_length = (IO::FromStorageFolder("data")).Length;
 		// loading files will be done in batches of 50
 		uint batches = uint(Math::Ceil(files.Length / 50.0));
-		for (uint i = 0; i < 10; i++) {
+		for (uint i = 0; i < batches; i++) {
 			// 50 or less if there is less than 50 left
 			uint amt = Math::Min(50, Math::Max(0, files.Length - (i * 50)));
 			for (uint j = 0; j < amt; j++) {
