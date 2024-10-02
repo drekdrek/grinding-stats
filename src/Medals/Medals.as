@@ -237,9 +237,8 @@ class Medals : BaseComponent {
 		if (network.TmRaceRules !is null &&
 			network.TmRaceRules.ScoreMgr !is null) {
 			auto score_mgr = network.TmRaceRules.ScoreMgr;
-			uint pb_time = score_mgr.Map_GetRecord_v2(
-				data_mgr.MenuUserId, map.MapInfo.MapUid, "PersonalBest", "",
-				"TimeAttack", "");
+			uint pb_time = score_mgr.Map_GetRecord(
+				data_mgr.MenuUserId, map.MapInfo.MapUid, "");
 			return pb_time;
 		} else {
 			int score = -1;
