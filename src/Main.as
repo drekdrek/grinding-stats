@@ -31,7 +31,8 @@ void migrateOldData() {
 				UI::HSV(0.10f, 1.0f, 1.0f), 7500);
 			warn("The new data folder already exists.\tOld path: " + old_path +
 				 "\tnew path: " + new_path);
-			startnew(CoroutineFunc(mergeData));
+			Meta::PluginCoroutine@ merge = startnew(CoroutineFunc(mergeData)); 
+			while (merge.IsRunning()) yield();
 		}
 		IO::Move(old_path, new_path);
 		// check if the folder is empty,
