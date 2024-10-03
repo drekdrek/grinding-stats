@@ -39,26 +39,20 @@ class Timer : BaseComponent {
 		auto rootmap = app.Challenge;
 #endif
 		auto playground = app.CurrentPlayground;
-		if (rootmap !is null && playground !is null &&
-			playground.GameTerminals.Length > 0) {
+		if (rootmap !is null && playground !is null && playground.GameTerminals.Length > 0) {
 			is_multiplayer = app.PlaygroundScript is null;
 			auto terminal = playground.GameTerminals[0];
 #if TMNEXT
-			is_paused =
-				app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed &&
-				!is_multiplayer;
+			is_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !is_multiplayer;
 			auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
 			if (gui_player is null)
 				return false;
 			auto script_player = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
-			is_countdown = app.Network.PlaygroundClientScriptAPI.GameTime -
-							   script_player.StartTime <
-						   0;
+			is_countdown = app.Network.PlaygroundClientScriptAPI.GameTime - script_player.StartTime < 0;
 			is_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
 			is_focused = app.InputPort.IsFocused;
 #elif MP4
-			is_paused =
-				app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
+			is_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
 			auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
 			if (gui_player is null)
 				return false;
@@ -66,23 +60,19 @@ class Timer : BaseComponent {
 			is_focused = app.InputPort.IsFocused;
 #elif TURBO
 			is_paused = playground.Interface.InterfaceRoot.IsFocused;
-			auto gui_player =
-				cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
+			auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
 			if (gui_player is null)
 				return false;
 			auto script_player = gui_player;
 			is_focused = true;
-			// i could not find a place where i could check if the
-			// game is focused. D: -- if you do pls let me know :)
+			// i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
 #endif
 			if (gui_player !is null) {
 				is_playing = true;
 				if (Math::Abs(script_player.Speed) < int(setting_idle_speed)) {
-
 					if (timer_start_idle == 0)
 						timer_start_idle = Time::Now;
-					if ((Time::Now - timer_start_idle) >
-						(1000 * setting_idle_time)) {
+					if ((Time::Now - timer_start_idle) > (1000 * setting_idle_time)) {
 						is_idle = true;
 					}
 				} else {
@@ -95,8 +85,7 @@ class Timer : BaseComponent {
 				timer_start_idle = 0;
 			}
 		}
-		return (!is_idle && is_playing && !is_paused && !is_countdown &&
-				!is_spectating && is_focused);
+		return (!is_idle && is_playing && !is_paused && !is_countdown && !is_spectating && is_focused);
 	}
 
 	void keep_time() {
@@ -156,8 +145,7 @@ class Timer : BaseComponent {
 	string toString(uint64 time) {
 		if (time == 0)
 			return "--:--:--." + (setting_show_thousands ? "---" : "--");
-		string str = "\\$bbb" + Time::Format(time, true, true,
-											 setting_show_hour_if_0, false);
+		string str = "\\$bbb" + Time::Format(time, true, true, setting_show_hour_if_0, false);
 		return setting_show_thousands ? str : str.SubStr(0, str.Length - 1);
 	}
 }

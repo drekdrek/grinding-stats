@@ -9,8 +9,9 @@ void Main() {
 #if DEPENDENCY_NADEOSERVICES
 	NadeoServices::AddAudience("NadeoLiveServices");
 #endif
-	if (setting_recap_show_menu && !recap.started)
+	if (setting_recap_show_menu && !recap.started) {
 		recap.start();
+	}
 
 	migrateOldData();
 }
@@ -18,25 +19,16 @@ void Main() {
 void migrateOldData() {
 	auto old_path = IO::FromDataFolder("Grinding Stats");
 	if (IO::FolderExists(old_path)) {
-		UI::ShowNotification(
-			"Grinding Stats",
-			"Found old data folder, attempting to merge data together.",
-			UI::HSV(0.10f, 1.0f, 1.0f), 2500);
+		UI::ShowNotification("Grinding Stats", "Found old data folder, attempting to merge data together.", UI::HSV(0.10f, 1.0f, 1.0f), 2500);
 		auto new_path = IO::FromStorageFolder("data");
 		if (IO::FolderExists(new_path)) {
-			// the new folder already exists, error
-			UI::ShowNotification(
-				"Grinding Stats",
-				"Data migration failed.\nAttempting to merge data together.",
-				UI::HSV(0.10f, 1.0f, 1.0f), 7500);
-			warn("The new data folder already exists.\tOld path: " + old_path +
-				 "\tnew path: " + new_path);
-			Meta::PluginCoroutine@ merge = startnew(CoroutineFunc(mergeData)); 
-			while (merge.IsRunning()) yield();
+			UI::ShowNotification("Grinding Stats", "Data migration failed.\nAttempting to merge data together.", UI::HSV(0.10f, 1.0f, 1.0f), 7500);
+			warn("The new data folder already exists.\tOld path: " + old_path + "\tnew path: " + new_path);
+			Meta::PluginCoroutine @merge = startnew(CoroutineFunc(mergeData));
+			while (merge.IsRunning())
+				yield();
 		}
 		IO::Move(old_path, new_path);
-		// check if the folder is empty,
-		// if it is, delete it
 		if (IO::IndexFolder(old_path, true).Length == 0) {
 			IO::DeleteFolder(old_path);
 		}
@@ -60,12 +52,8 @@ void mergeData() {
 
 	if (IO::IndexFolder(old_path, true).Length == 0) {
 		IO::DeleteFolder(old_path);
-		UI::ShowNotification("Grinding Stats", "Completed Data Transfer",
-							 UI::HSV(0.35f, 1.0f, 1.0f), 10000);
+		UI::ShowNotification("Grinding Stats", "Completed Data Transfer", UI::HSV(0.35f, 1.0f, 1.0f), 10000);
 	} else {
-		UI::ShowNotification("Grinding Stats",
-							 "There was a conflict with file names, please "
-							 "manually merge the data folders",
-							 UI::HSV(1.0f, 1.0f, 1.0f), 10000);
+		UI::ShowNotification("Grinding Stats", "There was a conflict with file names, please manually merge the data folders", UI::HSV(1.0f, 1.0f, 1.0f), 10000);
 	}
 }

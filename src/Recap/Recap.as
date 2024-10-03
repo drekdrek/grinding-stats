@@ -18,15 +18,14 @@ enum campaign_filter {
 string time_to_string(uint64 time) {
 	if (time == 0)
 		return "--:--:--." + (setting_show_thousands ? "---" : "--");
-	string str = "\\$bbb" +
-				 Time::Format(time, true, true, setting_show_hour_if_0, false);
+	string str = "\\$bbb" + Time::Format(time, true, true, setting_show_hour_if_0, false);
 	return setting_show_thousands ? str : str.SubStr(0, str.Length - 1);
 }
+
 string time_to_string(uint64 time, bool thousands) {
 	if (time == 0)
 		return "--:--:--." + (thousands ? "---" : "--");
-	string str = "\\$bbb" +
-				 Time::Format(time, true, true, setting_show_hour_if_0, false);
+	string str = "\\$bbb" + Time::Format(time, true, true, setting_show_hour_if_0, false);
 	return thousands ? str : str.SubStr(0, str.Length - 1);
 }
 } // namespace Recap
@@ -74,6 +73,7 @@ class Recap {
 			total_respawns += filtered_elements[i].respawns;
 		}
 	}
+
 	Recap() {
 		elements = array<RecapElement @>();
 		dirty = false;
@@ -84,80 +84,64 @@ class Recap {
 		sortSpecs.Dirty = false;
 		dirty = false;
 	}
+
   private void sort_items(ref @s) {
-		// coroutineFunc of sorting the items
 		if (filtered_elements.Length < 2)
 			return;
 
 		auto specs = (cast<UI::TableSortSpecs @>(s)).Specs;
 		for (uint i = 0; i < specs.Length; i++) {
 			auto spec = specs[i];
-
 			if (spec.SortDirection == UI::SortDirection::None)
 				continue;
 
 			if (spec.SortDirection == UI::SortDirection::Ascending) {
 				switch (spec.ColumnIndex) {
 				case 0:
-					filtered_elements.Sort(function(a, b) {
-						return a.stripped_name < b.stripped_name;
-					});
+					filtered_elements.Sort(function(a, b) { return a.stripped_name < b.stripped_name; });
 					break;
 				case 1:
-					filtered_elements.Sort(
-						function(a, b) { return a.time_uint < b.time_uint; });
+					filtered_elements.Sort(function(a, b) { return a.time_uint < b.time_uint; });
 					break;
 				case 2:
-					filtered_elements.Sort(
-						function(a, b) { return a.finishes < b.finishes; });
+					filtered_elements.Sort(function(a, b) { return a.finishes < b.finishes; });
 					break;
 				case 3:
-					filtered_elements.Sort(
-						function(a, b) { return a.resets < b.resets; });
+					filtered_elements.Sort(function(a, b) { return a.resets < b.resets; });
 					break;
 				case 4:
-					filtered_elements.Sort(
-						function(a, b) { return a.respawns < b.respawns; });
+					filtered_elements.Sort(function(a, b) { return a.respawns < b.respawns; });
 					break;
 				case 5:
-					filtered_elements.Sort(function(a, b) {
-						return a.modified_time < b.modified_time;
-					});
+					filtered_elements.Sort(function(a, b) { return a.modified_time < b.modified_time; });
 					break;
 				}
 			} else if (spec.SortDirection == UI::SortDirection::Descending) {
 				switch (spec.ColumnIndex) {
 				case 0:
-					filtered_elements.Sort(function(a, b) {
-						return a.stripped_name > b.stripped_name;
-					});
+					filtered_elements.Sort(function(a, b) { return a.stripped_name > b.stripped_name; });
 					break;
 				case 1:
-					filtered_elements.Sort(
-						function(a, b) { return a.time_uint > b.time_uint; });
+					filtered_elements.Sort(function(a, b) { return a.time_uint > b.time_uint; });
 					break;
 				case 2:
-					filtered_elements.Sort(
-						function(a, b) { return a.finishes > b.finishes; });
+					filtered_elements.Sort(function(a, b) { return a.finishes > b.finishes; });
 					break;
 				case 3:
-					filtered_elements.Sort(
-						function(a, b) { return a.resets > b.resets; });
+					filtered_elements.Sort(function(a, b) { return a.resets > b.resets; });
 					break;
 				case 4:
-					filtered_elements.Sort(
-						function(a, b) { return a.respawns > b.respawns; });
+					filtered_elements.Sort(function(a, b) { return a.respawns > b.respawns; });
 					break;
 				case 5:
-					filtered_elements.Sort(function(a, b) {
-						return a.modified_time > b.modified_time;
-					});
+					filtered_elements.Sort(function(a, b) { return a.modified_time > b.modified_time; });
 					break;
 				}
 			}
 			yield();
 		}
 	}
+
 	void start() { startnew(CoroutineFunc(load_files)); }
 
 	void refresh() {
@@ -183,24 +167,19 @@ class Recap {
 			return;
 		}
 		uint path_length = (IO::FromStorageFolder("data")).Length;
-		// loading files will be done in batches of 50
 		uint batches = uint(Math::Ceil(files.Length / 50.0));
 		for (uint i = 0; i < batches; i++) {
-			// 50 or less if there is less than 50 left
 			uint amt = Math::Min(50, Math::Max(0, files.Length - (i * 50)));
 			for (uint j = 0; j < amt; j++) {
-
-				string[] @matches =
-					Regex::Search(files[i * 50 + j], "\\/data\\/(.+)\\.json");
+				string[] @matches = Regex::Search(files[i * 50 + j], "\\/data\\/(.+)\\.json");
 				string map_id = matches[1];
-
 				elements.InsertLast(RecapElement(map_id));
 				log.InsertLast("Loaded " + map_id);
 				if (log.Length > 5) {
 					log.RemoveAt(0);
 				}
 			}
-			sleep(100); // delay to avoid crashing
+			sleep(100);
 		}
 		dirty = true;
 		count_total_finishes();
@@ -209,6 +188,7 @@ class Recap {
 		count_total_time();
 		recap.filter_elements();
 	}
+
 	void filter_elements() {
 		filtered_elements = array<RecapElement @>();
 		switch (current_recap) {
@@ -285,8 +265,6 @@ class Recap {
 		this.dirty = true;
 
 #if MP4
-		// Loads map names from tm2 exchange in batches to avoid API not
-		// responding
 		startnew(CoroutineFunc(get_all_tm2_names_from_api));
 #endif
 
@@ -295,6 +273,7 @@ class Recap {
 		count_total_respawns();
 		count_total_time();
 	}
+
   private void filter_all(bool uploaded) {
 		for (uint i = 0; i < elements.Length; i++) {
 			RecapElement @element = elements[i];
@@ -302,15 +281,14 @@ class Recap {
 				filtered_elements.InsertLast(element);
 		}
 	}
+
 #if TMNEXT
   private void filter_campaign(Recap::campaign_filter campaign_filter) {
 		if (campaigns.Length == 0 || current_campaign.Length == 0) {
 			print("Fetching campaign data");
 			while (!NadeoServices::IsAuthenticated("NadeoLiveServices"))
 				yield();
-			string url =
-				NadeoServices::BaseURLLive() +
-				"/api/token/campaign/official?length=20&offset=0&royal=false";
+			string url = NadeoServices::BaseURLLive() + "/api/token/campaign/official?length=20&offset=0&royal=false";
 			auto req = NadeoServices::Get("NadeoLiveServices", url);
 			req.Start();
 			while (!req.Finished())
@@ -318,19 +296,12 @@ class Recap {
 			Json::Value @maps = Json::Parse(req.String());
 			uint total_campaigns = maps['campaignList'].Length;
 			for (uint campaign = 0; campaign < total_campaigns; campaign++) {
-				for (uint j = 0;
-					 j < maps['campaignList'][campaign]['playlist'].Length;
-					 j++) {
+				for (uint j = 0; j < maps['campaignList'][campaign]['playlist'].Length; j++) {
 					if (campaign == 0)
-						current_campaign.InsertLast(
-							maps['campaignList'][campaign]['playlist'][j]
-								['mapUid']);
+						current_campaign.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
 					if (campaign == 1)
-						previous_campaign.InsertLast(
-							maps['campaignList'][campaign]['playlist'][j]
-								['mapUid']);
-					campaigns.InsertLast(maps['campaignList'][campaign]
-											 ['playlist'][j]['mapUid']);
+						previous_campaign.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
+					campaigns.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
 				}
 			}
 		}
@@ -344,7 +315,6 @@ class Recap {
 						continue;
 					}
 				}
-
 			} else if (campaign_filter == Recap::campaign_filter::current) {
 				for (uint j = 0; j < current_campaign.Length; j++) {
 					if (current_campaign[j] == element.map_id) {
@@ -352,7 +322,6 @@ class Recap {
 						continue;
 					}
 				}
-
 			} else if (campaign_filter == Recap::campaign_filter::previous) {
 				for (uint j = 0; j < previous_campaign.Length; j++) {
 					if (previous_campaign[j] == element.map_id) {
@@ -363,15 +332,13 @@ class Recap {
 			}
 		}
 	}
+
   private void filter_totd() {
 		if (totds.Length == 0) {
 			print("Fetching totd data");
 			while (!NadeoServices::IsAuthenticated("NadeoLiveServices"))
 				yield();
-			// this is going to break in October 2028
-			// hopefully i'll fix it by then
-			string url = NadeoServices::BaseURLLive() +
-						 "/api/token/campaign/month?length=100&offset=0";
+			string url = NadeoServices::BaseURLLive() + "/api/token/campaign/month?length=100&offset=0";
 			auto req = NadeoServices::Get("NadeoLiveServices", url);
 			req.Start();
 			while (!req.Finished())
@@ -379,10 +346,8 @@ class Recap {
 
 			Json::Value @maps = Json::Parse(req.String());
 			for (uint month = 0; month < maps['monthList'].Length; month++) {
-				for (uint j = 0; j < maps['monthList'][month]['days'].Length;
-					 j++) {
-					totds.InsertLast(
-						maps['monthList'][month]['days'][j]['mapUid']);
+				for (uint j = 0; j < maps['monthList'][month]['days'].Length; j++) {
+					totds.InsertLast(maps['monthList'][month]['days'][j]['mapUid']);
 				}
 				yield();
 			}
@@ -412,14 +377,12 @@ class Recap {
 		uint req_uid_limit = 8, cur_uid = 0;
 		while (cur_uid < elements.Length) {
 			string map_uids = elements[cur_uid++].map_id;
-			for (uint i = 1; i < req_uid_limit && cur_uid < elements.Length;
-				 i++, cur_uid++)
+			for (uint i = 1; i < req_uid_limit && cur_uid < elements.Length; i++, cur_uid++)
 				map_uids += "," + elements[cur_uid].map_id;
 
 			auto req = Net::HttpRequest();
 			req.Method = Net::HttpMethod::Get;
-			req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/multi/' +
-					  map_uids;
+			req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/multi/' + map_uids;
 			req.Start();
 			while (!req.Finished())
 				yield();
@@ -439,10 +402,7 @@ class Recap {
 					elem.name = format_string(map['GbxMapName']);
 					elem.titlepack = map['TitlePack'];
 
-					// removes spaces and backslashes from names for sorting
-					// purposes
-					elem.stripped_name =
-						Text::StripFormatCodes(elem.name).Replace('\\','');
+					elem.stripped_name = Text::StripFormatCodes(elem.name).Replace('\\','');
 					for (int j = 0; j < elem.stripped_name.Length; j++) {
 						if (elem.stripped_name.StartsWith(" "))
 							elem.stripped_name = elem.stripped_name.SubStr(2);
@@ -453,9 +413,7 @@ class Recap {
 			}
 		}
 	}
-
 #elif TURBO
-
   private void filter_titlePack(Recap::turbo_filter filter) {
 		for (uint i = 0; i < elements.Length; i++) {
 			RecapElement @element = elements[i];
@@ -489,12 +447,9 @@ class Recap {
 	}
 
   private void filter_turbo(Recap::turbo_filter filter) {
-
 		for (uint i = 0; i < elements.Length; i++) {
 			RecapElement @element = elements[i];
-			if (uint(Math::Floor(
-					(Text::ParseUInt64(element.stripped_name) - 1) / 40)) ==
-				uint(filter)) {
+			if (uint(Math::Floor((Text::ParseUInt64(element.stripped_name) - 1) / 40)) == uint(filter)) {
 				filtered_elements.InsertLast(element);
 			}
 		}

@@ -25,11 +25,9 @@ class Files : AbstractData {
 			medals_string = content.Get('medals', "");
 		}
 		if (medals_string == "" || medals_string == "[]")
-			medals_string =
-				'[{"medal":0,"achieved":false,"achieved_time":"          0"},{"medal":1,"achieved":false,"achieved_time":"          0"},{"medal":2,"achieved":false,"achieved_time":"          0"},{"medal":3,"achieved":false,"achieved_time":"          0"},{"medal":4,"achieved":false,"achieved_time":"          0"},{"medal":5,"achieved":false,"achieved_time":"          0"},{"medal":6,"achieved":false,"achieved_time":"          0"},{"medal":7,"achieved":false,"achieved_time":"          0"},{"medal":8,"achieved":false,"achieved_time":"          0"}]';
-		debug_print("Read finishes " + finishes + " resets " + resets +
-					" time " + time + " respawns " + respawns + "\nmedals " +
-					medals_string + "\nfrom " + file_location);
+			medals_string = '[{"medal":0,"achieved":false,"achieved_time":"          0"},{"medal":1,"achieved":false,"achieved_time":"          0"},{"medal":2,"achieved":false,"achieved_time":"          0"},{"medal":3,"achieved":false,"achieved_time":"          0"},{"medal":4,"achieved":false,"achieved_time":"          0"},{"medal":5,"achieved":false,"achieved_time":"          0"},{"medal":6,"achieved":false,"achieved_time":"          0"},{"medal":7,"achieved":false,"achieved_time":"          0"},{"medal":8,"achieved":false,"achieved_time":"          0"}]';
+		debug_print("Read finishes " + finishes + " resets " + resets + " time " + time +
+					" respawns " + respawns + "\nmedals " + medals_string + "\nfrom " + file_location);
 		finishesComponent = Finishes(finishes);
 		resetsComponent = Resets(resets);
 		timerComponent = Timer(time);
@@ -62,8 +60,7 @@ class Files : AbstractData {
 
 		Json::ToFile(file_location, content);
 
-		debug_print("Wrote finishes " + finishes + " resets " + resets +
-					" time " + time + " respawns " + respawns + "\nmedals " +
-					medals_string + "\nto " + file_location);
+		debug_print("Wrote finishes " + finishes + " resets " + resets + " time " + time +
+					" respawns " + respawns + "\nmedals " + medals_string + "\nto " + file_location);
 	}
 }

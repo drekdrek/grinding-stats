@@ -1,5 +1,7 @@
 ---
+BreakBeforeBraces: Attach
 AlignAfterOpenBracket: Align
 UseTab: Always
 IndentWidth: 4
 TabWidth: 4
+ColumnLimit: 0

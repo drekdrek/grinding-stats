@@ -11,9 +11,7 @@ class DataManager {
 		while (true) {
 #if TMNEXT
 			auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
-			mapId = (playground is null || playground.Map is null)
-						? ""
-						: playground.Map.IdName;
+			mapId = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
 #elif MP4
 			auto rootmap = app.RootMap;
 			mapId = (rootmap is null) ? "" : rootmap.IdName;
@@ -44,11 +42,12 @@ class DataManager {
 		localData.save();
 		cloudData.save();
 	}
+
   private void load() {
 		localData.load();
 		// if (setting_data_source == data_source::Cloud) { // not implemented yet
-		// 	cloudData.load();
-		// 	DataConflict::handle_conflict(localData, cloudData);
+		//     cloudData.load();
+		//     DataConflict::handle_conflict(localData, cloudData);
 		// }
 	}
 

@@ -1,16 +1,12 @@
 enum RenderMode {
-    Normal,
-    Interface
+	Normal,
+	Interface
 }
 
 bool should_render(RenderMode rendermode) {
-	if (rendermode == RenderMode::Normal &&
-		(!setting_enabled ||
-		 setting_display == displays::Only_when_Openplanet_menu_is_open))
+	if (rendermode == RenderMode::Normal && (!setting_enabled || setting_display == displays::Only_when_Openplanet_menu_is_open))
 		return false;
-	if (rendermode == RenderMode::Interface &&
-		(!setting_enabled ||
-		 setting_display != displays::Only_when_Openplanet_menu_is_open))
+	if (rendermode == RenderMode::Interface && (!setting_enabled || setting_display != displays::Only_when_Openplanet_menu_is_open))
 		return false;
 
 	auto app = cast<CTrackMania>(GetApp());
@@ -21,10 +17,8 @@ bool should_render(RenderMode rendermode) {
 #endif
 	if (map is null || map.MapInfo.MapUid == "" || app.Editor !is null)
 		return false;
-	if (app.CurrentPlayground is null ||
-		app.CurrentPlayground.Interface is null ||
-		(setting_display == displays::Always_except_when_interface_is_hidden &&
-		 !UI::IsGameUIVisible()))
+	if (app.CurrentPlayground is null || app.CurrentPlayground.Interface is null ||
+		(setting_display == displays::Always_except_when_interface_is_hidden && !UI::IsGameUIVisible()))
 		return false;
 	return true;
 }
@@ -33,6 +27,7 @@ void Render() {
 	if (should_render(RenderMode::Normal))
 		render_stats_ui();
 }
+
 void RenderInterface() {
 	if (setting_recap_show_menu)
 		RenderRecap();
@@ -47,11 +42,9 @@ void render_stats_ui() {
 	auto map_info = GetApp().Challenge.MapInfo;
 #endif
 
-	UI::SetNextWindowPos(200, 200,
-						 false ? UI::Cond::Always : UI::Cond::FirstUseEver);
-	int window_flags =
-		UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse |
-		UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
+	UI::SetNextWindowPos(200, 200, false ? UI::Cond::Always : UI::Cond::FirstUseEver);
+	int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse |
+					   UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
 	if (!UI::IsOverlayShown())
 		window_flags |= UI::WindowFlags::NoInputs;
 	UI::Begin("Grinding Stats", window_flags);
@@ -67,27 +60,21 @@ void render_stats_ui() {
 		UI::Text("\\$888" + format_string(map_info.AuthorNickName));
 		UI::EndTable();
 	}
+
 	UI::BeginTable("table", 2, UI::TableFlags::SizingFixedFit);
 	if (setting_show_total_time &&
 		(!data.timer.same || (data.timer.same && !setting_show_session_time) ||
-		 (data.timer.same && setting_show_session_time &&
-		  setting_show_duplicates))) {
+		 (data.timer.same && setting_show_session_time && setting_show_duplicates))) {
 		UI::TableNextRow();
 		UI::TableNextColumn();
-		UI::Text(
-			"\\$ddd" +
-			(data.timer.isRunning() ? Icons::ClockO : Icons::PauseCircleO) +
-			" Total Time");
+		UI::Text("\\$ddd" + (data.timer.isRunning() ? Icons::ClockO : Icons::PauseCircleO) + " Total Time");
 		UI::TableNextColumn();
 		UI::Text("\\$bbb" + data.timer.toString(data.timer.total));
 	}
 	if (setting_show_session_time) {
 		UI::TableNextRow();
 		UI::TableNextColumn();
-		UI::Text("\\$ddd" +
-				 (data.timer.isRunning() ? Icons::PlayCircleO
-										 : Icons::PauseCircleO) +
-				 " Session Time");
+		UI::Text("\\$ddd" + (data.timer.isRunning() ? Icons::PlayCircleO : Icons::PauseCircleO) + " Session Time");
 		UI::TableNextColumn();
 		UI::Text("\\$bbb" + data.timer.toString(data.timer.session));
 	}
@@ -106,8 +93,7 @@ void render_stats_ui() {
 		UI::Text(data.resets.toString());
 	}
 #if TMNEXT
-	if (setting_show_respawns_current || setting_show_respawns_total ||
-		setting_show_respawns_session) {
+	if (setting_show_respawns_current || setting_show_respawns_total || setting_show_respawns_session) {
 		UI::TableNextRow();
 		UI::TableNextColumn();
 		UI::Text("\\$ddd" + Icons::Refresh + " Respawns");
@@ -121,6 +107,5 @@ void render_stats_ui() {
 }
 
 string format_string(const string &in str) {
-	return setting_show_map_name_color ? Text::OpenplanetFormatCodes(str)
-									   : Text::StripFormatCodes(str);
+	return setting_show_map_name_color ? Text::OpenplanetFormatCodes(str) : Text::StripFormatCodes(str);
 }

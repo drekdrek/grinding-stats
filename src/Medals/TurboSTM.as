@@ -8,8 +8,7 @@ class SuperTime {
 	string m_player;
 }
 
-array<SuperTime @>
-	g_superTimes;
+array<SuperTime @> g_superTimes;
 SuperTime @g_hoveringSuperTime;
 
 SuperTime @GetSuperTime(int number) {
@@ -37,8 +36,7 @@ void LoadSuperTimes() {
 		yield();
 	}
 
-	auto superSoloFile =
-		GetFile("Media/Config/TMConsole/Campaign/SuperSoloCampaign.xml");
+	auto superSoloFile = GetFile("Media/Config/TMConsole/Campaign/SuperSoloCampaign.xml");
 	if (Fids::Preload(superSoloFile) is null) {
 		print("Unable to preload SuperSoloCampaign file!");
 		return;
@@ -58,8 +56,7 @@ void LoadSuperTimes() {
 	while (nodeTrack) {
 		auto newSuperTime = SuperTime();
 		newSuperTime.m_number = Text::ParseInt(nodeTrack.Attribute("id")) + 1;
-		newSuperTime.m_time =
-			Text::ParseUInt(nodeTrack.Attribute("superauthortime"));
+		newSuperTime.m_time = Text::ParseUInt(nodeTrack.Attribute("superauthortime"));
 		newSuperTime.m_player = nodeTrack.Attribute("superplayer");
 		g_superTimes.InsertLast(newSuperTime);
 

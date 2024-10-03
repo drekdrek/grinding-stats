@@ -46,12 +46,9 @@ abstract class AbstractData {
 		if (mapUid == "" || mapUid == "Unassigned")
 			return;
 
-		// if the data is exactly the same as the loaded data, then we don't
-		// need to save it
-		if (time == timerComponent.total &&
-			finishes == finishesComponent.total &&
-			resets == resetsComponent.total &&
-			respawns == respawnsComponent.total)
+		// if the data is exactly the same as the loaded data, then we don't need to save it
+		if (time == timerComponent.total && finishes == finishesComponent.total &&
+			resets == resetsComponent.total && respawns == respawnsComponent.total)
 			return;
 
 		save();

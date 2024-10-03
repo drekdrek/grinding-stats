@@ -36,27 +36,22 @@ class RecapElement {
 	}
 
 	void get_name_from_api() {
-
 		if (map_id == "Unassigned")
 			return;
 		if (name != map_id)
 			return;
+
 #if TMNEXT
 		CTrackMania @app = cast<CTrackMania>(GetApp());
 		MwId mwId = app.ManiaPlanetScriptAPI.MasterServer_MSUsers[0].Id;
-		CGameDataFileManagerScript @DataFileMgr =
-			app.MenuManager.MenuCustom_CurrentManiaApp.DataFileMgr;
+		CGameDataFileManagerScript @DataFileMgr = app.MenuManager.MenuCustom_CurrentManiaApp.DataFileMgr;
 		name = map_id;
 		auto req = DataFileMgr.Map_NadeoServices_GetFromUid(mwId, this.map_id);
 		while (req.IsProcessing)
 			yield();
 		if (req.HasFailed || req.IsCanceled || !req.HasSucceeded) {
 			if (req.ErrorCode != "C-AK-03-01") {
-
-				throw("req failed or canceled. mapId=" + map_id +
-					  " errorType=" + req.ErrorType +
-					  "; errorCode=" + req.ErrorCode +
-					  "; errorDescription=" + req.ErrorDescription);
+				throw("req failed or canceled. mapId=" + map_id + " errorType=" + req.ErrorType + "; errorCode=" + req.ErrorCode + "; errorDescription=" + req.ErrorDescription);
 			}
 		}
 		CNadeoServicesMap @map = req.Map;
@@ -67,8 +62,7 @@ class RecapElement {
 #elif MP4
 		auto req = Net::HttpRequest();
 		req.Method = Net::HttpMethod::Get;
-		req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/uid/' +
-				  this.map_id;
+		req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/uid/' + this.map_id;
 		req.Start();
 		while (!req.Finished())
 			yield();
@@ -84,8 +78,7 @@ class RecapElement {
 		for (uint i = 0; i < infos.Length; i++) {
 			if (map_id == infos[i].MapUid) {
 				string color = "";
-				uint series = uint(Math::Floor(
-					(Text::ParseUInt64(infos[i].NameForUi) - 1) / 40));
+				uint series = uint(Math::Floor((Text::ParseUInt64(infos[i].NameForUi) - 1) / 40));
 				if (setting_recap_show_colors) {
 					switch (series) {
 					case 0:
@@ -109,7 +102,7 @@ class RecapElement {
 			}
 		}
 #endif
-		// removes spaces and backslashes from names for sorting purposes
+
 		this.stripped_name = Text::StripFormatCodes(name).Replace('\\','');
 		for (int i = 0; i < this.stripped_name.Length; i++) {
 			if (this.stripped_name.StartsWith(" "))

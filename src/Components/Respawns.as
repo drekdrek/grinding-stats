@@ -26,8 +26,7 @@ class Respawns : BaseComponent {
 			if (setting_show_respawns_current)
 				string_constructor.InsertLast("\\$bbb" + current);
 
-			if (setting_show_respawns_session &&
-				(current != session || !setting_show_respawns_current))
+			if (setting_show_respawns_session && (current != session || !setting_show_respawns_current))
 				string_constructor.InsertLast("\\$bbb" + session);
 
 			if (setting_show_respawns_total) {
@@ -44,19 +43,17 @@ class Respawns : BaseComponent {
 			}
 		}
 		if (string_constructor.Length == 3) {
-			return string_constructor[0] + "\\$fff  /  " +
-				   string_constructor[1] + "\\$fff  /  " +
-				   string_constructor[2];
+			return string_constructor[0] + "\\$fff  /  " + string_constructor[1] + "\\$fff  /  " + string_constructor[2];
 		}
 		if (string_constructor.Length == 2) {
-			return string_constructor[0] + "\\$fff  /  " +
-				   string_constructor[1];
+			return string_constructor[0] + "\\$fff  /  " + string_constructor[1];
 		}
 		if (string_constructor.Length == 1) {
 			return string_constructor[0];
 		}
 		return "";
 	}
+
 	void handler() override {
 #if TMNEXT
 		uint64 last_respawn_time = 0;
@@ -74,10 +71,8 @@ class Respawns : BaseComponent {
 					auto script = cast<CSmScriptPlayer>(gui_player.ScriptAPI);
 					auto post = script.Post;
 
-					if (script.Score.NbRespawnsRequested > current + offset &&
-						post != CSmScriptPlayer::EPost::Char) {
-						if ((Time::Now - last_respawn_time) < 1000 &&
-							current != 0) {
+					if (script.Score.NbRespawnsRequested > current + offset && post != CSmScriptPlayer::EPost::Char) {
+						if ((Time::Now - last_respawn_time) < 1000 && current != 0) {
 							offset += 1;
 						} else {
 							current += 1;
