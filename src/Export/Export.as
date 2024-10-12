@@ -1,37 +1,19 @@
 namespace GrindingStats {
 
-import string time_to_string(uint64 time) from "Recap";
-import string time_to_string(uint64 time, bool thousands) from "Recap";
+import string TimeToString(uint64 time) from "Recap";
+import string TimeToString(uint64 time, bool thousands) from "Recap";
 
-uint64 get_total_time() {
-	return data.localData.timerComponent.total;
-}
-uint64 get_session_time() {
-	return data.localData.timerComponent.session;
-}
+import uint64 GetTotalTime() from "GrindingStats";
+import uint64 GetSessionTime() from "GrindingStats";
 
-uint64 get_total_finishes() {
-	return data.localData.finishesComponent.total;
-}
-uint64 get_session_finishes() {
-	return data.localData.finishesComponent.session;
-}
+import uint64 GetTotalFinishes() from "GrindingStats";
+import uint64 GetSessionFinishes() from "GrindingStats";
 
-uint64 get_total_resets() {
-	return data.localData.resetsComponent.total;
-}
-uint64 get_session_resets() {
-	return data.localData.resetsComponent.session;
-}
+import uint64 GetTotalResets() from "GrindingStats";
+import uint64 GetSessionResets() from "GrindingStats";
 
-uint64 get_total_respawns() {
-	return data.localData.respawnsComponent.total;
-}
-uint64 get_session_respawns() {
-	return data.localData.respawnsComponent.session;
-}
-uint64 get_current_respawns() {
-	return data.localData.respawnsComponent.current;
-}
+import uint64 GetTotalRespawns() from "GrindingStats";
+import uint64 GetSessionRespawns() from "GrindingStats";
+import uint64 GetCurrentRespawns() from "GrindingStats";
 
 } // namespace GrindingStats
