@@ -214,7 +214,7 @@ class Medals : BaseComponent {
 #elif MP4
 		if (network.TmRaceRules !is null && network.TmRaceRules.ScoreMgr !is null) {
 			auto score_mgr = network.TmRaceRules.ScoreMgr;
-			uint pb_time = score_mgr.Map_GetRecord(data_mgr.MenuUserId, map.MapInfo.MapUid, "");
+			uint pb_time = scoreMgr.Map_GetRecord(network.PlayerInfo.Id, map.MapInfo.MapUid, "");
 			return pb_time;
 		} else {
 			int score = -1;
