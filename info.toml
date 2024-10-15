@@ -4,9 +4,9 @@ author = "Drek"
 category = "Overlay"
 version = "2.1.3"
 siteid = 158
-module = "GrindingStats"
 
 [script]
+module = "GrindingStats"
 optional_dependencies = [
     "NadeoServices",
     "ChampionMedals",
@@ -14,3 +14,4 @@ optional_dependencies = [
     "WarriorMedals",
 ]
 timeout = 5000
+exports = ["src/Export/Export.as"]
