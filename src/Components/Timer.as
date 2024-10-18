@@ -64,8 +64,8 @@ class Timer : BaseComponent {
 			if (gui_player is null)
 				return false;
 			auto script_player = gui_player;
-			is_focused = true;
-			// i could not find a place where i could check if the game is focused. D: -- if you do pls let me know :)
+			// thank you XertroV :)
+			is_focused = Dev::GetOffsetBool(app.InputPort, 0x890);
 #endif
 			if (gui_player !is null) {
 				is_playing = true;
