@@ -65,7 +65,7 @@ class Timer : BaseComponent {
 				return false;
 			auto script_player = gui_player;
 			// thank you XertroV :)
-			is_focused = bool(Dev::GetOffsetUint8(app.InputPort, 0x890))
+			is_focused = Dev::GetOffsetUint8(app.InputPort, 0x890) == 1;
 #endif
 			if (gui_player !is null) {
 				is_playing = true;
