@@ -195,6 +195,9 @@ class Medals : BaseComponent {
 #elif TURBO
 		auto map = app.Challenge;
 #endif
+		if (map is null)
+			return 0;
+
 #if TMNEXT
 		if (network.ClientManiaAppPlayground !is null) {
 			auto user_mgr = network.ClientManiaAppPlayground.UserMgr;
@@ -206,8 +209,6 @@ class Medals : BaseComponent {
 			}
 
 			auto score_mgr = app.Network.ClientManiaAppPlayground.ScoreMgr;
-			if (map is null)
-				return 0;
 			uint pb_time = score_mgr.Map_GetRecord_v2(user_id, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
 			return pb_time;
 		}
