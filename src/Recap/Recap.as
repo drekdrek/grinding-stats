@@ -394,20 +394,24 @@ class Recap {
 
 				for (uint i = 1; i <= maps.Length; i++) {
 					Json::Value @map = maps[maps.Length - i];
-					RecapElement @elem = elements[cur_uid - i];
 
-					if (elem.map_id != map['TrackUID'])
-						continue;
+					for (uint e = i; e <= maps.Length; e++) {
+						RecapElement @elem = elements[cur_uid - e];
 
-					elem.name = format_string(map['GbxMapName']);
-					elem.titlepack = map['TitlePack'];
+						if (elem.map_id == map['TrackUID']) {
+							elem.name = format_string(map['GbxMapName']);
+							elem.titlepack = map['TitlePack'];
 
-					elem.stripped_name = Text::StripFormatCodes(elem.name).Replace('\\','');
-					for (int j = 0; j < elem.stripped_name.Length; j++) {
-						if (elem.stripped_name.StartsWith(" "))
-							elem.stripped_name = elem.stripped_name.SubStr(2);
-						else
+							elem.stripped_name = Text::StripFormatCodes(elem.name).Replace('\\','');
+							for (int j = 0; j < elem.stripped_name.Length; j++) {
+								if (elem.stripped_name.StartsWith(" "))
+									elem.stripped_name = elem.stripped_name.SubStr(2);
+								else
+									break;
+							}
+
 							break;
+						}
 					}
 				}
 			}
