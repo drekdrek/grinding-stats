@@ -158,6 +158,7 @@ void RenderRecap() {
 		}
 
 		if (load_recap && UI::BeginTable("Items", columns, UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY)) {
+			UI::TableSetupScrollFreeze(0, 1);
 			UI::TableSetupColumn("Name", UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::NoHide, 200);
 			UI::TableSetupColumn("Time", UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::DefaultSort | UI::TableColumnFlags::PreferSortDescending | UI::TableColumnFlags::NoHide, 150);
 			UI::TableSetupColumn("Finishes", UI::TableColumnFlags::WidthFixed, 100);
@@ -206,6 +207,7 @@ void RenderRecap() {
 					}
 					UI::TableNextRow();
 					UI::TableSetColumnIndex(0);
+					UI::AlignTextToFramePadding();
 					UI::Text(setting_recap_show_colors ? name : stripped_name);
 					if (UI::IsItemHovered() && Meta::IsDeveloperMode()) {
 						UI::BeginTooltip();
