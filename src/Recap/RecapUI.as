@@ -157,7 +157,7 @@ void RenderRecap() {
 			}
 		}
 
-		if (load_recap && UI::BeginTable("Items", columns, UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY)) {
+		if (load_recap && UI::BeginTable("Items", columns, UI::TableFlags::Sortable | UI::TableFlags::Resizable | UI::TableFlags::ScrollY | UI::TableFlags::RowBg)) {
 			UI::TableSetupScrollFreeze(0, 1);
 			UI::TableSetupColumn("Name", UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::NoHide, 200);
 			UI::TableSetupColumn("Time", UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::DefaultSort | UI::TableColumnFlags::PreferSortDescending | UI::TableColumnFlags::NoHide, 150);
