@@ -2,7 +2,6 @@ bool setting_recap_show_menu = false;
 bool load_recap = false;
 bool setting_recap_show_colors = setting_show_map_name_color;
 int total_files = 0;
-uint render_amount = 100;
 
 void RenderMenu() {
 	if (UI::MenuItem(Icons::List + " Grinding Stats Recap", "", setting_recap_show_menu)) {
@@ -175,7 +174,7 @@ void RenderRecap() {
 			if (sortSpecs !is null && (sortSpecs.Dirty || recap.dirty))
 				recap.SortItems(sortSpecs);
 
-			UI::ListClipper clipper(recap.filtered_elements.Length + 1 < render_amount ? recap.filtered_elements.Length + 1 : render_amount);
+			UI::ListClipper clipper(recap.filtered_elements.Length + 1);
 			while (clipper.Step()) {
 				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
 					string name, map_id, time, finishes, resets, respawns, stripped_name, time_modified;
