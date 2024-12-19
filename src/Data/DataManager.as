@@ -1,6 +1,6 @@
 class DataManager {
 
-	Cloud @cloudData = Cloud();
+	// Cloud @cloudData = Cloud();
 	Files @localData = Files();
 
 	DataManager() { startnew(CoroutineFunc(map_handler)); }
@@ -27,7 +27,7 @@ class DataManager {
 					yield();
 
 				localData = Files(mapId);
-				cloudData = Cloud(mapId);
+				// cloudData = Cloud(mapId);
 				startnew(CoroutineFunc(load));
 			}
 			yield();
@@ -37,10 +37,10 @@ class DataManager {
   private void save() {
 		// stop the timers
 		localData.timerComponent.stop();
-		cloudData.timerComponent.stop();
+		// cloudData.timerComponent.stop();
 
 		localData.save();
-		cloudData.save();
+		// cloudData.save();
 	}
 
   private void load() {
