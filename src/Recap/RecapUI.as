@@ -150,7 +150,9 @@ void RenderRecap() {
 
 		if (recap.filtered_elements.Length == 0) {
 			UI::SetCursorPos(vec2(10, 60));
-			UI::Text("Recap Log");
+			if (recap.log.Length > 0) {
+				UI::Text("Recap Log");
+			}
 			for (uint i = 0; i < recap.log.Length; i++) {
 				UI::Text(recap.log[i]);
 			}
