@@ -85,61 +85,96 @@ class Recap {
 		dirty = false;
 	}
 
+	void MergeSort(array<RecapElement @> &inout arr, int left, int right, UI::TableSortSpecs @specs) {
+		if (left < right) {
+			int mid = left + (right - left) / 2;
+
+			MergeSort(arr, left, mid, specs);
+			MergeSort(arr, mid + 1, right, specs);
+
+			Merge(arr, left, mid, right, specs);
+		}
+	}
+
+	void Merge(array<RecapElement @> &inout arr, int left, int mid, int right, UI::TableSortSpecs @specs) {
+		int n1 = mid - left + 1;
+		int n2 = right - mid;
+
+		array<RecapElement @> L(n1);
+		array<RecapElement @> R(n2);
+
+		for (int i = 0; i < n1; i++)
+			@L[i] = arr[left + i];
+		for (int j = 0; j < n2; j++)
+			@R[j] = arr[mid + 1 + j];
+
+		int i = 0, j = 0;
+		int k = left;
+
+		while (i < n1 && j < n2) {
+			if (Compare(L[i], R[j], specs) <= 0) {
+				@arr[k] = L[i];
+				i++;
+			} else {
+				@arr[k] = R[j];
+				j++;
+			}
+			k++;
+		}
+
+		while (i < n1) {
+			@arr[k] = L[i];
+			i++;
+			k++;
+		}
+
+		while (j < n2) {
+			@arr[k] = R[j];
+			j++;
+			k++;
+		}
+	}
+
+	int Compare(RecapElement @a, RecapElement @b, UI::TableSortSpecs @specs) {
+		for (uint i = 0; i < specs.Specs.Length; i++) {
+			UI::TableColumnSortSpecs spec = specs.Specs[i];
+
+			int result = 0;
+
+			switch (spec.ColumnIndex) {
+			case 0:
+				result = a.stripped_name.ToLower() > b.stripped_name.ToLower() == true ? -1 : 1;
+				break;
+			case 1:
+				result = int(a.time_uint - b.time_uint);
+				break;
+			case 2:
+				result = int(a.finishes - b.finishes);
+				break;
+			case 3:
+				result = int(a.resets - b.resets);
+				break;
+			case 4:
+				result = int(a.respawns - b.respawns);
+				break;
+			case 5:
+				result = int(a.modified_time - b.modified_time);
+				break;
+			}
+
+			if (result != 0) {
+				return spec.SortDirection == UI::SortDirection::Ascending ? result : -result;
+			}
+		}
+		return 0;
+	}
+
   private void sort_items(ref @s) {
 		if (filtered_elements.Length < 2)
 			return;
 
-		auto specs = (cast<UI::TableSortSpecs @>(s)).Specs;
-		for (uint i = 0; i < specs.Length; i++) {
-			auto spec = specs[i];
-			if (spec.SortDirection == UI::SortDirection::None)
-				continue;
-
-			if (spec.SortDirection == UI::SortDirection::Ascending) {
-				switch (spec.ColumnIndex) {
-				case 0:
-					filtered_elements.Sort(function(a, b) { return a.stripped_name < b.stripped_name; });
-					break;
-				case 1:
-					filtered_elements.Sort(function(a, b) { return a.time_uint < b.time_uint; });
-					break;
-				case 2:
-					filtered_elements.Sort(function(a, b) { return a.finishes < b.finishes; });
-					break;
-				case 3:
-					filtered_elements.Sort(function(a, b) { return a.resets < b.resets; });
-					break;
-				case 4:
-					filtered_elements.Sort(function(a, b) { return a.respawns < b.respawns; });
-					break;
-				case 5:
-					filtered_elements.Sort(function(a, b) { return a.modified_time < b.modified_time; });
-					break;
-				}
-			} else if (spec.SortDirection == UI::SortDirection::Descending) {
-				switch (spec.ColumnIndex) {
-				case 0:
-					filtered_elements.Sort(function(a, b) { return a.stripped_name > b.stripped_name; });
-					break;
-				case 1:
-					filtered_elements.Sort(function(a, b) { return a.time_uint > b.time_uint; });
-					break;
-				case 2:
-					filtered_elements.Sort(function(a, b) { return a.finishes > b.finishes; });
-					break;
-				case 3:
-					filtered_elements.Sort(function(a, b) { return a.resets > b.resets; });
-					break;
-				case 4:
-					filtered_elements.Sort(function(a, b) { return a.respawns > b.respawns; });
-					break;
-				case 5:
-					filtered_elements.Sort(function(a, b) { return a.modified_time > b.modified_time; });
-					break;
-				}
-			}
-			yield();
-		}
+		UI::TableSortSpecs @specs = cast<UI::TableSortSpecs @>(s);
+		MergeSort(filtered_elements, 0, int(filtered_elements.Length) - 1, specs);
 	}
 
 	void start() { startnew(CoroutineFunc(load_files)); }
