@@ -43,7 +43,7 @@ class Timer : BaseComponent {
 			is_multiplayer = app.PlaygroundScript is null;
 			auto terminal = playground.GameTerminals[0];
 #if TMNEXT
-			is_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed && !is_multiplayer;
+			is_paused = (app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed || UI::CurrentActionMap() != "Vehicle") && !is_multiplayer;
 			auto gui_player = cast<CSmPlayer>(terminal.GUIPlayer);
 			if (gui_player is null)
 				return false;
@@ -52,14 +52,14 @@ class Timer : BaseComponent {
 			is_spectating = app.Network.PlaygroundClientScriptAPI.IsSpectator;
 			is_focused = app.InputPort.IsFocused;
 #elif MP4
-			is_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed;
+			is_paused = app.Network.PlaygroundClientScriptAPI.IsInGameMenuDisplayed || UI::CurrentActionMap() != "TmRaceFull";
 			auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
 			if (gui_player is null)
 				return false;
 			auto script_player = gui_player.ScriptAPI;
 			is_focused = app.InputPort.IsFocused;
 #elif TURBO
-			is_paused = playground.Interface.InterfaceRoot.IsFocused;
+			is_paused = playground.Interface.InterfaceRoot.IsFocused || UI::CurrentActionMap() != "TmRacePad";
 			auto gui_player = cast<CTrackManiaPlayer>(terminal.ControlledPlayer);
 			if (gui_player is null)
 				return false;
