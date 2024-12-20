@@ -3,32 +3,37 @@ class DataManager {
 	// Cloud @cloudData = Cloud();
 	Files @localData = Files();
 
+	bool auto_save_running = false;
+	string mapId = "";
+
 	DataManager() { startnew(CoroutineFunc(map_handler)); }
 
   private void map_handler() {
-		string mapId = "";
 		auto app = GetApp();
 		while (true) {
 #if TMNEXT
 			auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
-			mapId = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
+			this.mapId = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
 #elif MP4
 			auto rootmap = app.RootMap;
-			mapId = (rootmap is null) ? "" : rootmap.IdName;
+			this.mapId = (rootmap is null) ? "" : rootmap.IdName;
 #elif TURBO
 			auto challenge = app.Challenge;
-			mapId = (challenge is null) ? "" : challenge.IdName;
+			this.mapId = (challenge is null) ? "" : challenge.IdName;
 #endif
-			if (mapId != localData.mapUid && app.Editor is null) {
+			if (this.mapId != localData.mapUid && app.Editor is null) {
 				print("saving and loading data");
 				// the map has changed and we are not in the editor.
+				auto_save_running = false;
 				auto saving = startnew(CoroutineFunc(save));
 				while (saving.IsRunning())
 					yield();
 
-				localData = Files(mapId);
+				localData = Files(this.mapId);
 				// cloudData = Cloud(mapId);
 				startnew(CoroutineFunc(load));
+
+				startnew(CoroutineFunc(auto_save));
 			}
 			yield();
 		}
@@ -49,6 +54,21 @@ class DataManager {
 		//     cloudData.load();
 		//     DataConflict::handle_conflict(localData, cloudData);
 		// }
+	}
+
+  private void auto_save() {
+		if (this.mapId == "" || this.mapId == "Unassigned")
+			return;
+		auto_save_running = true;
+		uint64 start_time = Time::Now;
+		while (auto_save_running) {
+			if (Time::Now - start_time > setting_autosave_interval * 1000) {
+				localData.save();
+				start_time = Time::Now;
+			}
+			// so it can be stopped
+			sleep(1000);
+		}
 	}
 
 	Timer @get_timer() { return localData.timerComponent; }
