@@ -63,7 +63,7 @@ class Finishes : BaseComponent {
 				auto gui_player = cast<CTrackManiaPlayer>(terminal.GUIPlayer);
 				if (gui_player !is null) {
 					auto race_state = gui_player.ScriptAPI.RaceState;
-					if (!handled && race_state == CTrackManiaPlayer::ERaceState::Finished) {
+					if (!handled && race_state == CTrackManiaPlayer::ERaceState::Finished && UI::CurrentActionMap() == "TmRaceFull") {
 						handled = true;
 						session += 1;
 						total += 1;
