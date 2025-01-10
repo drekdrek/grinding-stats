@@ -11,6 +11,8 @@ class RecapElement {
 	int64 modified_time;
 #if MP4
 	string titlepack;
+#elif TURBO
+	string environment;
 #endif
 
 	RecapElement() {}
@@ -99,6 +101,7 @@ class RecapElement {
 					}
 				}
 				name = color + infos[i].NameForUi;
+				environment = get_environment_name(infos[i].NameForUi);
 			}
 		}
 #endif
@@ -111,4 +114,26 @@ class RecapElement {
 				break;
 		}
 	}
+
+#if TURBO
+	string get_environment_name(const string &in mapName) {
+		int num;
+
+		if (!Text::TryParseInt(mapName, num))
+			return "";
+
+		int numMod40 = num % 40;
+
+		if (numMod40 >= 1 && numMod40 <= 10)
+			return "Canyon";
+		else if (numMod40 >= 11 && numMod40 <= 20)
+			return "Valley";
+		else if (numMod40 >= 21 && numMod40 <= 30)
+			return "Lagoon";
+		else if (numMod40 >= 31 && numMod40 <= 40 || numMod40 == 0)
+			return "Stadium";
+
+		return "";
+	}
+#endif
 }
