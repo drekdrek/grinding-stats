@@ -155,7 +155,13 @@ class Recap {
 				result = int(a.resets - b.resets);
 				break;
 			case 4:
+#if TMNEXT
 				result = int(a.respawns - b.respawns);
+#elif MP4
+				result = a.titlepack.ToLower() > b.titlepack.ToLower() ? -1 : 1;
+#else
+				result = a.environment.ToLower() > b.environment.ToLower() ? -1 : 1;
+#endif
 				break;
 			case 5:
 				result = int(a.modified_time - b.modified_time);
