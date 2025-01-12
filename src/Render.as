@@ -48,7 +48,6 @@ void render_stats_ui() {
 	if (!UI::IsOverlayShown())
 		window_flags |= UI::WindowFlags::NoInputs;
 	UI::Begin("Grinding Stats", window_flags);
-	UI::BeginGroup();
 
 	if (setting_show_map_name) {
 		UI::BeginTable("header", 1, UI::TableFlags::SizingFixedFit);
@@ -102,7 +101,6 @@ void render_stats_ui() {
 	}
 #endif
 	UI::EndTable();
-	UI::EndGroup();
 	UI::End();
 }
 
