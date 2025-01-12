@@ -155,7 +155,13 @@ class Recap {
 				result = int(a.resets - b.resets);
 				break;
 			case 4:
+#if TMNEXT
 				result = int(a.respawns - b.respawns);
+#elif MP4
+				result = a.titlepack.ToLower() > b.titlepack.ToLower() ? -1 : 1;
+#else
+				result = a.environment.ToLower() > b.environment.ToLower() ? -1 : 1;
+#endif
 				break;
 			case 5:
 				result = int(a.modified_time - b.modified_time);
@@ -281,16 +287,16 @@ class Recap {
 			this.filter_turbo(Recap::turbo_filter::black);
 			break;
 		case recap_filter::canyon:
-			this.filter_titlePack(Recap::turbo_filter::canyon);
+			this.filter_environment(Recap::turbo_filter::canyon);
 			break;
 		case recap_filter::stadium:
-			this.filter_titlePack(Recap::turbo_filter::stadium);
+			this.filter_environment(Recap::turbo_filter::stadium);
 			break;
 		case recap_filter::valley:
-			this.filter_titlePack(Recap::turbo_filter::valley);
+			this.filter_environment(Recap::turbo_filter::valley);
 			break;
 		case recap_filter::lagoon:
-			this.filter_titlePack(Recap::turbo_filter::lagoon);
+			this.filter_environment(Recap::turbo_filter::lagoon);
 			break;
 #endif
 		default:
@@ -456,34 +462,11 @@ class Recap {
 		}
 	}
 #elif TURBO
-  private void filter_titlePack(Recap::turbo_filter filter) {
+  private void filter_environment(Recap::turbo_filter filter) {
 		for (uint i = 0; i < elements.Length; i++) {
 			RecapElement @element = elements[i];
-			int num = Text::ParseInt(element.stripped_name);
-			int numMod40 = num % 40;
-			switch (filter) {
-			case Recap::turbo_filter::canyon:
-				if (numMod40 >= 1 && numMod40 <= 10) {
-					filtered_elements.InsertLast(element);
-				}
-				break;
-			case Recap::turbo_filter::stadium:
-				if (numMod40 >= 11 && numMod40 <= 20) {
-					filtered_elements.InsertLast(element);
-				}
-				break;
-			case Recap::turbo_filter::valley:
-				if (numMod40 >= 21 && numMod40 <= 30) {
-					filtered_elements.InsertLast(element);
-				}
-				break;
-			case Recap::turbo_filter::lagoon:
-				if (numMod40 >= 31 && numMod40 <= 40 || numMod40 == 0) {
-					filtered_elements.InsertLast(element);
-				}
-				break;
-			default:
-				break;
+			if (element.environment.ToLower() == tostring(filter)) {
+				filtered_elements.InsertLast(element);
 			}
 		}
 	}

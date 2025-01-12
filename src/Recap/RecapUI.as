@@ -106,12 +106,13 @@ void RenderRecap() {
 				add_selectable(recap_filter::all_nadeo_campaigns);
 				add_selectable(recap_filter::totd);
 				add_selectable(recap_filter::custom);
-#elif MP4
+#elif MP4 || TURBO
 				add_selectable(recap_filter::canyon);
 				add_selectable(recap_filter::stadium);
 				add_selectable(recap_filter::valley);
 				add_selectable(recap_filter::lagoon);
-#elif TURBO
+#endif
+#if TURBO
 				add_selectable(recap_filter::turbo_white);
 				add_selectable(recap_filter::turbo_green);
 				add_selectable(recap_filter::turbo_blue);
@@ -127,11 +128,7 @@ void RenderRecap() {
 			UI::EndMenuBar();
 		}
 
-#if TURBO
-		uint columns = 6;
-#elif MP4 || TMNEXT
 		uint columns = 7;
-#endif
 
 		if (!load_recap) {
 			auto windowWidth = UI::GetWindowSize();
@@ -168,6 +165,8 @@ void RenderRecap() {
 			UI::TableSetupColumn("Respawns", UI::TableColumnFlags::WidthFixed, 100);
 #elif MP4
 			UI::TableSetupColumn("Title pack", UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::NoResize, 100);
+#elif TURBO
+			UI::TableSetupColumn("Environment", UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::NoResize, 100);
 #endif
 			UI::TableSetupColumn("Last Played", UI::TableColumnFlags::WidthFixed, 100);
 			UI::TableSetupColumn("Custom Recap", UI::TableColumnFlags::WidthFixed, 100);
@@ -183,6 +182,8 @@ void RenderRecap() {
 					string name, map_id, time, finishes, resets, respawns, stripped_name, time_modified;
 #if MP4
 					string titlepack;
+#elif TURBO
+					string environment;
 #endif
 					if (i != 0) {
 						RecapElement @element = recap.filtered_elements[i - 1];
@@ -196,6 +197,8 @@ void RenderRecap() {
 						time_modified = Time::FormatString("%F %r", element.modified_time);
 #if MP4
 						titlepack = element.titlepack;
+#elif TURBO
+						environment = element.environment;
 #endif
 					} else {
 						map_id = "";
@@ -224,25 +227,18 @@ void RenderRecap() {
 					UI::Text(finishes);
 					UI::TableSetColumnIndex(3);
 					UI::Text(resets);
-#if TMNEXT
 					UI::TableSetColumnIndex(4);
+#if TMNEXT
 					UI::Text(respawns);
 #elif MP4
-					UI::TableSetColumnIndex(4);
 					UI::Text(titlepack);
+#elif TURBO
+					UI::Text(environment);
 #endif
-#if TURBO
-					UI::TableSetColumnIndex(4);
-#else
 					UI::TableSetColumnIndex(5);
-#endif
 					UI::Text(time_modified);
 					if (i != 0) {
-#if TURBO
-						UI::TableSetColumnIndex(5);
-#else
 						UI::TableSetColumnIndex(6);
-#endif
 						bool is_cust_map = setting_custom_recap.Contains(map_id);
 						if (UI::Checkbox("##" + map_id, is_cust_map) != is_cust_map) {
 							if (is_cust_map)
