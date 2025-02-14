@@ -19,7 +19,7 @@ class Resets : BaseComponent {
 			if (setting_show_resets_session)
 				string_constructor.InsertLast("\\$bbb" + session);
 
-			if (setting_show_resets_total && total != session)
+			if (setting_show_resets_total && total > session)
 				string_constructor.InsertLast("\\$bbb" + total);
 		}
 

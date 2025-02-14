@@ -19,7 +19,7 @@ class Finishes : BaseComponent {
 			if (setting_show_finishes_session)
 				string_constructor.InsertLast("\\$bbb" + session);
 
-			if (setting_show_finishes_total && total != session)
+			if (setting_show_finishes_total && total > session)
 				string_constructor.InsertLast("\\$bbb" + total);
 		}
 
