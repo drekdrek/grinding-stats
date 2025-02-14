@@ -415,7 +415,7 @@ class Recap {
 	}
 
   private void get_all_tm2_names_from_api() {
-		uint req_uid_limit = 8;
+		uint req_uid_limit = 50;
 
 		for (uint cur_uid = 0; cur_uid < elements.Length; cur_uid += req_uid_limit) {
 			string[] map_uids = array<string>();
@@ -426,7 +426,7 @@ class Recap {
 
 			auto req = Net::HttpRequest();
 			req.Method = Net::HttpMethod::Get;
-			req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/multi/' + string::Join(map_uids, ",");
+			req.Url = 'https://tm.mania.exchange/api/maps?fields=GbxMapName,TitlePack,MapUid&count=' + (req_uid_limit + 10) + '&uid=' + string::Join(map_uids, ",");
 			req.Start();
 			while (!req.Finished())
 				yield();
@@ -434,7 +434,7 @@ class Recap {
 			string resp_str = req.String();
 
 			if (req.ResponseCode() == 200 && resp_str != "") {
-				Json::Value @maps = Json::Parse(resp_str);
+				Json::Value @maps = Json::Parse(resp_str)["Results"];
 
 				for (uint m = 0; m < maps.Length; m++) {
 					Json::Value @map = maps[m];
@@ -442,7 +442,7 @@ class Recap {
 					for (uint e = cur_uid; e < cur_uid + req_uid_limit && e < elements.Length; e++) {
 						RecapElement @elem = elements[e];
 
-						if (elem.map_id == map['TrackUID']) {
+						if (elem.map_id == map['MapUid']) {
 							elem.name = format_string(map['GbxMapName']);
 							elem.titlepack = map['TitlePack'];
 
