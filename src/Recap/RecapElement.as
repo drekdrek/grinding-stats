@@ -64,14 +64,15 @@ class RecapElement {
 #elif MP4
 		auto req = Net::HttpRequest();
 		req.Method = Net::HttpMethod::Get;
-		req.Url = 'https://tm.mania.exchange/api/maps/get_map_info/uid/' + this.map_id;
+		req.Url = 'https://tm.mania.exchange/api/maps?fields=GbxMapName,TitlePack&count=1&uid=' + this.map_id;
 		req.Start();
 		while (!req.Finished())
 			yield();
-		Json::Value @map = Json::Parse(req.String());
-		if (map.Length > 0) {
-			name = format_string(map[0]['GbxMapName']);
-			titlepack = string(map[0]['TitlePack']);
+		Json::Value @res = req.Json();
+		if (req.ResponseCode() == 200 && res["Results"].Length > 0) {
+			Json::Value @map = res["Results"][0];
+			name = format_string(map['GbxMapName']);
+			titlepack = string(map['TitlePack']);
 		}
 
 #elif TURBO
