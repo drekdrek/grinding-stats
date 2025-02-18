@@ -31,10 +31,10 @@ class Respawns : BaseComponent {
 
 			if (setting_show_respawns_total) {
 				bool showTotal = true;
-				if (total == current && setting_show_respawns_current) {
+				if (total <= current && setting_show_respawns_current) {
 					showTotal = false;
 				}
-				if (total == session && setting_show_respawns_session) {
+				if (total <= session && setting_show_respawns_session) {
 					showTotal = false;
 				}
 				if (showTotal) {
