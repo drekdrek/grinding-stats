@@ -67,7 +67,7 @@ string recap_filter_string(recap_filter filter) {
 	case recap_filter::shorts:
 		return "All Weekly Shorts";
 	case recap_filter::this_week_shorts:
-		return "This Week's Shorts";
+		return "Current Week's Shorts";
 #elif TURBO
 	case recap_filter::canyon:
 		return "Canyon";
