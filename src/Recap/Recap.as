@@ -32,6 +32,8 @@ string time_to_string(uint64 time, bool thousands) {
 
 class Recap {
 	array<string> totds;
+	array<string> shorts;
+	array<string> this_week_shorts;
 	array<string> campaigns;
 	array<string> previous_campaign;
 	array<string> current_campaign;
@@ -257,6 +259,12 @@ class Recap {
 		case recap_filter::totd:
 			this.filter_totd();
 			break;
+		case recap_filter::shorts:
+			this.filter_shorts();
+			break;
+		case recap_filter::this_week_shorts:
+			this.filter_shorts_week();
+			break;
 #elif MP4
 		case recap_filter::canyon:
 			this.filter_titlePack("Canyon");
@@ -369,6 +377,66 @@ class Recap {
 						filtered_elements.InsertLast(element);
 						continue;
 					}
+				}
+			}
+		}
+	}
+
+  void filter_shorts() {
+		if (shorts.Length == 0) {
+			print("Fetching shorts data");
+			while (!NadeoServices::IsAuthenticated("NadeoLiveServices"))
+				yield();
+			string url = NadeoServices::BaseURLLive() + "/api/campaign/weekly-shorts?length=1000&offset=0";
+			auto req = NadeoServices::Get("NadeoLiveServices", url);
+			req.Start();
+			while (!req.Finished())
+				yield();
+
+			Json::Value @maps = Json::Parse(req.String());
+			for (uint campaign = 0; campaign < maps['campaignList'].Length; campaign++) {
+				for (uint j = 0; j < maps['campaignList'][campaign]['playlist'].Length; j++) {
+					shorts.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
+				}
+				yield();
+			}
+		}
+		for (uint i = 0; i < elements.Length; i++) {
+			RecapElement @element = elements[i];
+			for (uint j = 0; j < shorts.Length; j++) {
+				if (shorts[j] == element.map_id) {
+					filtered_elements.InsertLast(element);
+					continue;
+				}
+			}
+		}
+	}
+
+	void filter_shorts_week() {
+if (this_week_shorts.Length == 0) {
+			print("Fetching shorts data");
+			while (!NadeoServices::IsAuthenticated("NadeoLiveServices"))
+				yield();
+			string url = NadeoServices::BaseURLLive() + "/api/campaign/weekly-shorts?length=1&offset=0";
+			auto req = NadeoServices::Get("NadeoLiveServices", url);
+			req.Start();
+			while (!req.Finished())
+				yield();
+
+			Json::Value @maps = Json::Parse(req.String());
+			for (uint campaign = 0; campaign < maps['campaignList'].Length; campaign++) {
+				for (uint j = 0; j < maps['campaignList'][campaign]['playlist'].Length; j++) {
+					this_week_shorts.InsertLast(maps['campaignList'][campaign]['playlist'][j]['mapUid']);
+				}
+				yield();
+			}
+		}
+		for (uint i = 0; i < elements.Length; i++) {
+			RecapElement @element = elements[i];
+			for (uint j = 0; j < this_week_shorts.Length; j++) {
+				if (this_week_shorts[j] == element.map_id) {
+					filtered_elements.InsertLast(element);
+					continue;
 				}
 			}
 		}

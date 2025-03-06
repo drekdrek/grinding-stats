@@ -17,6 +17,9 @@ enum recap_filter {
 	current_campaign,
 	previous_campaign,
 	all_nadeo_campaigns,
+	shorts,
+	this_week_shorts,
+	totd,
 #elif MP4 || TURBO
 	canyon,
 	stadium,
@@ -30,7 +33,6 @@ enum recap_filter {
 	turbo_red,
 	turbo_black,
 #endif
-	totd,
 	custom
 }
 
@@ -62,6 +64,10 @@ string recap_filter_string(recap_filter filter) {
 		return "All seasonal campaigns";
 	case recap_filter::totd:
 		return "All TOTDs";
+	case recap_filter::shorts:
+		return "All Weekly Shorts";
+	case recap_filter::this_week_shorts:
+		return "This Week's Shorts";
 #elif TURBO
 	case recap_filter::canyon:
 		return "Canyon";
@@ -105,7 +111,8 @@ void RenderRecap() {
 				add_selectable(recap_filter::previous_campaign);
 				add_selectable(recap_filter::all_nadeo_campaigns);
 				add_selectable(recap_filter::totd);
-				add_selectable(recap_filter::custom);
+				add_selectable(recap_filter::shorts);
+				add_selectable(recap_filter::this_week_shorts);
 #elif MP4 || TURBO
 				add_selectable(recap_filter::canyon);
 				add_selectable(recap_filter::stadium);
