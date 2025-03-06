@@ -1,5 +1,6 @@
 namespace Medals {
 enum Type {
+	None = -1,
 	Bronze = 0,
 	Silver = 1,
 	Gold = 2,
@@ -22,6 +23,49 @@ enum Type {
 #elif TURBO && DEPENDENCY_DUCKMEDALS
 	Duck = 8,
 #endif
+}
+
+string get_color(Medals::Type type) {
+    switch (type) {
+        case Medals::Type::None:
+            return "\\$444";
+        case Medals::Type::Bronze:
+            return "\\$964";
+        case Medals::Type::Silver:
+            return "\\$899";
+        case Medals::Type::Gold:
+            return "\\$db4";
+#if TMNEXT || MP4
+        case Medals::Type::Author:
+            return "\\$071";
+#elif TURBO
+        case Medals::Type::Trackmaster:
+            return "\\$071";
+        case Medals::Type::S_Bronze:
+            return "\\$964";
+        case Medals::Type::S_Silver:
+            return "\\$899";
+        case Medals::Type::S_Gold:
+            return "\\$db4";
+        case Medals::Type::S_Trackmaster:
+            return "\\$071";
+#endif
+#if TMNEXT && DEPENDENCY_WARRIORMEDALS
+        case Medals::Type::Warrior:
+            return "\\$3CF";
+#endif
+#if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
+        case Medals::Type::Champion:
+            return "\\$F47";
+#elif MP4 && DEPENDENCY_DUCKMEDALS
+        case Medals::Type::Duck:
+            return "\\$F47";
+#elif TURBO && DEPENDENCY_DUCKMEDALS
+        case Medals::Type::Duck:
+            return "\\$F47";
+#endif
+    }
+	return "\\$000"; // Default color if type is unknown
 }
 
 string to_string(Medals::Type type) {
@@ -67,10 +111,10 @@ string to_string(Medals::Type type) {
 } // namespace Medals
 
 class Medals : BaseComponent {
-  private array<BaseMedal @> medals = array<BaseMedal @>();
+  protected array<BaseMedal @> medals = array<BaseMedal @>();
 	bool first_run = true;
 
-	Medals() {};
+	Medals() {}
 
 	Medals(const string &in medals_string) {
 		if (medals_string == "")

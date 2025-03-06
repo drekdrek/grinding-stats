@@ -135,7 +135,7 @@ void RenderRecap() {
 			UI::EndMenuBar();
 		}
 
-		uint columns = 7;
+		uint columns = 8;
 
 		if (!load_recap) {
 			auto windowWidth = UI::GetWindowSize();
@@ -176,6 +176,7 @@ void RenderRecap() {
 			UI::TableSetupColumn("Environment", UI::TableColumnFlags::WidthFixed | UI::TableColumnFlags::NoResize, 100);
 #endif
 			UI::TableSetupColumn("Last Played", UI::TableColumnFlags::WidthFixed, 100);
+			UI::TableSetupColumn("Medal", UI::TableColumnFlags::WidthFixed, 100);
 			UI::TableSetupColumn("Custom Recap", UI::TableColumnFlags::WidthFixed, 100);
 			UI::TableHeadersRow();
 
@@ -192,6 +193,7 @@ void RenderRecap() {
 #elif TURBO
 					string environment;
 #endif
+					BaseMedal medal;
 					if (i != 0) {
 						RecapElement @element = recap.filtered_elements[i - 1];
 						stripped_name = element.stripped_name;
@@ -207,6 +209,9 @@ void RenderRecap() {
 #elif TURBO
 						environment = element.environment;
 #endif
+						try {
+							medal = element.medals.get_highest_medal();
+						} catch {}
 					} else {
 						map_id = "";
 						name = "TOTAL (" + recap.filtered_elements.Length + ")";
@@ -244,8 +249,29 @@ void RenderRecap() {
 #endif
 					UI::TableSetColumnIndex(5);
 					UI::Text(time_modified);
+					UI::TableSetColumnIndex(6);
+					if (medal.type != Medals::Type::None) {
+						string medal_color = Medals::get_color(medal.type);
+						string medal_time = Recap::time_to_string(medal.achieved_time);
+#if TURBO
+						if (medal.type > 3 && medal.type < 8) {// if the medal is a super-x medal
+						// credits to Phlarx for this code
+							UI::PushStyleVar(UI::StyleVar::ItemInnerSpacing, vec2(0, 0));
+							UI::Text(medal_color + Icons::Circle);
+							UI::Text("\\$0f1"+ Icons::CircleO);
+							UI::PopStyleVar();
+							UI::Text(" " + medal_time);
+						} else {
+							UI::Text(medal_color + Icons::Circle + " \\$bbb" + medal_time);
+						}
+#else
+						UI::Text(medal_color + Icons::Circle + " \\$bbb" + medal_time);
+#endif
+					} else if (i != 0) {
+						UI::Text(Medals::get_color(Medals::Type::None) + Icons::Circle + " \\$bbb" + "No Data");
+					}
 					if (i != 0) {
-						UI::TableSetColumnIndex(6);
+						UI::TableSetColumnIndex(7);
 						bool is_cust_map = setting_custom_recap.Contains(map_id);
 						if (UI::Checkbox("##" + map_id, is_cust_map) != is_cust_map) {
 							if (is_cust_map)

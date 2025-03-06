@@ -1,9 +1,11 @@
 
 class BaseMedal {
-	Medals::Type type;
+	Medals::Type type = Medals::Type::None;
 	uint64 target = 0;
 	uint64 achieved_time = 0;
 	bool achieved = false;
+
+	BaseMedal() {}
 
 	BaseMedal(Medals::Type type, bool achieved, uint64 achieved_time, uint64 target = 0) {
 		this.target = target;

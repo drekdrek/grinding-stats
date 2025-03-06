@@ -1,5 +1,6 @@
 class RecapElement {
 	RecapFiles file;
+	RecapMedals medals;
 	string map_id;
 	string name;
 	string stripped_name;
@@ -26,6 +27,7 @@ class RecapElement {
 
 		this.stripped_name = Text::StripFormatCodes(name);
 		file = RecapFiles(id);
+		medals = RecapMedals(file.get_medals_string());
 		time = Recap::time_to_string(file.get_time());
 		time_uint = file.get_time();
 		finishes = file.get_finishes();

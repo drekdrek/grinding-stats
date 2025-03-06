@@ -1,5 +1,6 @@
 class RecapFiles : Files {
-
+	
+	RecapMedals medals; 
 	RecapFiles() {}
 
 	RecapFiles(const string &in id) {
