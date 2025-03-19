@@ -210,7 +210,7 @@ void RenderRecap() {
 						environment = element.environment;
 #endif
 						try {
-							medal = element.medals.get_highest_medal();
+							medal = element.medal.get_highest_medal();
 						} catch {}
 					} else {
 						map_id = "";
