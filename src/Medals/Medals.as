@@ -132,7 +132,7 @@ class Medals : BaseComponent {
 			}
 		}
 		if (candidate == -1)
-			return null;
+			return BaseMedal(Medals::Type::None, false, 0, 0);
 		return this.medals[candidate];
 	}
 
