@@ -168,6 +168,23 @@ class Recap {
 			case 5:
 				result = int(a.modified_time - b.modified_time);
 				break;
+			case 6: 
+				{
+					BaseMedal@ a_medal = a.medal.get_highest_medal();
+					BaseMedal@ b_medal = b.medal.get_highest_medal();
+					if (a_medal.type == Medals::Type::None || a_medal.achieved_time == 0) {
+						result = spec.SortDirection == UI::SortDirection:: Ascending ? 1: -1;
+					} else if (b_medal.type == Medals::Type::None || b_medal.achieved_time == 0) {
+						result = spec.SortDirection == UI::SortDirection:: Ascending ? -1: 1;
+					} else 
+					
+					if (a_medal.achieved_time == b_medal.achieved_time) {
+						result = int(a_medal.type - b_medal.type);
+					} else {
+						result = int(a_medal.achieved_time - b_medal.achieved_time);
+					}
+					break;
+				}
 			}
 
 			if (result != 0) {
