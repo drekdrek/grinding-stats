@@ -120,7 +120,9 @@ class Medals : BaseComponent {
 		if (medals_string == "")
 			return;
 		Json::Value @m = Json::Parse(medals_string);
-		build_medals(m);
+		// check if there is a medal missing...
+		Json::Value @m_verified = verify_medals(m);
+		build_medals(m_verified);
 	}
 
 	BaseMedal @get_highest_medal() {
@@ -209,6 +211,61 @@ class Medals : BaseComponent {
 			ret.Add(medal);
 		}
 		return Json::Write(ret);
+	}
+
+	Json::Value @verify_medals(Json::Value @m) {
+#if TMNEXT && DEPENDENCY_WARRIORMEDALS
+	bool add_warrior = true;
+#endif
+#if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
+	bool add_champion = true;
+#endif
+#if MP4 || TURBO
+#if DEPENDENCY_DUCKMEDALS
+	bool add_duck = true;
+#endif
+#endif
+	Json::Value ret = Json::Array();
+	for (uint i=0; i < m.Length; i++) {
+		ret.Add(m[i]);
+#if TMNEXT && DEPENDENCY_WARRIORMEDALS
+		if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Warrior)
+			add_warrior = false;
+#endif
+#if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
+	if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Champion)
+			add_champion = false;
+#endif
+#if MP4 && DEPENDENCY_DUCKMEDALS
+	if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Duck)
+			add_duck = false;
+#elif TURBO && DEPENDENCY_DUCKMEDALS
+	if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Duck)
+			add_duck = false;
+#endif
+		
+	}
+#if TMNEXT && DEPENDENCY_WARRIORMEDALS
+	if (add_warrior) {
+		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":"          0"}'));
+	}
+#endif
+#if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
+	if (add_champion) {
+		ret.Add(Json::Parse('{"medal":5,"achieved":false,"achieved_time":"          0"}'));
+	}
+#endif
+#if MP4 && DEPENDENCY_DUCKMEDALS
+	if (add_duck) {
+		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":"          0"}'));
+	}
+#elif TURBO && DEPENDENCY_DUCKMEDALS
+	if (add_duck) {
+		ret.Add(Json::Parse('{"medal":8,"achieved":false,"achieved_time":"          0"}'));
+	}
+#endif
+	
+	return ret;
 	}
 
 	Json::Value @export_medals() {
