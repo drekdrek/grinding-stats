@@ -254,13 +254,16 @@ void RenderRecap() {
 						string medal_color = Medals::get_color(medal.type);
 						string medal_time = Recap::time_to_string(medal.achieved_time);
 #if TURBO
-						if (medal.type > 3 && medal.type < 8) {// if the medal is a super-x medal
-						// credits to Phlarx for this code
-							UI::PushStyleVar(UI::StyleVar::ItemInnerSpacing, vec2(0, 0));
+						if (medal.type > 3 && medal.type < 8) {
+						// i hate this
+							vec2 curPos =  UI::GetCursorPos();
+							curPos.y += 4;
 							UI::Text(medal_color + Icons::Circle);
+							UI::SetCursorPos(curPos);
 							UI::Text("\\$0f1"+ Icons::CircleO);
-							UI::PopStyleVar();
-							UI::Text(" " + medal_time);
+							curPos.x += UI::CalcItemSize();
+							UI::SetCursorPos(curPos);
+							UI::Text("" + medal_time);
 						} else {
 							UI::Text(medal_color + Icons::Circle + " \\$bbb" + medal_time);
 						}
