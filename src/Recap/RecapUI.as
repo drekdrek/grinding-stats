@@ -261,7 +261,7 @@ void RenderRecap() {
 							UI::Text(medal_color + Icons::Circle);
 							UI::SetCursorPos(curPos);
 							UI::Text("\\$0f1"+ Icons::CircleO);
-							curPos.x += UI::CalcItemSize();
+							curPos.x += 21;
 							UI::SetCursorPos(curPos);
 							UI::Text("" + medal_time);
 						} else {
