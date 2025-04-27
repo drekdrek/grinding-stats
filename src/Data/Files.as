@@ -25,7 +25,7 @@ class Files : AbstractData {
 				time = Text::ParseUInt64(content.Get('time', "0"));
 				respawns = Text::ParseUInt64(content.Get('respawns', "0"));
 				medals_string = content.Get('medals', "");
-				personalbests_json = content.Get('personal_bests', "[]");
+				personalbests_json = content.Get('personal_bests', Json::Array());
 			} catch {
 				debug_print("Failed to parse file, attempting to read old format");
 				finishes = content.Get("finishes", "0");
@@ -33,7 +33,7 @@ class Files : AbstractData {
 				time = content.Get('time', "0");
 				respawns = content.Get('respawns', "0");
 				medals_string = content.Get('medals', "");
-				personalbests_json = content.Get('personal_bests', "[]");
+				personalbests_json = content.Get('personal_bests', Json::Array());
 			}
 		}
 		if (medals_string == "" || medals_string == "[]")
