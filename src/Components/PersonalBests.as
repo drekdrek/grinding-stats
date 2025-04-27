@@ -10,13 +10,11 @@ class PersonalBestData {
 
 	PersonalBestData() {}
 
-	PersonalBestData(
-			uint64 _achieved_time,
-			uint64 _time_played,
-			uint64 _finishes,
-			uint64 _resets,
-			uint64 _respawns
-			) {
+	PersonalBestData(uint64 _achieved_time,
+					 uint64 _time_played,
+					 uint64 _finishes,
+					 uint64 _resets,
+					 uint64 _respawns) {
 		achieved_time = _achieved_time;
 		time_played = _time_played;
 		finishes = _finishes;
@@ -25,8 +23,8 @@ class PersonalBestData {
 	}
 
 	PersonalBestData(Json::Value pb_object) {
-		if ( pb_object.GetType() != Json::Type::Object )
-			throw("Expected Json::Type::Object, received type #" + pb_object.GetType());
+		if (pb_object.GetType() != Json::Type::Object)
+			throw("Expected Json::Type::Object, received enum type " + pb_object.GetType());
 		achieved_time = uint64(double(pb_object["achieved_time"]));
 		time_played = uint64(double(pb_object["time_played"]));
 		finishes = uint64(double(pb_object["finishes"]));
@@ -56,11 +54,10 @@ class PersonalBests : BaseComponent {
 	PersonalBests() {}
 
 	PersonalBests(Json::Value pbs_array) {
-		if ( pbs_array.GetType() != Json::Type::Array )
-			throw("Expected Json::Type::Array, received type #" + pbs_array.GetType());
-		for(uint i = 0 ; i < pbs_array.Length ; i++ )
+		if (pbs_array.GetType() != Json::Type::Array)
+			throw("Expected Json::Type::Array, received enum type " + pbs_array.GetType());
+		for(uint i = 0 ; i < pbs_array.Length ; i++)
 			personalbests.InsertLast(PersonalBestData(pbs_array[i]));
-		print("Loaded " + personalbests.Length + " PBs: " + toString());
 	}
 
 	~PersonalBests() { running = false; }
@@ -96,19 +93,16 @@ class PersonalBests : BaseComponent {
 			return;
 		handled = true;
 
-		// New finish, handle it.
-		// TODO: 2025-04-27 Can other coroutines be seriously out of sync ?
+		// New finish, check if it's a new PB.
+		// TODO: 2025-04-27 Can other grindstats coroutines be seriously out of sync ?
 		print("PersonalBests : handling new finish.");
 		uint pb_time = get_pb_time();
 		if (pb_time == uint(-1))
 			return;
-		print("Present PB = " + pb_time + " ; " +
-			"previously known PB = " + (personalbests.Length == 0 ? "None" : Text::Format("%d", personalbests[0].achieved_time)));
-		if (personalbests.Length == 0 || pb_time < personalbests[0].achieved_time) {
-			// New PB, record it.
-			print("PersonalBests : new personal best.");
+		print("Present PB = " + pb_time +
+			" ; vs previously known PB = " + (personalbests.Length == 0 ? "None" : Text::Format("%d", personalbests[0].achieved_time)));
+		if (personalbests.Length == 0 || pb_time < personalbests[0].achieved_time)
 			record_personalbest(pb_time);
-		}
 #endif
 	}
 
@@ -133,12 +127,11 @@ class PersonalBests : BaseComponent {
 			return;
 		record_personalbest(pb_time);
 		personalbests[0].unmonitored = true;
-		print("PersonalBests: recorded previsouly unmonitored PB: " + toString());
 	}
 
 	Json::Value toJson() {
 		Json::Value@ json = Json::Array();
-		for ( uint i = 0; i < personalbests.Length; i++ )
+		for (uint i = 0; i < personalbests.Length; i++)
 			json.Add(personalbests[i].toJson());
 		return json;
 	}
