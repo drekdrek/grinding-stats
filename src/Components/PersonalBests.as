@@ -92,34 +92,31 @@ class PersonalBests : BaseComponent {
 		handled = true;
 
 		// New finish, handle it.
+		// TODO: 2025-04-27 Can other coroutines be seriously out of sync ?
 		print("PersonalBests : handling new finish.");
-		auto network = cast<CTrackManiaNetwork>(app.Network);
-		if (network.ClientManiaAppPlayground is null)
-			return;
-		auto score_mgr = network.ClientManiaAppPlayground.ScoreMgr;
-		auto user_mgr = network.ClientManiaAppPlayground.UserMgr;
-		if (user_mgr.Users.Length == 0)
-			return;
-		MwId user_id = user_mgr.Users[0].Id;
-		string mapuid = app.RootMap.MapInfo.MapUid;
-		uint pb_time = score_mgr.Map_GetRecord_v2(user_id, mapuid, "PersonalBest", "", "TimeAttack", "");
+		uint pb_time = get_pb_time();
 		if (pb_time == uint(-1))
 			return;
 		print("Present PB = " + pb_time + " ; " +
 			"previously known PB = " + (personalbests.Length == 0 ? "None" : Text::Format("%d", personalbests[0].achieved_time)));
 		if (personalbests.Length == 0 || pb_time < personalbests[0].achieved_time) {
 			// New PB, record it.
-			// TODO: 2025-04-27 Can other coroutines be seriously out of sync ?
 			print("PersonalBests : new personal best.");
-			personalbests.InsertAt(0, PersonalBestData(
-				pb_time,
-				grindstats.timerComponent.total,
-				grindstats.finishesComponent.total,
-				grindstats.resetsComponent.total,
-				grindstats.respawnsComponent.total
-			));
+			record_personalbest(pb_time);
 		}
 #endif
+	}
+
+	void record_personalbest(uint64 pb_time) {
+		if(grindstats is null)
+			throw("PersonalBests::@grindstats needed but it has not been initialized.");
+		personalbests.InsertAt(0, PersonalBestData(
+			pb_time,
+			grindstats.timerComponent.total,
+			grindstats.finishesComponent.total,
+			grindstats.resetsComponent.total,
+			grindstats.respawnsComponent.total
+		));
 	}
 
 	Json::Value toJson() {
@@ -131,6 +128,84 @@ class PersonalBests : BaseComponent {
 
 	string toString() override {
 		return Json::Write(toJson());
+	}
+
+	uint get_pb_time() {
+		auto app = cast<CTrackMania>(GetApp());
+		auto network = cast<CTrackManiaNetwork>(app.Network);
+
+#if TMNEXT || MP4
+		auto map = app.RootMap;
+#elif TURBO
+		auto map = app.Challenge;
+#endif
+		if (map is null)
+			return 0;
+
+#if TMNEXT
+		if (network.ClientManiaAppPlayground !is null) {
+			auto user_mgr = network.ClientManiaAppPlayground.UserMgr;
+			MwId user_id;
+			if (user_mgr.Users.Length > 0) {
+				user_id = user_mgr.Users[0].Id;
+			} else {
+				user_id.Value = uint(-1);
+			}
+
+			auto score_mgr = app.Network.ClientManiaAppPlayground.ScoreMgr;
+			uint pb_time = score_mgr.Map_GetRecord_v2(user_id, map.MapInfo.MapUid, "PersonalBest", "", "TimeAttack", "");
+			return pb_time;
+		}
+#elif MP4
+		if (network.TmRaceRules !is null && network.TmRaceRules.ScoreMgr !is null) {
+			auto score_mgr = network.TmRaceRules.ScoreMgr;
+			uint pb_time = score_mgr.Map_GetRecord(network.PlayerInfo.Id, map.MapInfo.MapUid, "");
+			return pb_time;
+		} else {
+			int score = -1;
+			if (app.CurrentProfile !is null && app.CurrentProfile.AccountSettings !is null) {
+				for (uint i = 0; i < app.ReplayRecordInfos.Length; i++) {
+					if (app.ReplayRecordInfos[i] !is null && app.ReplayRecordInfos[i].MapUid == map.MapInfo.MapUid && app.ReplayRecordInfos[i].PlayerLogin == app.CurrentProfile.AccountSettings.OnlineLogin) {
+						auto record = app.ReplayRecordInfos[i];
+						if (score < 0 || record.BestTime < uint(score)) {
+							score = int(record.BestTime);
+						}
+					}
+					if (i & 0xff == 0xff) {
+						yield();
+						if (app.CurrentProfile is null || app.CurrentProfile.AccountSettings is null || app.ReplayRecordInfos.Length <= i) {
+							warn("Game state changed while scanning records. Retrying in 500ms...");
+							break;
+						}
+					}
+				}
+			}
+			if (app.CurrentPlayground !is null && app.CurrentPlayground.GameTerminals.Length > 0 &&
+				cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer) !is null &&
+				cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score !is null) {
+				int sessScore = int(cast<CTrackManiaPlayer>(app.CurrentPlayground.GameTerminals[0].GUIPlayer).Score.BestTime);
+				if (sessScore > 0 && (score < 0 || sessScore < score)) {
+					score = sessScore;
+				}
+			}
+			return score;
+		}
+
+#elif TURBO
+		if (network.TmRaceRules !is null) {
+			auto dataMgr = network.TmRaceRules.DataMgr;
+			dataMgr.RetrieveRecordsNoMedals(map.MapInfo.MapUid, dataMgr.MenuUserId);
+			yield();
+			while (!dataMgr.Ready)
+				yield();
+			for (uint i = 0; i < dataMgr.Records.Length; i++) {
+				if (dataMgr.Records[i].GhostName == "Solo_BestGhost") {
+					return dataMgr.Records[i].Time;
+				}
+			}
+		}
+#endif
+		return 0;
 	}
 }
 
