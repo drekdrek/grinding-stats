@@ -12,6 +12,7 @@ abstract class AbstractData {
 	Respawns @respawnsComponent = Respawns(0);
 	Timer @timerComponent = Timer(0);
 	Medals @medalsComponent = Medals();
+	PersonalBests @personalBestsComponent = PersonalBests();
 
 	AbstractData() {}
 
@@ -30,6 +31,7 @@ abstract class AbstractData {
 		resetsComponent.start();
 		respawnsComponent.start();
 		medalsComponent.start();
+		personalBestsComponent.start();
 	}
 
 	void overwrite(AbstractData @other) {
