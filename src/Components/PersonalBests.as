@@ -58,6 +58,7 @@ class PersonalBests : BaseComponent {
 			throw("Expected Json::Type::Array, received enum type " + pbs_array.GetType());
 		for(uint i = 0 ; i < pbs_array.Length ; i++)
 			personalbests.InsertLast(PersonalBestData(pbs_array[i]));
+		debug_print("Loaded PB history: " + toString());
 	}
 
 	~PersonalBests() { running = false; }
@@ -84,7 +85,7 @@ class PersonalBests : BaseComponent {
 		auto ui_sequence = terminal.UISequence_Current;
 		if (ui_sequence != CGamePlaygroundUIConfig::EUISequence::Finish) {
 			if(handled) {
-				print("PersonalBests : reseting handling flag.");
+				debug_print("Reseting handling flag.");
 				handled = false;
 			}
 			return;
@@ -95,14 +96,17 @@ class PersonalBests : BaseComponent {
 
 		// New finish, check if it's a new PB.
 		// TODO: 2025-04-27 Can other grindstats coroutines be seriously out of sync ?
-		print("PersonalBests : handling new finish.");
+		debug_print("Handling new finish.");
 		uint pb_time = get_pb_time();
 		if (pb_time == uint(-1))
 			return;
-		print("Present PB = " + pb_time +
-			" ; vs previously known PB = " + (personalbests.Length == 0 ? "None" : Text::Format("%d", personalbests[0].achieved_time)));
-		if (personalbests.Length == 0 || pb_time < personalbests[0].achieved_time)
+		debug_print("Present PB = " + pb_time +
+			" ; vs previously known PB = " +
+			(personalbests.Length == 0 ? "None" : Text::Format("%d", personalbests[0].achieved_time)));
+		if (personalbests.Length == 0 || pb_time < personalbests[0].achieved_time) {
 			record_personalbest(pb_time);
+			debug_print("New PB! Current PBs: " + toString());
+		}
 #endif
 	}
 
@@ -127,6 +131,7 @@ class PersonalBests : BaseComponent {
 			return;
 		record_personalbest(pb_time);
 		personalbests[0].unmonitored = true;
+		debug_print("Recorded unmonitored PB: " + toString());
 	}
 
 	Json::Value toJson() {
@@ -138,6 +143,10 @@ class PersonalBests : BaseComponent {
 
 	string toString() override {
 		return Json::Write(toJson());
+	}
+
+	void debug_print(string s) {
+		// print("PersonalBests: " + s);
 	}
 
 	uint get_pb_time() {
