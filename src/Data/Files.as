@@ -43,6 +43,7 @@ class Files : AbstractData {
 		create_components();
 		personalBestsComponent = PersonalBests(personalbests_json);
 		@personalBestsComponent.grindstats = this;
+		personalBestsComponent.record_unmonitored_pb_if_any();
 	}
 
 	void create_components() {

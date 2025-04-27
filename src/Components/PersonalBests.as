@@ -6,6 +6,7 @@ class PersonalBestData {
 	uint64 finishes;
 	uint64 resets;
 	uint64 respawns;
+	bool unmonitored; // For records that were not fully monitored and for which grindstats are unreliable.
 
 	PersonalBestData() {}
 
@@ -31,6 +32,8 @@ class PersonalBestData {
 		finishes = uint64(double(pb_object["finishes"]));
 		resets = uint64(double(pb_object["resets"]));
 		respawns = uint64(double(pb_object["respawns"]));
+		if (pb_object.HasKey('unmonitored'))
+			unmonitored = true;
 	}
 
 	Json::Value toJson() {
@@ -40,6 +43,8 @@ class PersonalBestData {
 		json['finishes'] = finishes;
 		json['resets'] = resets;
 		json['respawns'] = respawns;
+		if (unmonitored)
+			json['unmonitored'] = true;
 		return json;
 	}
 }
@@ -117,6 +122,18 @@ class PersonalBests : BaseComponent {
 			grindstats.resetsComponent.total,
 			grindstats.respawnsComponent.total
 		));
+	}
+
+	// If the user has a PB on the map that the GrindingStats JSON didn't know about, record it.
+	void record_unmonitored_pb_if_any() {
+		if (personalbests.Length > 0)
+			return; 
+		uint pb_time = get_pb_time();
+		if (pb_time == 0 or pb_time == uint(-1))
+			return;
+		record_personalbest(pb_time);
+		personalbests[0].unmonitored = true;
+		print("PersonalBests: recorded previsouly unmonitored PB: " + toString());
 	}
 
 	Json::Value toJson() {
