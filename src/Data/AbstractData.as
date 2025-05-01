@@ -6,6 +6,7 @@ abstract class AbstractData {
   protected uint64 resets = 0;
   protected uint64 respawns = 0;
   protected string medals_string = "";
+  protected Json::Value medals_json = Json::Value();
 
 	Finishes @finishesComponent = Finishes(0);
 	Resets @resetsComponent = Resets(0);
