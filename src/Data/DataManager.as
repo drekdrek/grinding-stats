@@ -2,8 +2,10 @@ class DataManager {
 
 	SQLite::Database@ db = SQLite::Database(IO::FromStorageFolder("data.db"));
 	// Cloud @cloudData = Cloud();
-	Files @localData = Files();
-
+	// Files @localData = Files();
+	SQLite @localData = SQLite();
+	
+	
 	bool auto_save_running = false;
 	string mapId = "";
 
@@ -52,7 +54,7 @@ class DataManager {
 			}
 
 			this.mapId = mapId_now;
-			localData = Files(this.mapId);
+			localData = SQLite(db, this.mapId);
 
 			if (this.mapId != "" && this.mapId != "Unassigned") {
 				print("Loading data & starting coroutines for map \"" + this.mapId + "\"");
