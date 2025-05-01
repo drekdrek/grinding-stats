@@ -125,6 +125,11 @@ class Medals : BaseComponent {
 		build_medals(m_verified);
 	}
 
+	Medals(Json::Value medals) {
+		Json::Value @m_verified = verify_medals(medals);
+		build_medals(m_verified);
+	}
+
 	BaseMedal @get_highest_medal() {
 		int candidate = -1;
 		for (uint i = 0; i < this.medals.Length; i++) {

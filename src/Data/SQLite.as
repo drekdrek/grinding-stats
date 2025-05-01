@@ -26,11 +26,13 @@ class SQLite : AbstractData {
             respawns integer
         );
         CREATE TABLE IF NOT EXISTS medals (
+            id INTEGER PRIMARY KEY,
             map_id VARCHAR(32),
-            medal_id integer,
-            achieved boolean,
-            achieved_time integer,
-            FOREIGN KEY(map_id) references grinds(map_id)
+            medal_id INTEGER,
+            achieved BOOLEAN,
+            achieved_time INTEGER,
+            FOREIGN KEY (map_id) REFERENCES grinds(map_id),
+            UNIQUE (map_id, medal_id)
         );
         """;
 
@@ -52,27 +54,48 @@ class SQLite : AbstractData {
             return;
         }
 
-        string query_string = """
-        SELECT * from grinds where map_id = ?;
+        string grinds_query_string = """
+        SELECT * FROM grinds WHERE map_id = ?;
         """;
 
-        auto query = db.Prepare(query_string);
-        query.Bind(1, mapUid);
-        query.Execute();
+        auto grinds_query = db.Prepare(grinds_query_string);
+        grinds_query.Bind(1, mapUid);
+        grinds_query.Execute();
 
-        query.NextRow(); // im not sure why i have to do this twice, but its blank otherwise
-        query.NextRow();
+        grinds_query.NextRow(); // im not sure why i have to do this twice, but its blank otherwise
+        grinds_query.NextRow();
 
-        print(query.GetColumnString("map_id"));
-        finishes = uint64(query.GetColumnInt64("finishes"));
-        resets = uint64(query.GetColumnInt64("resets"));
-        time = uint64(query.GetColumnInt64("time"));
-        respawns = uint64(query.GetColumnInt64("respawns"));
-        // print(query.GetQueryExpanded());
+        print(grinds_query.GetColumnString("map_id"));
+        finishes = uint64(grinds_query.GetColumnInt64("finishes"));
+        resets = uint64(grinds_query.GetColumnInt64("resets"));
+        time = uint64(grinds_query.GetColumnInt64("time"));
+        respawns = uint64(grinds_query.GetColumnInt64("respawns"));
+        // print(grinds_query.GetQueryExpanded());
     
 
         debug_print("Loaded finishes " + finishes + " resets " + resets + " time " + time +
-					" respawns " + respawns);
+					" respawns " + respawns + " with map_id " + mapUid);
+
+        string medals_query_string = """
+        SELECT * FROM medals WHERE map_id = ?;
+        """;
+
+        auto medals_query = db.Prepare(medals_query_string);
+        medals_query.Bind(1, mapUid);
+        medals_query.Execute();
+
+        medals_json = Json::Array();
+        while (medals_query.NextRow()) {
+            if (medals_query.GetColumnString("map_id") == "") {
+                Json::Value@ medal = Json::Object();
+                medal["medal"] = medals_query.GetColumnInt("medal_id");
+                medal["achieved"] = medals_query.GetColumnInt("achieved") == 1;
+                medal["achieved_time"] = uint64(medals_query.GetColumnInt64("achieved_time"));
+                medals_json.Add(medal);
+            }
+        }
+
+
         create_components();
     }
 
@@ -87,25 +110,45 @@ class SQLite : AbstractData {
 		time = timerComponent.total;
 		respawns = respawnsComponent.total;
 
-        string query_string = """
+        string grinds_insert = """
         INSERT INTO grinds (map_id, time, finishes, resets, respawns)
         VALUES (?,?,?,?,?)
         ON CONFLICT(map_id)
         DO UPDATE SET time=excluded.time, finishes=excluded.finishes, resets=excluded.resets, respawns=excluded.respawns;
         """;
 
-        auto query = db.Prepare(query_string);
-        query.Bind(1, mapUid);
-        query.Bind(2, time);
-        query.Bind(3, finishes);
-        query.Bind(4, resets);
-        query.Bind(5, respawns);
+        auto grinds_query = db.Prepare(grinds_insert);
+        grinds_query.Bind(1, mapUid);
+        grinds_query.Bind(2, time);
+        grinds_query.Bind(3, finishes);
+        grinds_query.Bind(4, resets);
+        grinds_query.Bind(5, respawns);
         
         debug_print("Wrote finishes " + finishes + " resets " + resets + " time " + time +
-					" respawns " + respawns);
-        print(query.GetQueryExpanded());
-        query.Execute();
+					" respawns " + respawns + " with map_id " + mapUid);
+        print(grinds_query.GetQueryExpanded());
+        grinds_query.Execute();
 
+
+        string medals_insert = """
+        INSERT INTO medals (map_id, medal_id, achieved, achieved_time)
+        VALUES (?,?,?,?)
+        ON CONFLICT(map_id, medal_id)
+        DO UPDATE SET achieved=excluded.achieved, achieved_time=excluded.achieved_time
+        """;
+
+        auto medals = medalsComponent.export_medals();
+
+        for (uint i = 0; i < medals.Length; i++) {
+            Json::Value@ medal = medals[i];
+            print(Json::Write(medal));
+            auto medals_query = db.Prepare(medals_insert);
+            medals_query.Bind(1,mapUid);
+            medals_query.Bind(2, int(medal.Get("medal")));
+            medals_query.Bind(3, bool(medal.Get("achieved")) ? 1 : 0);
+            medals_query.Bind(4, uint64(medal.Get("achieved_time")));
+            medals_query.Execute();
+        }
     }
 
     	void create_components() {
@@ -113,6 +156,7 @@ class SQLite : AbstractData {
 		resetsComponent = Resets(resets);
 		timerComponent = Timer(time);
 		respawnsComponent = Respawns(respawns);
+        medalsComponent = Medals(medals_json);
 	}
 
 }
