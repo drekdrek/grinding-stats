@@ -11,7 +11,8 @@ class SQLite : AbstractData {
         }
         @this.db = db;
         initialize();
-        migrate();
+
+        try {migrate();} catch {}
     }
 
 
