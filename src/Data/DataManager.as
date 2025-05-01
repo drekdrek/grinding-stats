@@ -2,14 +2,16 @@ class DataManager {
 
 	SQLite::Database@ db = SQLite::Database(IO::FromStorageFolder("data.db"));
 	// Cloud @cloudData = Cloud();
-	Files @localData = Files();
-
+	// Files @localData = Files();
+	SQLite @localData = SQLite();
+	
+	
 	bool auto_save_running = false;
 	string mapId = "";
 
 	DataManager() { startnew(CoroutineFunc(map_handler)); }
 
-  private void map_handler() {
+	private void map_handler() {
 		auto app = GetApp();
 		while (true) {
 #if TMNEXT
@@ -30,7 +32,7 @@ class DataManager {
 				while (saving.IsRunning())
 					yield();
 
-				localData = Files(this.mapId);
+				localData = SQLite(db, this.mapId);
 				// cloudData = Cloud(mapId);
 				startnew(CoroutineFunc(load));
 
