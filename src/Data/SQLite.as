@@ -23,7 +23,8 @@ class SQLite : AbstractData {
             time integer,
             finishes integer,
             resets integer,
-            respawns integer
+            respawns integer,
+            updated_at timestamp
         );
         CREATE TABLE IF NOT EXISTS medals (
             id INTEGER PRIMARY KEY,
@@ -114,10 +115,10 @@ class SQLite : AbstractData {
 		respawns = respawnsComponent.total;
 
         string grinds_insert = """
-        INSERT INTO grinds (map_id, time, finishes, resets, respawns)
-        VALUES (?,?,?,?,?)
+        INSERT INTO grinds (map_id, time, finishes, resets, respawns, updated_at)
+        VALUES (?,?,?,?,?,?)
         ON CONFLICT(map_id)
-        DO UPDATE SET time=excluded.time, finishes=excluded.finishes, resets=excluded.resets, respawns=excluded.respawns;
+        DO UPDATE SET time=excluded.time, finishes=excluded.finishes, resets=excluded.resets, respawns=excluded.respawns, updated_at=excluded.updated_at;
         """;
 
         auto grinds_query = db.Prepare(grinds_insert);
@@ -126,6 +127,7 @@ class SQLite : AbstractData {
         grinds_query.Bind(3, finishes);
         grinds_query.Bind(4, resets);
         grinds_query.Bind(5, respawns);
+        grinds_query.Bind(6, Time::get_Stamp());
         
         debug_print("Wrote finishes " + finishes + " resets " + resets + " time " + time +
 					" respawns " + respawns + " with map_id " + mapUid);
