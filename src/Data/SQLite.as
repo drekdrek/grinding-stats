@@ -1,15 +1,15 @@
 class SQLite : AbstractData {
-    private string file_location = IO::FromStorageFolder("data.db");
     private SQLite::Database@ db = null;
     
     SQLite() {}
 
-    SQLite(const string &in id) {
+    SQLite(SQLite::Database@ db, const string &in id) {
+        
         super(id);
         if (id == "" || id == "Unassigned") {
             return;
         }
-        @db = SQLite::Database(file_location);
+        @this.db = db;
         initialize();
         migrate();
     }
