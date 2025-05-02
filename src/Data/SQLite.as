@@ -3,6 +3,12 @@ class SQLite : AbstractData {
     
     SQLite() {}
 
+    SQLite(SQLite::Database@ db) {
+        super();
+        @this.db = db;
+        return;
+    }
+
     SQLite(SQLite::Database@ db, const string &in id) {
         
         super(id);
@@ -163,5 +169,17 @@ class SQLite : AbstractData {
 		respawnsComponent = Respawns(respawns);
         medalsComponent = Medals(medals_json);
 	}
+
+    uint get_track_count() {
+        string query_string = """
+        SELECT count(*) as count FROM grinds
+        """;
+        auto query = db.Prepare(query_string);
+        query.Execute();
+        query.NextRow();
+        query.NextRow();
+        int count = query.GetColumnInt("count");
+        return count;
+    }
 
 }

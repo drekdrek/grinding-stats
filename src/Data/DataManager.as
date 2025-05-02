@@ -3,7 +3,7 @@ class DataManager {
 	SQLite::Database@ db = SQLite::Database(IO::FromStorageFolder("data.db"));
 	// Cloud @cloudData = Cloud();
 	// Files @localData = Files();
-	SQLite @localData = SQLite();
+	SQLite @localData = SQLite(db);
 	
 	
 	bool auto_save_running = false;
