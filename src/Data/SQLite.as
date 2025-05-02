@@ -6,7 +6,9 @@ class SQLite : AbstractData {
     SQLite(SQLite::Database@ db) {
         super();
         @this.db = db;
-        return;
+        initialize();
+
+        try {migrate();} catch {}
     }
 
     SQLite(SQLite::Database@ db, const string &in id) {
