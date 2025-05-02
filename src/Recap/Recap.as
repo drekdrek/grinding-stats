@@ -81,8 +81,16 @@ class Recap {
 		dirty = false;
 	}
 
+	int16 sort_col_index = 0;
+	UI::SortDirection sort_dir = UI::SortDirection::None;
 	void SortItems(UI::TableSortSpecs @sortSpecs) {
-		startnew(CoroutineFuncUserdata(sort_items), sortSpecs);
+		if (sort_col_index == sortSpecs.Specs[0].ColumnIndex && sort_dir != sortSpecs.Specs[0].SortDirection) {
+			filtered_elements.Reverse();
+		} else {
+			startnew(CoroutineFuncUserdata(sort_items), sortSpecs);
+		}
+		sort_col_index = sortSpecs.Specs[0].ColumnIndex;
+		sort_dir = sortSpecs.Specs[0].SortDirection;
 		sortSpecs.Dirty = false;
 		dirty = false;
 	}
