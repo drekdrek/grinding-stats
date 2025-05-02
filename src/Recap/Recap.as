@@ -230,19 +230,19 @@ class Recap {
   private void load_files() {
 		RecapSQLite sql = RecapSQLite(data.db);
 		elements = sql.get_recap_elements();
-		
-		uint batches = uint(Math::Ceil(elements.Length / 50.0));
+		int BATCH_AMOUNT = 100;
+		uint batches = uint(Math::Ceil(elements.Length / float(BATCH_AMOUNT)));
 		for (uint i = 0; i < batches; i++) {
-			uint amt = Math::Min(50, Math::Max(0, elements.Length - (i * 50)));
+			uint amt = Math::Min(BATCH_AMOUNT, Math::Max(0, elements.Length - (i * BATCH_AMOUNT)));
 			for (uint j = 0; j < amt; j++) {
 				
-				startnew(CoroutineFunc(elements[i * 50 + j].get_name_from_api));
-				log.InsertLast("Loaded " + elements[i * 50 + j].map_id);
+				startnew(CoroutineFunc(elements[i * BATCH_AMOUNT + j].get_name_from_api));
+				log.InsertLast("Loaded " + elements[i * BATCH_AMOUNT + j].map_id);
 				if (log.Length > 5) {
 					log.RemoveAt(0);
 				}
 			}
-			sleep(25);
+			yield();
 		}
 
 		dirty = true;
