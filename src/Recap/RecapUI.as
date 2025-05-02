@@ -1,11 +1,11 @@
 bool setting_recap_show_menu = false;
 bool load_recap = false;
 bool setting_recap_show_colors = setting_show_map_name_color;
-int total_files = 0;
+uint total_tracks = 0;
 
 void RenderMenu() {
 	if (UI::MenuItem(Icons::List + " Grinding Stats Recap", "", setting_recap_show_menu)) {
-		total_files = IO::IndexFolder(IO::FromStorageFolder("data"), true).Length;
+		total_tracks = data.localData.get_track_count();
 		setting_recap_show_menu = !setting_recap_show_menu;
 	}
 }
@@ -139,9 +139,9 @@ void RenderRecap() {
 
 		if (!load_recap) {
 			auto windowWidth = UI::GetWindowSize();
-			string text = "You have " + total_files + " files in your Grinding Stats data folder.\n" +
+			string text = "You have " + total_tracks + " tracks in Grinding Stats\n" +
 						  "This will take a while depending on how many files you have.\n" +
-						  "It will lag/freeze the game while loading.";
+						  "It may lag/freeze the game while loading.";
 			vec2 textWidth = Draw::MeasureString(text);
 			UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2, windowWidth.y / 2 + 25));
 			UI::Text(text);

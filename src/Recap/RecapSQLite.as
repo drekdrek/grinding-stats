@@ -4,8 +4,8 @@ class RecapSQLite {
     RecapSQLite(SQLite::Database@ db) {
 
     }
-
-
+    
+    
     array<RecapElement@> get_recap_elements() {
         array<RecapElement@> ret = array<RecapElement @>();
         string query_string = """
