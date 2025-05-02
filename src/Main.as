@@ -75,15 +75,18 @@ void migrateToSQLite() {
 				grinds_query.Bind(j * 6+5, respawns);
 				grinds_query.Bind(j * 6+6, IO::FileModifiedTime(old[idx]));
 
-				if (medals_string == "" || medals_string == "[]")
-				medals_string = '{"map_id": "' + map_id + '","medals":[{"medal": 0,"achieved": false,"achieved_time": 0},{"medal": 1,"achieved": false,"achieved_time": 0},{"medal": 2,"achieved": false,"achieved_time": 0},{"medal": 3,"achieved": false,"achieved_time": 0},{"medal": 4,"achieved": false,"achieved_time": 0},{"medal": 5,"achieved": false,"achieved_time": 0},{"medal": 6,"achieved": false,"achieved_time": 0},{"medal": 7,"achieved": false,"achieved_time": 0},{"medal": 8,"achieved": false,"achieved_time": 0}]}';
-					
+				array<string> strings = {map_id,};
+				if (medals_string == "" || medals_string == "[]") {
+				medals_string = '[{"medal": 0,"achieved": false,"achieved_time": 0},{"medal": 1,"achieved": false,"achieved_time": 0},{"medal": 2,"achieved": false,"achieved_time": 0},{"medal": 3,"achieved": false,"achieved_time": 0},{"medal": 4,"achieved": false,"achieved_time": 0},{"medal": 5,"achieved": false,"achieved_time": 0},{"medal": 6,"achieved": false,"achieved_time": 0},{"medal": 7,"achieved": false,"achieved_time": 0},{"medal": 8,"achieved": false,"achieved_time": 0}]';
+				}
+				strings.InsertAt(1, medals_string);
+				
 
-				startnew(CoroutineFuncUserdata(insert_medals),Json::Parse(medals_string));
+				startnew(CoroutineFuncUserdata(insert_medals),strings);
 			}
 			// print(grinds_query.GetQueryExpanded());
 			grinds_query.Execute();
-			print(i+1 + "/" + batches + " (" + i+1/float(batches) +"%)");
+			print(i+1 + "/" + batches + " (" + (i+1)/float(batches) * 100 +"%)");
 				
 			sleep(250);
 		}
@@ -93,13 +96,14 @@ void migrateToSQLite() {
 }
 
 void insert_medals(ref@ medals_ref) {
-				
-				Json::Value@ medals = cast<Json::Value@>(medals_ref);
+				array<string> strings = cast<array<string>>(medals_ref);
+				string map_id = strings[0];
+				Json::Value@ medals = Json::Parse(strings[1]);
 				string medals_insert = """
 			INSERT INTO medals (map_id, medal_id, achieved, achieved_time)
 				VALUES
 			""";
-			for (uint a = 0; a < medals["medals"].Length - 1; a++) {
+			for (uint a = 0; a < medals.Length - 1; a++) {
 				medals_insert = medals_insert + "(?,?,?,?),\n";
 			}
 			medals_insert = medals_insert +
@@ -107,14 +111,16 @@ void insert_medals(ref@ medals_ref) {
 			ON CONFLICT(map_id, medal_id)
 				DO UPDATE SET achieved=excluded.achieved, achieved_time=excluded.achieved_time;
 			""";
-				string map_id = medals["map_id"];
-				medals = medals["medals"];
 				auto medals_query = data.db.Prepare(medals_insert);
 				for (uint i = 0; i < medals.Length; i++) {
 					medals_query.Bind(i*4 + 1,map_id);
 					medals_query.Bind(i*4 + 2, int(medals[i].Get("medal")));
 					medals_query.Bind(i*4 + 3, bool(medals[i].Get("achieved")) ? 1 : 0);
+					try {
 					medals_query.Bind(i*4 + 4, uint64(medals[i].Get("achieved_time")));
+					} catch {
+						medals_query.Bind(i*4 + 4, uint64(Text::ParseUInt64(medals[i].Get("achieved_time"))));
+					}
 				}
 				medals_query.Execute();
 }
