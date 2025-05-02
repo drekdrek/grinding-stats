@@ -199,11 +199,11 @@ void RenderRecap() {
 						stripped_name = element.stripped_name;
 						map_id = element.map_id;
 						name = element.name;
-						time = element.time;
+						time = element.time_string;
 						finishes = "" + element.finishes;
 						resets = "" + element.resets;
 						respawns = "" + element.respawns;
-						time_modified = Time::FormatString("%F %r", element.modified_time);
+						time_modified = Time::FormatString("%F %r", element.updated_at);
 #if MP4
 						titlepack = element.titlepack;
 #elif TURBO
