@@ -83,7 +83,7 @@ void migrateToSQLite() {
 			}
 			// print(grinds_query.GetQueryExpanded());
 			grinds_query.Execute();
-			print(i + "/" + batches + " (" + i/float(batches) +"%)");
+			print(i+1 + "/" + batches + " (" + i+1/float(batches) +"%)");
 				
 			sleep(250);
 		}
