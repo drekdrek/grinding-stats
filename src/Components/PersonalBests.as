@@ -64,6 +64,8 @@ class PersonalBests : BaseComponent {
 
 	void handler() override {
 		while (this.running) {
+			if (GetApp().RootMap is null)
+				break;
 			check_for_finish();
 			yield();
 		}
