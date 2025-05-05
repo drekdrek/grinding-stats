@@ -17,7 +17,6 @@ abstract class AbstractData {
 
 	AbstractData(const string &in id) {
 		mapUid = id;
-		start();
 	}
 
 	void save() {}

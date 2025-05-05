@@ -31,7 +31,10 @@ class DataManager {
 
 				localData = Files(this.mapId);
 				// cloudData = Cloud(mapId);
-				startnew(CoroutineFunc(load));
+				auto loading = startnew(CoroutineFunc(load));
+				while (loading.IsRunning())
+					yield();
+				localData.start();
 
 				startnew(CoroutineFunc(auto_save));
 			}

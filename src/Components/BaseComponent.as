@@ -1,5 +1,5 @@
 class BaseComponent {
-  protected bool running = true;
+  protected bool running = false;
   protected bool handled = false;
   protected array<string> string_constructor;
 
