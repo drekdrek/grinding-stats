@@ -1,5 +1,3 @@
-#if TMNEXT
-
 class PersonalBestData {
 	uint64 achieved_time;
 	uint64 time_played;
@@ -63,12 +61,14 @@ class PersonalBests : BaseComponent {
 	~PersonalBests() { running = false; }
 
 	void handler() override {
+#if TMNEXT
 		while (this.running) {
 			if (GetApp().RootMap is null)
 				break;
 			check_for_finish();
 			yield();
 		}
+#endif
 	}
 
 	void check_for_finish() {
@@ -227,5 +227,3 @@ class PersonalBests : BaseComponent {
 		return 0;
 	}
 }
-
-#endif
