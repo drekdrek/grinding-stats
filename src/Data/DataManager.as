@@ -18,28 +18,29 @@ class DataManager {
 				continue;
 #if TMNEXT
 			auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
-			this.mapId = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
+			string mapId_now = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
 #elif MP4
 			auto rootmap = app.RootMap;
-			this.mapId = (rootmap is null) ? "" : rootmap.IdName;
+			string mapId_now = (rootmap is null) ? "" : rootmap.IdName;
 #elif TURBO
 			auto challenge = app.Challenge;
-			this.mapId = (challenge is null) ? "" : challenge.IdName;
+			string mapId_now = (challenge is null) ? "" : challenge.IdName;
 #endif
-			if (this.mapId == localData.mapUid)
+			if (mapId_now == this.mapId)
 				continue;
 
 			// Map has changed.
 			print("saving and loading data");
 			auto_save_running = false;
-			localData.stop();
+			localData.stop_components();
 			localData.save();
 			// cloudData.stop();
 			// cloudData.save();
 
+			this.mapId = mapId_now;
 			localData = Files(this.mapId);
 			localData.load();
-			localData.start();
+			localData.start_components();
 			startnew(CoroutineFunc(auto_save));
 			// cloudData = Cloud(mapId);
 			// if (setting_data_source == data_source::Cloud) { // not implemented yet

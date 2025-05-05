@@ -23,7 +23,7 @@ abstract class AbstractData {
 
 	void load() {}
 
-	void start() {
+	void start_components() {
 		timerComponent.start();
 		finishesComponent.start();
 		resetsComponent.start();
@@ -31,7 +31,7 @@ abstract class AbstractData {
 		medalsComponent.start();
 	}
 
-	void stop() {
+	void stop_components() {
 		timerComponent.stop();
 		finishesComponent.stop();
 		resetsComponent.stop();
