@@ -85,10 +85,8 @@ class PersonalBests : BaseComponent {
 			return;
 		auto ui_sequence = terminal.UISequence_Current;
 		if (ui_sequence != CGamePlaygroundUIConfig::EUISequence::Finish) {
-			if(handled) {
-				debug_print("Reseting handling flag.");
+			if(handled)
 				handled = false;
-			}
 			return;
 		}
 		if (handled)
@@ -96,10 +94,10 @@ class PersonalBests : BaseComponent {
 		handled = true;
 
 		// New finish, check if it's a new PB.
-		// TODO: 2025-04-27 Can other grindstats coroutines be seriously out of sync ?
 		debug_print("Handling new finish.");
+		sleep(1000); // Making sure the API ((Map_GetRecord_v2...) and other components are up to date with this finish.
 		uint pb_time = get_pb_time();
-		if (pb_time == uint(-1))
+		if (pb_time == uint(-1) or pb_time == 0)
 			return;
 		debug_print("Present PB = " + pb_time +
 			" ; vs previously known PB = " +
