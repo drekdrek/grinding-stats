@@ -25,22 +25,22 @@ class PersonalBestData {
 	PersonalBestData(Json::Value pb_object) {
 		if (pb_object.GetType() != Json::Type::Object)
 			throw("Expected Json::Type::Object, received enum type " + pb_object.GetType());
-		achieved_time = uint64(double(pb_object["achieved_time"]));
-		time_played = uint64(double(pb_object["time_played"]));
-		finishes = uint64(double(pb_object["finishes"]));
-		resets = uint64(double(pb_object["resets"]));
-		respawns = uint64(double(pb_object["respawns"]));
+		achieved_time = Text::ParseUInt64(pb_object["achieved_time"]);
+		time_played = Text::ParseUInt64(pb_object["time_played"]);
+		finishes = Text::ParseUInt64(pb_object["finishes"]);
+		resets = Text::ParseUInt64(pb_object["resets"]);
+		respawns = Text::ParseUInt64(pb_object["respawns"]);
 		if (pb_object.HasKey('unmonitored'))
 			unmonitored = true;
 	}
 
 	Json::Value toJson() {
 		Json::Value json = Json::Object();
-		json['achieved_time'] = achieved_time;
-		json['time_played'] = time_played;
-		json['finishes'] = finishes;
-		json['resets'] = resets;
-		json['respawns'] = respawns;
+		json['achieved_time'] = Text::Format("%d", achieved_time);
+		json['time_played'] = Text::Format("%d", time_played);
+		json['finishes'] = Text::Format("%d", finishes);
+		json['resets'] = Text::Format("%d", resets);
+		json['respawns'] = Text::Format("%d", respawns);
 		if (unmonitored)
 			json['unmonitored'] = true;
 		return json;
