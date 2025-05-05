@@ -4,7 +4,7 @@ class Finishes : BaseComponent {
 
 	Finishes(uint64 total) { super(total); }
 
-	~Finishes() { running = false; }
+	~Finishes() {}
 
 	string toString() override {
 		string_constructor = array<string>();

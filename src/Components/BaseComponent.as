@@ -14,9 +14,17 @@ class BaseComponent {
 		session = 0;
 	}
 
+	~BaseComponent() {
+		running = false;
+	}
+
 	void start() {
 		running = true;
 		startnew(CoroutineFunc(handler));
+	}
+
+	void stop() {
+		running = false;
 	}
 
   protected void handler() {}

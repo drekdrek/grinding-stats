@@ -3,7 +3,7 @@ class Resets : BaseComponent {
 
 	Resets(uint64 total) { super(total); }
 
-	~Resets() { running = false; }
+	~Resets() {}
 
 	string toString() override {
 		string_constructor = array<string>();

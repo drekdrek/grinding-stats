@@ -31,6 +31,14 @@ abstract class AbstractData {
 		medalsComponent.start();
 	}
 
+	void stop() {
+		timerComponent.stop();
+		finishesComponent.stop();
+		resetsComponent.stop();
+		respawnsComponent.stop();
+		medalsComponent.stop();
+	}
+
 	void overwrite(AbstractData @other) {
 		time = other.time;
 		finishes = other.finishes;

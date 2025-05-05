@@ -9,7 +9,7 @@ class Respawns : BaseComponent {
 		current = 0;
 	}
 
-	~Respawns() { running = false; }
+	~Respawns() {}
 
 	string toString() override {
 		string_constructor = array<string>();

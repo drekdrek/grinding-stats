@@ -32,9 +32,9 @@ class DataManager {
 			// Map has changed.
 			print("saving and loading data");
 			auto_save_running = false;
-			localData.timerComponent.stop();
+			localData.stop();
 			localData.save();
-			// cloudData.timerComponent.stop();
+			// cloudData.stop();
 			// cloudData.save();
 
 			localData = Files(this.mapId);

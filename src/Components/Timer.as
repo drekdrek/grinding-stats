@@ -20,7 +20,6 @@ class Timer : BaseComponent {
 
 	~Timer() {
 		this.timing = false;
-		this.running = false;
 	}
 
 	bool isRunning() {
@@ -105,7 +104,8 @@ class Timer : BaseComponent {
 		}
 	}
 
-	void stop() {
+	void stop() override {
+		running = false;
 		session_offset = session;
 		total_offset = total;
 		timing = false;
