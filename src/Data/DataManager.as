@@ -6,11 +6,16 @@ class DataManager {
 	bool auto_save_running = false;
 	string mapId = "";
 
-	DataManager() { startnew(CoroutineFunc(map_handler)); }
+	DataManager() {
+		startnew(CoroutineFunc(map_handler));
+	}
 
-  private void map_handler() {
+	private void map_handler() {
 		auto app = GetApp();
 		while (true) {
+			yield();
+			if (app.Editor !is null)
+				continue;
 #if TMNEXT
 			auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
 			this.mapId = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
@@ -21,42 +26,27 @@ class DataManager {
 			auto challenge = app.Challenge;
 			this.mapId = (challenge is null) ? "" : challenge.IdName;
 #endif
-			if (this.mapId != localData.mapUid && app.Editor is null) {
-				print("saving and loading data");
-				// the map has changed and we are not in the editor.
-				auto_save_running = false;
-				auto saving = startnew(CoroutineFunc(save));
-				while (saving.IsRunning())
-					yield();
+			if (this.mapId == localData.mapUid)
+				continue;
 
-				localData = Files(this.mapId);
-				// cloudData = Cloud(mapId);
-				auto loading = startnew(CoroutineFunc(load));
-				while (loading.IsRunning())
-					yield();
-				localData.start();
+			// Map has changed.
+			print("saving and loading data");
+			auto_save_running = false;
+			localData.timerComponent.stop();
+			localData.save();
+			// cloudData.timerComponent.stop();
+			// cloudData.save();
 
-				startnew(CoroutineFunc(auto_save));
-			}
-			yield();
+			localData = Files(this.mapId);
+			localData.load();
+			localData.start();
+			startnew(CoroutineFunc(auto_save));
+			// cloudData = Cloud(mapId);
+			// if (setting_data_source == data_source::Cloud) { // not implemented yet
+			//     cloudData.load();
+			//     DataConflict::handle_conflict(localData, cloudData);
+			// }
 		}
-	}
-
-  private void save() {
-		// stop the timers
-		localData.timerComponent.stop();
-		// cloudData.timerComponent.stop();
-
-		localData.save();
-		// cloudData.save();
-	}
-
-  private void load() {
-		localData.load();
-		// if (setting_data_source == data_source::Cloud) { // not implemented yet
-		//     cloudData.load();
-		//     DataConflict::handle_conflict(localData, cloudData);
-		// }
 	}
 
   private void auto_save() {
