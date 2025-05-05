@@ -42,8 +42,7 @@ class Files : AbstractData {
 					" respawns " + respawns + "\nmedals " + medals_string + "\nfrom " + file_location);
 		create_components();
 		personalBestsComponent = PersonalBests(personalbests_json);
-		@personalBestsComponent.grindstats = this;
-		personalBestsComponent.record_unmonitored_pb_if_any();
+		personalBestsComponent.record_unwitnessed_pb_if_any();
 	}
 
 	void create_components() {
