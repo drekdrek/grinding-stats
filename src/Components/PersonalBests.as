@@ -6,7 +6,7 @@ class PersonalBestData {
 	uint64 finishes;
 	uint64 resets;
 	uint64 respawns;
-	bool unmonitored; // For records that were not fully monitored and for which grindstats are unreliable.
+	bool witnessed; // False marks PBs that couldn't be recorded live.
 
 	PersonalBestData() {}
 
@@ -14,12 +14,14 @@ class PersonalBestData {
 					 uint64 _time_played,
 					 uint64 _finishes,
 					 uint64 _resets,
-					 uint64 _respawns) {
+					 uint64 _respawns,
+					 bool _witnessed) {
 		achieved_time = _achieved_time;
 		time_played = _time_played;
 		finishes = _finishes;
 		resets = _resets;
 		respawns = _respawns;
+		witnessed = _witnessed;
 	}
 
 	PersonalBestData(Json::Value pb_object) {
@@ -30,8 +32,7 @@ class PersonalBestData {
 		finishes = Text::ParseUInt64(pb_object["finishes"]);
 		resets = Text::ParseUInt64(pb_object["resets"]);
 		respawns = Text::ParseUInt64(pb_object["respawns"]);
-		if (pb_object.HasKey('unmonitored'))
-			unmonitored = true;
+		witnessed = pb_object["witnessed"];
 	}
 
 	Json::Value toJson() {
@@ -41,8 +42,7 @@ class PersonalBestData {
 		json['finishes'] = Text::Format("%d", finishes);
 		json['resets'] = Text::Format("%d", resets);
 		json['respawns'] = Text::Format("%d", respawns);
-		if (unmonitored)
-			json['unmonitored'] = true;
+		json['witnessed'] = witnessed;
 		return json;
 	}
 }
@@ -103,33 +103,33 @@ class PersonalBests : BaseComponent {
 			" ; vs previously known PB = " +
 			(personalbests.Length == 0 ? "None" : Text::Format("%d", personalbests[0].achieved_time)));
 		if (personalbests.Length == 0 || pb_time < personalbests[0].achieved_time) {
-			record_personalbest(pb_time);
+			record_personalbest(pb_time, true);
 			debug_print("New PB! Current PBs: " + toString());
 		}
 #endif
 	}
 
-	void record_personalbest(uint64 pb_time) {
+	void record_personalbest(uint64 pb_time, bool witnessed) {
 		const AbstractData @grindstats = data.localData;
 		personalbests.InsertAt(0, PersonalBestData(
 			pb_time,
 			grindstats.timerComponent.total,
 			grindstats.finishesComponent.total,
 			grindstats.resetsComponent.total,
-			grindstats.respawnsComponent.total
+			grindstats.respawnsComponent.total,
+			witnessed
 		));
 	}
 
 	// If the user has a PB on the map that the GrindingStats JSON didn't know about, record it.
-	void record_unmonitored_pb_if_any() {
-		if (personalbests.Length > 0)
-			return; 
+	void record_unwitnessed_pb_if_any() {
 		uint pb_time = get_pb_time();
 		if (pb_time == 0 or pb_time == uint(-1))
 			return;
-		record_personalbest(pb_time);
-		personalbests[0].unmonitored = true;
-		debug_print("Recorded unmonitored PB: " + toString());
+		if (personalbests.Length == 0 or pb_time < personalbests[0].achieved_time) {
+			record_personalbest(pb_time, false);
+			debug_print("Recorded new unwitnessed PB ; current PBs: " + toString());
+		}
 	}
 
 	Json::Value toJson() {
