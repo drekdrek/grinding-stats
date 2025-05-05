@@ -49,7 +49,6 @@ class PersonalBestData {
 
 class PersonalBests : BaseComponent {
 	protected array<PersonalBestData@> personalbests; // With current PB at index 0 (if any).
-	const AbstractData @grindstats;
 
 	PersonalBests() {}
 
@@ -111,8 +110,7 @@ class PersonalBests : BaseComponent {
 	}
 
 	void record_personalbest(uint64 pb_time) {
-		if(grindstats is null)
-			throw("PersonalBests::@grindstats needed but it has not been initialized.");
+		const AbstractData @grindstats = data.localData;
 		personalbests.InsertAt(0, PersonalBestData(
 			pb_time,
 			grindstats.timerComponent.total,
