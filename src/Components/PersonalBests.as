@@ -145,7 +145,7 @@ class PersonalBests : BaseComponent {
 		return Json::Write(toJson());
 	}
 
-	void debug_print(string s) {
+	void debug_print(const string &in s) {
 		// print("PersonalBests: " + s);
 	}
 
