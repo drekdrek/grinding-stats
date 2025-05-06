@@ -13,21 +13,28 @@ class DataManager {
 	private void map_handler() {
 		auto app = GetApp();
 		while (true) {
-			yield();
-			if (app.Editor !is null)
+			if (app.Editor !is null) {
+				yield();
 				continue;
+			}
+			string mapId_now = "";
 #if TMNEXT
 			auto playground = cast<CSmArenaClient>(app.CurrentPlayground);
-			string mapId_now = (playground is null || playground.Map is null) ? "" : playground.Map.IdName;
+			if (playground !is null && playground.Map !is null)
+				mapId_now = playground.Map.IdName;
 #elif MP4
 			auto rootmap = app.RootMap;
-			string mapId_now = (rootmap is null) ? "" : rootmap.IdName;
+			if (rootmap !is null)
+				mapId_now = rootmap.IdName;
 #elif TURBO
 			auto challenge = app.Challenge;
-			string mapId_now = (challenge is null) ? "" : challenge.IdName;
+			if (challenge !is null)
+				mapId_now = challenge.IdName;
 #endif
-			if (mapId_now == this.mapId)
+			if (mapId_now == this.mapId) {
+				yield();
 				continue;
+			}
 
 			// Map has changed.
 			if (this.mapId != "" && this.mapId != "Unassigned") {
@@ -53,6 +60,7 @@ class DataManager {
 				//     DataConflict::handle_conflict(localData, cloudData);
 				// }
 			}
+			yield();
 		}
 	}
 

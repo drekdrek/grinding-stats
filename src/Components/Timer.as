@@ -95,11 +95,13 @@ class Timer : BaseComponent {
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map !is null) {
-				current_time = Time::Now;
-				session = (current_time + session_offset) - start_time;
-				total = (current_time + total_offset) - start_time;
+			if (map is null) {
+				yield();
+				continue;
 			}
+			current_time = Time::Now;
+			session = (current_time + session_offset) - start_time;
+			total = (current_time + total_offset) - start_time;
 			yield();
 		}
 	}
