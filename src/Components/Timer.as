@@ -128,7 +128,6 @@ class Timer : BaseComponent {
 
 	void handler() override {
 		while (this.running) {
-			yield();
 
 			auto app = GetApp();
 #if TMNEXT || MP4
@@ -136,8 +135,10 @@ class Timer : BaseComponent {
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map is null)
+			if (map is null) {
+				yield();
 				continue;
+			}
 			bool is_running = isRunning();
 			if (!is_running && !handled) {
 				handled = true;
@@ -146,6 +147,7 @@ class Timer : BaseComponent {
 				handled = false;
 				start_timing();
 			}
+			yield();
 		}
 	}
 

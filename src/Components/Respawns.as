@@ -58,12 +58,12 @@ class Respawns : BaseComponent {
 #if TMNEXT
 		uint64 last_respawn_time = 0;
 		while (this.running) {
-			yield();
-
 			auto app = GetApp();
 			auto map = app.RootMap;
-			if (map is null)
+			if (map is null) {
+				yield();
 				continue;
+			}
 			auto playground = app.CurrentPlayground;
 			if (playground !is null && playground.GameTerminals.Length > 0) {
 				auto terminal = playground.GameTerminals[0];
@@ -89,6 +89,7 @@ class Respawns : BaseComponent {
 					}
 				}
 			}
+			yield();
 		}
 #endif
 	}

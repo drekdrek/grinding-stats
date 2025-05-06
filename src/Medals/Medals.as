@@ -140,7 +140,6 @@ class Medals : BaseComponent {
 
 	void handler() override {
 		while (running) {
-			yield();
 			if (first_run) {
 				first_run = false;
 #if TURBO
@@ -154,8 +153,10 @@ class Medals : BaseComponent {
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map is null)
+			if (map is null) {
+				yield();
 				continue;
+			}
 			auto playground = app.CurrentPlayground;
 			auto network = cast<CTrackManiaNetwork>(app.Network);
 			if (playground !is null && playground.GameTerminals.Length > 0) {
@@ -198,6 +199,7 @@ class Medals : BaseComponent {
 				}
 #endif
 			}
+			yield();
 		}
 	}
 
