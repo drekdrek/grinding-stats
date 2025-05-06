@@ -30,23 +30,29 @@ class DataManager {
 				continue;
 
 			// Map has changed.
-			print("saving and loading data");
-			auto_save_running = false;
-			localData.stop_components();
-			localData.save();
-			// cloudData.stop();
-			// cloudData.save();
+			if (this.mapId != "" && this.mapId != "Unassigned") {
+				print("Saving data & stopping coroutines for map \"" + this.mapId + "\"");
+				auto_save_running = false;
+				localData.stop_components();
+				localData.save();
+				// cloudData.stop();
+				// cloudData.save();
+			}
 
 			this.mapId = mapId_now;
 			localData = Files(this.mapId);
-			localData.load();
-			localData.start_components();
-			startnew(CoroutineFunc(auto_save));
-			// cloudData = Cloud(mapId);
-			// if (setting_data_source == data_source::Cloud) { // not implemented yet
-			//     cloudData.load();
-			//     DataConflict::handle_conflict(localData, cloudData);
-			// }
+
+			if (this.mapId != "" && this.mapId != "Unassigned") {
+				print("Loading data & starting coroutines for map \"" + this.mapId + "\"");
+				localData.load();
+				localData.start_components();
+				startnew(CoroutineFunc(auto_save));
+				// cloudData = Cloud(mapId);
+				// if (setting_data_source == data_source::Cloud) { // not implemented yet
+				//     cloudData.load();
+				//     DataConflict::handle_conflict(localData, cloudData);
+				// }
+			}
 		}
 	}
 
