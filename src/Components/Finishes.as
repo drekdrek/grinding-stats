@@ -34,6 +34,7 @@ class Finishes : BaseComponent {
 
 	void handler() override {
 		while (this.running) {
+			yield();
 
 			auto app = GetApp();
 #if TMNEXT || MP4
@@ -42,7 +43,7 @@ class Finishes : BaseComponent {
 			auto map = app.Challenge;
 #endif
 			if (map is null)
-				return;
+				continue;
 			auto playground = app.CurrentPlayground;
 			auto network = cast<CTrackManiaNetwork>(app.Network);
 			if (playground !is null && playground.GameTerminals.Length > 0) {
@@ -85,7 +86,6 @@ class Finishes : BaseComponent {
 				}
 #endif
 			}
-			yield();
 		}
 	}
 }

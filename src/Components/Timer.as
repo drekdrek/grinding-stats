@@ -89,6 +89,7 @@ class Timer : BaseComponent {
 
 	void keep_time() {
 		while (timing) {
+			yield();
 			auto app = GetApp();
 #if TMNEXT || MP4
 			auto map = app.RootMap;
@@ -96,11 +97,10 @@ class Timer : BaseComponent {
 			auto map = app.Challenge;
 #endif
 			if (map is null)
-				return;
+				continue;
 			current_time = Time::Now;
 			session = (current_time + session_offset) - start_time;
 			total = (current_time + total_offset) - start_time;
-			yield();
 		}
 	}
 
@@ -119,6 +119,7 @@ class Timer : BaseComponent {
 
 	void handler() override {
 		while (this.running) {
+			yield();
 
 			auto app = GetApp();
 #if TMNEXT || MP4
@@ -127,7 +128,7 @@ class Timer : BaseComponent {
 			auto map = app.Challenge;
 #endif
 			if (map is null)
-				return;
+				continue;
 			bool is_running = isRunning();
 			if (!is_running && !handled) {
 				handled = true;
@@ -138,7 +139,6 @@ class Timer : BaseComponent {
 				timing = true;
 				startnew(CoroutineFunc(keep_time));
 			}
-			yield();
 		}
 	}
 
