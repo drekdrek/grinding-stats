@@ -89,23 +89,28 @@ class Timer : BaseComponent {
 
 	void keep_time() {
 		while (timing) {
-			yield();
 			auto app = GetApp();
 #if TMNEXT || MP4
 			auto map = app.RootMap;
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map is null)
-				continue;
-			current_time = Time::Now;
-			session = (current_time + session_offset) - start_time;
-			total = (current_time + total_offset) - start_time;
+			if (map !is null) {
+				current_time = Time::Now;
+				session = (current_time + session_offset) - start_time;
+				total = (current_time + total_offset) - start_time;
+			}
+			yield();
 		}
 	}
 
-	void stop() override {
-		running = false;
+	void start_timing() {
+		timing = true;
+		start_time = Time::Now;
+		startnew(CoroutineFunc(keep_time));
+	}
+
+	void stop_timing() {
 		session_offset = session;
 		total_offset = total;
 		timing = false;
@@ -113,9 +118,12 @@ class Timer : BaseComponent {
 
 	void start() override {
 		running = true;
-		timing = true;
 		startnew(CoroutineFunc(handler));
-		startnew(CoroutineFunc(keep_time));
+	}
+
+	void stop() override {
+		running = false;
+		stop_timing();
 	}
 
 	void handler() override {
@@ -133,12 +141,10 @@ class Timer : BaseComponent {
 			bool is_running = isRunning();
 			if (!is_running && !handled) {
 				handled = true;
-				stop();
+				stop_timing();
 			} else if (is_running && handled) {
 				handled = false;
-				start_time = Time::Now;
-				timing = true;
-				startnew(CoroutineFunc(keep_time));
+				start_timing();
 			}
 		}
 	}
