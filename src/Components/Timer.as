@@ -4,7 +4,7 @@ class Timer : BaseComponent {
   private uint64 current_time = Time::Now;
   private uint64 session_offset = 0;
   private uint64 total_offset = 0;
-  private bool timing = true;
+  private bool timing = false;
 	bool same = false;
 
   private uint64 timer_start_idle = 0;
@@ -113,6 +113,7 @@ class Timer : BaseComponent {
 
 	void start() override {
 		running = true;
+		timing = true;
 		startnew(CoroutineFunc(handler));
 		startnew(CoroutineFunc(keep_time));
 	}
