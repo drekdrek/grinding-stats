@@ -46,7 +46,6 @@ class SQLite : AbstractData {
         """;
 
         db.Execute(query);
-        print("executed " + query);
     }
 
     void migrate() {
@@ -74,12 +73,10 @@ class SQLite : AbstractData {
         grinds_query.NextRow(); // im not sure why i have to do this twice, but its blank otherwise
         grinds_query.NextRow();
 
-        print(grinds_query.GetColumnString("map_id"));
         finishes = uint64(grinds_query.GetColumnInt64("finishes"));
         resets = uint64(grinds_query.GetColumnInt64("resets"));
         time = uint64(grinds_query.GetColumnInt64("time"));
         respawns = uint64(grinds_query.GetColumnInt64("respawns"));
-        // print(grinds_query.GetQueryExpanded());
     
 
         debug_print("Loaded finishes " + finishes + " resets " + resets + " time " + time +
@@ -139,7 +136,6 @@ class SQLite : AbstractData {
         
         debug_print("Wrote finishes " + finishes + " resets " + resets + " time " + time +
 					" respawns " + respawns + " with map_id " + mapUid);
-        print(grinds_query.GetQueryExpanded());
         grinds_query.Execute();
 
 
@@ -154,7 +150,6 @@ class SQLite : AbstractData {
 
         for (uint i = 0; i < medals.Length; i++) {
             Json::Value@ medal = medals[i];
-            print(Json::Write(medal));
             auto medals_query = db.Prepare(medals_insert);
             medals_query.Bind(1,mapUid);
             medals_query.Bind(2, int(medal.Get("medal")));
