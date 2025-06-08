@@ -125,6 +125,11 @@ class Medals : BaseComponent {
 		build_medals(m_verified);
 	}
 
+	Medals(Json::Value medals) {
+		Json::Value @m_verified = verify_medals(medals);
+		build_medals(m_verified);
+	}
+
 	BaseMedal @get_highest_medal() {
 		int candidate = -1;
 		for (uint i = 0; i < this.medals.Length; i++) {
@@ -249,21 +254,21 @@ class Medals : BaseComponent {
 	}
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
 	if (add_warrior) {
-		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":"          0"}'));
+		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":0}'));
 	}
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
 	if (add_champion) {
-		ret.Add(Json::Parse('{"medal":5,"achieved":false,"achieved_time":"          0"}'));
+		ret.Add(Json::Parse('{"medal":5,"achieved":false,"achieved_time":0}'));
 	}
 #endif
 #if MP4 && DEPENDENCY_DUCKMEDALS
 	if (add_duck) {
-		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":"          0"}'));
+		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":0}'));
 	}
 #elif TURBO && DEPENDENCY_DUCKMEDALS
 	if (add_duck) {
-		ret.Add(Json::Parse('{"medal":8,"achieved":false,"achieved_time":"          0"}'));
+		ret.Add(Json::Parse('{"medal":8,"achieved":false,"achieved_time":0}'));
 	}
 #endif
 	
@@ -381,7 +386,7 @@ class Medals : BaseComponent {
 		for (uint i = 0; i < m.Length; i++) {
 			int medal = m[i].Get("medal");
 			bool achieved = m[i].Get("achieved", false);
-			uint64 achieved_time = Text::ParseUInt64(m[i].Get("achieved_time", 0));
+			uint64 achieved_time = m[i].Get("achieved_time", 0);
 			switch (Medals::Type(medal)) {
 			case Medals::Type::Bronze:
 				this.medals.InsertLast(BaseMedal(medal, achieved, achieved_time, map.TMObjective_BronzeTime));

@@ -51,7 +51,7 @@ class Recap {
   private void count_total_time() {
 		total_time = 0;
 		for (uint i = 0; i < filtered_elements.Length; i++) {
-			total_time += filtered_elements[i].time_uint;
+			total_time += filtered_elements[i].time;
 		}
 	}
 
@@ -81,8 +81,16 @@ class Recap {
 		dirty = false;
 	}
 
+	int16 sort_col_index = 0;
+	UI::SortDirection sort_dir = UI::SortDirection::None;
 	void SortItems(UI::TableSortSpecs @sortSpecs) {
-		startnew(CoroutineFuncUserdata(sort_items), sortSpecs);
+		if (sort_col_index == sortSpecs.Specs[0].ColumnIndex && sort_dir != sortSpecs.Specs[0].SortDirection) {
+			filtered_elements.Reverse();
+		} else {
+			startnew(CoroutineFuncUserdata(sort_items), sortSpecs);
+		}
+		sort_col_index = sortSpecs.Specs[0].ColumnIndex;
+		sort_dir = sortSpecs.Specs[0].SortDirection;
 		sortSpecs.Dirty = false;
 		dirty = false;
 	}
@@ -148,7 +156,7 @@ class Recap {
 				result = a.stripped_name.ToLower() > b.stripped_name.ToLower() == true ? -1 : 1;
 				break;
 			case 1:
-				result = int(a.time_uint - b.time_uint);
+				result = int(a.time - b.time);
 				break;
 			case 2:
 				result = int(a.finishes - b.finishes);
@@ -166,7 +174,7 @@ class Recap {
 #endif
 				break;
 			case 5:
-				result = int(a.modified_time - b.modified_time);
+				result = int(a.updated_at - b.updated_at);
 				break;
 			case 6: 
 				{
@@ -220,27 +228,23 @@ class Recap {
 	}
 
   private void load_files() {
-		auto files = IO::IndexFolder(IO::FromStorageFolder("data"), true);
-		if (elements.Length != files.Length) {
-			elements = array<RecapElement @>();
-		} else {
-			return;
-		}
-		uint path_length = (IO::FromStorageFolder("data")).Length;
-		uint batches = uint(Math::Ceil(files.Length / 50.0));
+		RecapSQLite sql = RecapSQLite(data.db);
+		elements = sql.get_recap_elements();
+		int BATCH_AMOUNT = 100;
+		uint batches = uint(Math::Ceil(elements.Length / float(BATCH_AMOUNT)));
 		for (uint i = 0; i < batches; i++) {
-			uint amt = Math::Min(50, Math::Max(0, files.Length - (i * 50)));
+			uint amt = Math::Min(BATCH_AMOUNT, Math::Max(0, elements.Length - (i * BATCH_AMOUNT)));
 			for (uint j = 0; j < amt; j++) {
-				string[] @matches = Regex::Search(files[i * 50 + j], "\\/data\\/(.+)\\.json");
-				string map_id = matches[1];
-				elements.InsertLast(RecapElement(map_id));
-				log.InsertLast("Loaded " + map_id);
+				
+				startnew(CoroutineFunc(elements[i * BATCH_AMOUNT + j].get_name_from_api));
+				log.InsertLast("Loaded " + elements[i * BATCH_AMOUNT + j].map_id);
 				if (log.Length > 5) {
 					log.RemoveAt(0);
 				}
 			}
-			sleep(100);
+			yield();
 		}
+
 		dirty = true;
 		count_total_finishes();
 		count_total_resets();
