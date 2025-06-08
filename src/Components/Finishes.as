@@ -4,7 +4,7 @@ class Finishes : BaseComponent {
 
 	Finishes(uint64 total) { super(total); }
 
-	~Finishes() { running = false; }
+	~Finishes() {}
 
 	string toString() override {
 		string_constructor = array<string>();
@@ -34,15 +34,16 @@ class Finishes : BaseComponent {
 
 	void handler() override {
 		while (this.running) {
-
 			auto app = GetApp();
 #if TMNEXT || MP4
 			auto map = app.RootMap;
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map is null)
-				return;
+			if (map is null) {
+				yield();
+				continue;
+			}
 			auto playground = app.CurrentPlayground;
 			auto network = cast<CTrackManiaNetwork>(app.Network);
 			if (playground !is null && playground.GameTerminals.Length > 0) {

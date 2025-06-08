@@ -9,7 +9,7 @@ class Respawns : BaseComponent {
 		current = 0;
 	}
 
-	~Respawns() { running = false; }
+	~Respawns() {}
 
 	string toString() override {
 		string_constructor = array<string>();
@@ -58,11 +58,12 @@ class Respawns : BaseComponent {
 #if TMNEXT
 		uint64 last_respawn_time = 0;
 		while (this.running) {
-
 			auto app = GetApp();
 			auto map = app.RootMap;
-			if (map is null)
-				return;
+			if (map is null) {
+				yield();
+				continue;
+			}
 			auto playground = app.CurrentPlayground;
 			if (playground !is null && playground.GameTerminals.Length > 0) {
 				auto terminal = playground.GameTerminals[0];

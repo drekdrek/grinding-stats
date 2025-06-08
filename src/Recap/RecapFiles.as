@@ -34,7 +34,5 @@ class RecapFiles : Files {
 		debug_print("Read finishes " + finishes + " resets " + resets + " time " + time + " respawns " + respawns + "\nmedals " + medals_string + "\nfrom " + file_location);
 	}
 
-	void start() override {} // don't need to start the handlers
-
 	int64 get_modified_time() { return IO::FileModifiedTime(file_location); }
 }
