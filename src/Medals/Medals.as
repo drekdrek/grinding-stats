@@ -158,8 +158,10 @@ class Medals : BaseComponent {
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map is null)
-				return;
+			if (map is null) {
+				yield();
+				continue;
+			}
 			auto playground = app.CurrentPlayground;
 			auto network = cast<CTrackManiaNetwork>(app.Network);
 			if (playground !is null && playground.GameTerminals.Length > 0) {

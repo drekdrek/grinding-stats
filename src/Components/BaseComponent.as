@@ -1,5 +1,5 @@
 class BaseComponent {
-  protected bool running = true;
+  protected bool running = false;
   protected bool handled = false;
   protected array<string> string_constructor;
 
@@ -14,9 +14,17 @@ class BaseComponent {
 		session = 0;
 	}
 
+	~BaseComponent() {
+		running = false;
+	}
+
 	void start() {
 		running = true;
 		startnew(CoroutineFunc(handler));
+	}
+
+	void stop() {
+		running = false;
 	}
 
   protected void handler() {}

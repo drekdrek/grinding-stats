@@ -4,7 +4,7 @@ class Timer : BaseComponent {
   private uint64 current_time = Time::Now;
   private uint64 session_offset = 0;
   private uint64 total_offset = 0;
-  private bool timing = true;
+  private bool timing = false;
 	bool same = false;
 
   private uint64 timer_start_idle = 0;
@@ -20,7 +20,6 @@ class Timer : BaseComponent {
 
 	~Timer() {
 		this.timing = false;
-		this.running = false;
 	}
 
 	bool isRunning() {
@@ -96,8 +95,10 @@ class Timer : BaseComponent {
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map is null)
-				return;
+			if (map is null) {
+				yield();
+				continue;
+			}
 			current_time = Time::Now;
 			session = (current_time + session_offset) - start_time;
 			total = (current_time + total_offset) - start_time;
@@ -105,7 +106,13 @@ class Timer : BaseComponent {
 		}
 	}
 
-	void stop() {
+	void start_timing() {
+		timing = true;
+		start_time = Time::Now;
+		startnew(CoroutineFunc(keep_time));
+	}
+
+	void stop_timing() {
 		session_offset = session;
 		total_offset = total;
 		timing = false;
@@ -114,7 +121,11 @@ class Timer : BaseComponent {
 	void start() override {
 		running = true;
 		startnew(CoroutineFunc(handler));
-		startnew(CoroutineFunc(keep_time));
+	}
+
+	void stop() override {
+		running = false;
+		stop_timing();
 	}
 
 	void handler() override {
@@ -126,17 +137,17 @@ class Timer : BaseComponent {
 #elif TURBO
 			auto map = app.Challenge;
 #endif
-			if (map is null)
-				return;
+			if (map is null) {
+				yield();
+				continue;
+			}
 			bool is_running = isRunning();
 			if (!is_running && !handled) {
 				handled = true;
-				stop();
+				stop_timing();
 			} else if (is_running && handled) {
 				handled = false;
-				start_time = Time::Now;
-				timing = true;
-				startnew(CoroutineFunc(keep_time));
+				start_timing();
 			}
 			yield();
 		}

@@ -18,19 +18,26 @@ abstract class AbstractData {
 
 	AbstractData(const string &in id) {
 		mapUid = id;
-		start();
 	}
 
 	void save() {}
 
 	void load() {}
 
-	void start() {
+	void start_components() {
 		timerComponent.start();
 		finishesComponent.start();
 		resetsComponent.start();
 		respawnsComponent.start();
 		medalsComponent.start();
+	}
+
+	void stop_components() {
+		timerComponent.stop();
+		finishesComponent.stop();
+		resetsComponent.stop();
+		respawnsComponent.stop();
+		medalsComponent.stop();
 	}
 
 	void overwrite(AbstractData @other) {
