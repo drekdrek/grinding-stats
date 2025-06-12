@@ -7,6 +7,10 @@ class DataManager {
 	string mapId = "";
 
 	DataManager() {
+
+	}
+
+	void start() {
 		startnew(CoroutineFunc(map_handler));
 	}
 

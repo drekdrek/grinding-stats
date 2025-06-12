@@ -1,10 +1,10 @@
 
-DataManager data;
 Recap recap;
+DataManager data;
 
 void Main() {
 #if TURBO
-	startnew(CoroutineFunc(TurboSTM::LoadSuperTimes));
+	await(startnew(CoroutineFunc(TurboSTM::LoadSuperTimes)));
 #endif
 #if DEPENDENCY_NADEOSERVICES
 	NadeoServices::AddAudience("NadeoLiveServices");
@@ -14,6 +14,7 @@ void Main() {
 	}
 
 	migrateOldData();
+	data.start();
 }
 
 void migrateOldData() {
@@ -24,9 +25,7 @@ void migrateOldData() {
 		if (IO::FolderExists(new_path)) {
 			UI::ShowNotification("Grinding Stats", "Data migration failed.\nAttempting to merge data together.", UI::HSV(0.10f, 1.0f, 1.0f), 7500);
 			warn("The new data folder already exists.\tOld path: " + old_path + "\tnew path: " + new_path);
-			auto @merge = startnew(CoroutineFunc(mergeData));
-			while (merge.IsRunning())
-				yield();
+			await(startnew(CoroutineFunc(mergeData)));
 		}
 		IO::Move(old_path, new_path);
 		if (IO::IndexFolder(old_path, true).Length == 0) {
