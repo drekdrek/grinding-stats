@@ -52,7 +52,7 @@ string get_color(Medals::Type type) {
 #endif
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
         case Medals::Type::Warrior:
-            return "\\$3CF";
+            return WarriorMedals::GetColorStr();
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
         case Medals::Type::Champion:
