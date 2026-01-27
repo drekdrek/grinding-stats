@@ -25,7 +25,7 @@ void migrateOldData() {
 		if (IO::FolderExists(new_path)) {
 			UI::ShowNotification("Grinding Stats", "Data migration failed.\nAttempting to merge data together.", UI::HSV(0.10f, 1.0f, 1.0f), 7500);
 			warn("The new data folder already exists.\tOld path: " + old_path + "\tnew path: " + new_path);
-			await(startnew(CoroutineFunc(mergeData)));
+			await(startnew(mergeData));
 		}
 		IO::Move(old_path, new_path);
 		if (IO::IndexFolder(old_path, true).Length == 0) {
