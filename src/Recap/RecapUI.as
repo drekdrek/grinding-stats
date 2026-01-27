@@ -142,7 +142,7 @@ void RenderRecap() {
 			string text = "You have " + total_files + " files in your Grinding Stats data folder.\n" +
 						  "This will take a while depending on how many files you have.\n" +
 						  "It will lag/freeze the game while loading.";
-			vec2 textWidth = Draw::MeasureString(text);
+			vec2 textWidth = UI::MeasureString(text);
 			UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2, windowWidth.y / 2 + 25));
 			UI::Text(text);
 			UI::SetCursorPos(vec2(windowWidth.x / 2 - 100, windowWidth.y / 2 - 25));
