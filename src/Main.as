@@ -4,7 +4,7 @@ DataManager data;
 
 void Main() {
 #if TURBO
-	await(startnew(CoroutineFunc(TurboSTM::LoadSuperTimes)));
+	await(startnew(TurboSTM::LoadSuperTimes));
 #endif
 #if DEPENDENCY_NADEOSERVICES
 	NadeoServices::AddAudience("NadeoLiveServices");
