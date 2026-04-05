@@ -1,43 +1,42 @@
 class RecapElement {
-	RecapFiles file;
-	RecapMedals medal;
-	string map_id;
-	string name;
-	string stripped_name;
-	string time;
-	uint64 time_uint;
-	uint64 finishes;
-	uint64 resets;
-	uint64 respawns;
-	int64 modified_time;
+    RecapMedals medal;
+    string map_id;
+    string name;
+    string stripped_name;
+    string time_string;
+    uint64 time;
+    uint64 finishes;
+    uint64 resets;
+    uint64 respawns;
+    int64 updated_at;
 #if MP4
-	string titlepack;
+    string titlepack;
 #elif TURBO
-	string environment;
+    string environment;
 #endif
 
-	RecapElement() {}
+    RecapElement() {}
 
-	RecapElement(const string &in id) {
-#if MP4
-		titlepack = "";
+    RecapElement(const string &in id, uint64 time, uint64 finishes, uint64 resets, uint64 respawns, int64 updated_at, Json::Value@ medals) {
+#if MP4 
+        titlepack = "";
+#elif TURBO
+        environment = "";
 #endif
-		this.map_id = id;
-		this.name = map_id;
+        this.map_id = id;
+        this.name = map_id;
 
-		this.stripped_name = Text::StripFormatCodes(name);
-		file = RecapFiles(id);
-		medal = RecapMedals(file.get_medals_string());
-		time = Recap::time_to_string(file.get_time());
-		time_uint = file.get_time();
-		finishes = file.get_finishes();
-		resets = file.get_resets();
-		respawns = file.get_respawns();
-		modified_time = file.get_modified_time();
-#if TMNEXT || TURBO
-		startnew(CoroutineFunc(get_name_from_api));
-#endif
-	}
+        this.stripped_name = Text::StripFormatCodes(name);
+        this.medal = RecapMedals(medals);
+        this.time = time;
+        this.time_string = Recap::time_to_string(this.time);
+        this.finishes = finishes;
+        this.resets = resets;
+        this.respawns = respawns;
+        this.updated_at = updated_at;
+    }
+    
+
 
 	void get_name_from_api() {
 		if (map_id == "Unassigned")
