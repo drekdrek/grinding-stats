@@ -1,7 +1,7 @@
 class BaseComponent {
-  protected bool running = false;
-  protected bool handled = false;
-  protected array<string> string_constructor;
+	protected bool running = false;
+	protected bool handled = false;
+	protected array<string> string_constructor;
 
 	uint64 session;
 	uint64 total;
@@ -27,7 +27,7 @@ class BaseComponent {
 		running = false;
 	}
 
-  protected void handler() {}
+  	protected void handler() {}
 
 	string toString() { return ""; }
 }

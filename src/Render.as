@@ -26,6 +26,8 @@ bool should_render(RenderMode rendermode) {
 void Render() {
 	if (should_render(RenderMode::Normal))
 		render_stats_ui();
+	if (migrate.needed)
+		migrate.UI();
 }
 
 void RenderInterface() {
