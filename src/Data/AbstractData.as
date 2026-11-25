@@ -21,13 +21,15 @@ abstract class AbstractData {
 
 	AbstractData(const string &in id) {
 		mapUid = id;
+		if (id != "") {
 #if TMNEXT || MP4
-		auto map_info = GetApp().RootMap.MapInfo;
+			auto map_info = GetApp().RootMap.MapInfo;
 #elif TURBO
-		auto map_info = GetApp().Challenge.MapInfo;
+			auto map_info = GetApp().Challenge.MapInfo;
 #endif
-		this.name = map_info.Name;
-		this.author = map_info.AuthorNickName;
+			this.name = map_info.Name;
+			this.author = map_info.AuthorNickName;
+		}
 	}
 
 	void save() {}
