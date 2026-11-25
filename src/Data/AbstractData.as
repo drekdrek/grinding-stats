@@ -6,6 +6,10 @@ abstract class AbstractData {
   protected uint64 resets = 0;
   protected uint64 respawns = 0;
   protected string medals_string = "";
+  protected Json::Value medals_json = Json::Value();
+  protected string name = "";
+  protected string titlepack = "";
+  protected string author = "";
 
 	Finishes @finishesComponent = Finishes(0);
 	Resets @resetsComponent = Resets(0);
@@ -17,6 +21,15 @@ abstract class AbstractData {
 
 	AbstractData(const string &in id) {
 		mapUid = id;
+		if (id != "") {
+#if TMNEXT || MP4
+			auto map_info = GetApp().RootMap.MapInfo;
+#elif TURBO
+			auto map_info = GetApp().Challenge.MapInfo;
+#endif
+			this.name = map_info.Name;
+			this.author = map_info.AuthorNickName;
+		}
 	}
 
 	void save() {}
@@ -63,15 +76,21 @@ abstract class AbstractData {
 
 	void debug_print(const string &in text) { print(text); }
 
+	uint get_track_count() { return 0; }
+
 	uint64 get_time() { return time; }
 	uint64 get_finishes() { return finishes; }
 	uint64 get_resets() { return resets; }
 	uint64 get_respawns() { return respawns; }
 	string get_medals_string() { return medals_string; }
+	string get_name() { return name; }
+	string get_author() { return author; }
 
 	void set_time(uint64 _time) { time = _time; }
 	void set_finishes(uint64 _finishes) { finishes = _finishes; }
 	void set_resets(uint64 _resets) { resets = _resets; }
 	void set_respawns(uint64 _respawns) { respawns = _respawns; }
 	void set_medals_string(const string &in _medals_string) { medals_string = _medals_string; }
+	void set_name(const string &in _name) { name = _name; }
+	void set_author(const string &in _author) { author = _author; }
 }

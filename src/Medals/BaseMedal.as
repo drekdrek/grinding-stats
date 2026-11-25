@@ -35,4 +35,8 @@ class BaseMedal {
 			}
 		}
 	}
+
+	string toString() {
+		return "type: " + Medals::to_string(this.type) + ", achieved: " + this.achieved + ", achieved_time: " + Time::Format(this.achieved_time) + ", target: " + Time::Format(this.target);
+	}
 }

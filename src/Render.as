@@ -26,6 +26,9 @@ bool should_render(RenderMode rendermode) {
 void Render() {
 	if (should_render(RenderMode::Normal))
 		render_stats_ui();
+	data.localData.medalsComponent.debug_render_medals();
+	if (migrate.needed)
+		migrate.UI();
 }
 
 void RenderInterface() {
@@ -36,11 +39,6 @@ void RenderInterface() {
 }
 
 void render_stats_ui() {
-#if TMNEXT || MP4
-	auto map_info = GetApp().RootMap.MapInfo;
-#elif TURBO
-	auto map_info = GetApp().Challenge.MapInfo;
-#endif
 
 	UI::SetNextWindowPos(200, 200, false ? UI::Cond::Always : UI::Cond::FirstUseEver);
 	int window_flags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse |
@@ -53,10 +51,10 @@ void render_stats_ui() {
 		UI::BeginTable("header", 1, UI::TableFlags::SizingFixedFit);
 		UI::TableNextRow();
 		UI::TableNextColumn();
-		UI::Text("\\$ddd" + format_string(map_info.Name));
+		UI::Text("\\$ddd" + format_string(data.localData.name));
 		UI::TableNextRow();
 		UI::TableNextColumn();
-		UI::Text("\\$888" + format_string(map_info.AuthorNickName));
+		UI::Text("\\$888" + format_string(data.localData.author));
 		UI::EndTable();
 	}
 

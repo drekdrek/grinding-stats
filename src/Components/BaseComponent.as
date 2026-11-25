@@ -29,5 +29,7 @@ class BaseComponent {
 
   protected void handler() {}
 
-	string toString() { return ""; }
+	string toString() {
+		return "";
+	}
 }

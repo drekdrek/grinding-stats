@@ -1,20 +1,28 @@
 class DataManager {
 
+	SQLite::Database @db = SQLite::Database(IO::FromStorageFolder("data.db"));
 	// Cloud @cloudData = Cloud();
-	Files @localData = Files();
+	Files @localDataFiles = Files();
+	SQLite @localDataSQL = SQLite(db);
+
+	AbstractData @get_localData() {
+		// if data hasn't been migrated yet, OR migration is ongoing, use Files, otherwise use SQLite
+		if (migrate.needed || migrate.running)
+			return localDataFiles;
+		return localDataSQL;
+	}
 
 	bool auto_save_running = false;
 	string mapId = "";
 
 	DataManager() {
-
 	}
 
 	void start() {
 		startnew(CoroutineFunc(map_handler));
 	}
 
-	private void map_handler() {
+  private void map_handler() {
 		auto app = GetApp();
 		while (true) {
 			if (app.Editor !is null) {
@@ -51,7 +59,8 @@ class DataManager {
 			}
 
 			this.mapId = mapId_now;
-			localData = Files(this.mapId);
+			localDataFiles = Files(this.mapId);
+			localDataSQL = SQLite(db, this.mapId);
 
 			if (this.mapId != "" && this.mapId != "Unassigned") {
 				print("Loading data & starting coroutines for map \"" + this.mapId + "\"");
@@ -87,6 +96,7 @@ class DataManager {
 	Finishes @get_finishes() { return localData.finishesComponent; }
 	Resets @get_resets() { return localData.resetsComponent; }
 	Respawns @get_respawns() { return localData.respawnsComponent; }
+	Medals @get_medals() { return localData.medalsComponent; }
 
   private void set_timer(Timer @_) {}
   private void set_finishes(Finishes @_) {}

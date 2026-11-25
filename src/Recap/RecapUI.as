@@ -1,11 +1,11 @@
 bool setting_recap_show_menu = false;
 bool load_recap = false;
 bool setting_recap_show_colors = setting_show_map_name_color;
-int total_files = 0;
+uint total_tracks = 0;
 
 void RenderMenu() {
 	if (UI::MenuItem(Icons::List + " Grinding Stats Recap", "", setting_recap_show_menu)) {
-		total_files = IO::IndexFolder(IO::FromStorageFolder("data"), true).Length;
+		total_tracks = data.localData.get_track_count();
 		setting_recap_show_menu = !setting_recap_show_menu;
 	}
 }
@@ -139,21 +139,31 @@ void RenderRecap() {
 
 		if (!load_recap) {
 			auto windowWidth = UI::GetWindowSize();
-			string text = "You have " + total_files + " files in your Grinding Stats data folder.\n" +
-						  "This will take a while depending on how many files you have.\n" +
-						  "It will lag/freeze the game while loading.";
+			UI::BeginFormattingGroup();
+			string text = "";
+			if (migrate.needed) {
+				text = "\\$f60" + "Please migrate to SQLite in order to use Recap";
+			} else {
+
+				text = "You have " + total_tracks + " tracks in Grinding Stats\n" +
+					   "This will take a while depending on how many files you have.\n" +
+					   "It will lag/freeze the game while loading.";
+			}
 			vec2 textWidth = UI::MeasureString(text);
 			UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2, windowWidth.y / 2 + 25));
 			UI::Text(text);
 			UI::SetCursorPos(vec2(windowWidth.x / 2 - 100, windowWidth.y / 2 - 25));
+			UI::EndFormattingGroup();
+			UI::BeginDisabled(migrate.needed);
 			if (UI::Button("Load Recap", vec2(200, 50))) {
-				load_recap = true;
 				recap.start();
+				load_recap = true;
 			}
+			UI::EndDisabled();
 		}
 
 		if (recap.filtered_elements.Length == 0) {
-			UI::SetCursorPos(vec2(10, 60));
+			UI::SetCursorPos(vec2(5, 40));
 			if (recap.log.Length > 0) {
 				UI::Text("Recap Log");
 			}
@@ -181,8 +191,9 @@ void RenderRecap() {
 			UI::TableHeadersRow();
 
 			auto sortSpecs = UI::TableGetSortSpecs();
-			if (sortSpecs !is null && (sortSpecs.Dirty || recap.dirty))
-				recap.SortItems(sortSpecs);
+			if (sortSpecs !is null && (sortSpecs.Dirty || recap.dirty)) {
+				recap.SortItems(sortSpecs, recap.first_sort);
+			}
 
 			UI::ListClipper clipper(recap.filtered_elements.Length + 1);
 			while (clipper.Step()) {
@@ -199,19 +210,20 @@ void RenderRecap() {
 						stripped_name = element.stripped_name;
 						map_id = element.map_id;
 						name = element.name;
-						time = element.time;
+						time = element.time_string;
 						finishes = "" + element.finishes;
 						resets = "" + element.resets;
 						respawns = "" + element.respawns;
-						time_modified = Time::FormatString("%F %r", element.modified_time);
+						time_modified = Time::FormatString("%F %r", element.updated_at);
 #if MP4
 						titlepack = element.titlepack;
 #elif TURBO
 						environment = element.environment;
 #endif
 						try {
-							medal = element.medal.get_highest_medal();
-						} catch {}
+							medal = element.medal;
+						} catch {
+						}
 					} else {
 						map_id = "";
 						name = "TOTAL (" + recap.filtered_elements.Length + ")";
@@ -228,9 +240,9 @@ void RenderRecap() {
 					if (UI::IsItemHovered() && Meta::IsDeveloperMode()) {
 						UI::BeginTooltip();
 						if (map_id == stripped_name)
-							UI::Text(stripped_name);
+							UI::Text("\n" + stripped_name);
 						else
-							UI::Text(map_id + "\n" + "'" + Text::StripFormatCodes(name) + "'");
+							UI::Text("\n" + map_id + "\n" + "'" + Text::StripFormatCodes(name).Replace('\\','') + "'");
 						UI::EndTooltip();
 					}
 					UI::TableSetColumnIndex(1);
@@ -255,12 +267,12 @@ void RenderRecap() {
 						string medal_time = Recap::time_to_string(medal.achieved_time);
 #if TURBO
 						if (medal.type > 3 && medal.type < 8) {
-						// i hate this
-							vec2 curPos =  UI::GetCursorPos();
+							// i hate this
+							vec2 curPos = UI::GetCursorPos();
 							curPos.y += 4;
 							UI::Text(medal_color + Icons::Circle);
 							UI::SetCursorPos(curPos);
-							UI::Text("\\$0f1"+ Icons::CircleO);
+							UI::Text("\\$0f1" + Icons::CircleO);
 							curPos.x += 21;
 							UI::SetCursorPos(curPos);
 							UI::Text("" + medal_time);

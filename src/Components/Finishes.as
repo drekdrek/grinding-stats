@@ -2,7 +2,9 @@ class Finishes : BaseComponent {
 
 	Finishes() {}
 
-	Finishes(uint64 total) { super(total); }
+	Finishes(uint64 total) {
+		super(total);
+	}
 
 	~Finishes() {}
 
