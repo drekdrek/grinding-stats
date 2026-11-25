@@ -41,6 +41,7 @@ class Recap {
 	array<RecapElement @> elements;
 	array<RecapElement @> filtered_elements;
 	bool dirty;
+	bool first_sort = true;
 	bool started = false;
 	uint64 total_time = 0;
 	uint total_finishes = 0;
@@ -83,8 +84,8 @@ class Recap {
 
 	int16 sort_col_index = 0;
 	UI::SortDirection sort_dir = UI::SortDirection::None;
-	void SortItems(UI::TableSortSpecs @sortSpecs) {
-		if (sort_col_index == sortSpecs.Specs[0].ColumnIndex && sort_dir != sortSpecs.Specs[0].SortDirection) {
+	void SortItems(UI::TableSortSpecs @sortSpecs, bool force = false) {
+		if (!force && sort_col_index == sortSpecs.Specs[0].ColumnIndex && sort_dir != sortSpecs.Specs[0].SortDirection) {
 			filtered_elements.Reverse();
 		} else {
 			startnew(CoroutineFuncUserdata(sort_items), sortSpecs);
@@ -93,6 +94,7 @@ class Recap {
 		sort_dir = sortSpecs.Specs[0].SortDirection;
 		sortSpecs.Dirty = false;
 		dirty = false;
+		first_sort = false;
 	}
 
 	void MergeSort(array<RecapElement @> &inout arr, int left, int right, UI::TableSortSpecs @specs) {
@@ -150,7 +152,6 @@ class Recap {
 			UI::TableColumnSortSpecs spec = specs.Specs[i];
 
 			int result = 0;
-
 			switch (spec.ColumnIndex) {
 			case 0:
 				result = a.stripped_name.ToLower() > b.stripped_name.ToLower() == true ? -1 : 1;
@@ -176,23 +177,22 @@ class Recap {
 			case 5:
 				result = int(a.updated_at - b.updated_at);
 				break;
-			case 6: 
-				{
-					BaseMedal@ a_medal = a.medal.get_highest_medal();
-					BaseMedal@ b_medal = b.medal.get_highest_medal();
-					if (a_medal.type == Medals::Type::None || a_medal.achieved_time == 0) {
-						result = spec.SortDirection == UI::SortDirection:: Ascending ? 1: -1;
-					} else if (b_medal.type == Medals::Type::None || b_medal.achieved_time == 0) {
-						result = spec.SortDirection == UI::SortDirection:: Ascending ? -1: 1;
-					} else 
-					
+			case 6: {
+				BaseMedal @a_medal = a.medal;
+				BaseMedal @b_medal = b.medal;
+				if (a_medal.type == Medals::Type::None || a_medal.achieved_time == 0) {
+					result = spec.SortDirection == UI::SortDirection::Ascending ? 1 : -1;
+				} else if (b_medal.type == Medals::Type::None || b_medal.achieved_time == 0) {
+					result = spec.SortDirection == UI::SortDirection::Ascending ? -1 : 1;
+				} else
+
 					if (a_medal.achieved_time == b_medal.achieved_time) {
-						result = int(a_medal.type - b_medal.type);
-					} else {
-						result = int(a_medal.achieved_time - b_medal.achieved_time);
-					}
-					break;
+					result = int(a_medal.type - b_medal.type);
+				} else {
+					result = int(a_medal.achieved_time - b_medal.achieved_time);
 				}
+				break;
+			}
 			}
 
 			if (result != 0) {
@@ -230,20 +230,6 @@ class Recap {
   private void load_files() {
 		RecapSQLite sql = RecapSQLite(data.db);
 		elements = sql.get_recap_elements();
-		int BATCH_AMOUNT = 100;
-		uint batches = uint(Math::Ceil(elements.Length / float(BATCH_AMOUNT)));
-		for (uint i = 0; i < batches; i++) {
-			uint amt = Math::Min(BATCH_AMOUNT, Math::Max(0, elements.Length - (i * BATCH_AMOUNT)));
-			for (uint j = 0; j < amt; j++) {
-				
-				startnew(CoroutineFunc(elements[i * BATCH_AMOUNT + j].get_name_from_api));
-				log.InsertLast("Loaded " + elements[i * BATCH_AMOUNT + j].map_id);
-				if (log.Length > 5) {
-					log.RemoveAt(0);
-				}
-			}
-			yield();
-		}
 
 		dirty = true;
 		count_total_finishes();
@@ -403,7 +389,7 @@ class Recap {
 		}
 	}
 
-  void filter_shorts() {
+	void filter_shorts() {
 		if (shorts.Length == 0) {
 			print("Fetching shorts data");
 			while (!NadeoServices::IsAuthenticated("NadeoLiveServices"))
@@ -434,7 +420,7 @@ class Recap {
 	}
 
 	void filter_shorts_week() {
-if (this_week_shorts.Length == 0) {
+		if (this_week_shorts.Length == 0) {
 			print("Fetching shorts data");
 			while (!NadeoServices::IsAuthenticated("NadeoLiveServices"))
 				yield();

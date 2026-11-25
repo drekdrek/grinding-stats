@@ -1,7 +1,9 @@
 class Resets : BaseComponent {
 	Resets() {}
 
-	Resets(uint64 total) { super(total); }
+	Resets(uint64 total) {
+		super(total);
+	}
 
 	~Resets() {}
 
