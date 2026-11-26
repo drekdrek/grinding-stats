@@ -31,10 +31,10 @@ class Migrate {
 		UI::Begin("Grinding Stats SQLite Migration", UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking);
 		auto windowWidth = UI::GetWindowSize();
 		string text = "You have " + total + " tracks in Grinding Stats\n" +
-					  "This will take an estimated " + this.initialEstimatedTime() + "\n" +
-					  "(~10-15 seconds per 1000 tracks)\n\n" +
-					  "You can play a track while is this working,\n" +
-					  " however performance may be impacted";
+			"This will take an estimated " + this.initialEstimatedTime() + "\n" +
+			"(~10-15 seconds per 1000 tracks)\n\n" +
+			"You can play a track while is this working,\n" +
+			" however performance may be impacted";
 		vec2 textWidth = UI::MeasureString(text);
 		UI::SetCursorPos(vec2(windowWidth.x / 2 - textWidth.x / 2, 25));
 		UI::Text(text);
