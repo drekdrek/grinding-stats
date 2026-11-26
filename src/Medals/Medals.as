@@ -130,6 +130,10 @@ class Medals : BaseComponent {
 		build_medals(m_verified);
 	}
 
+	Medals(BaseMedal @highest_medal) {
+		build_medals(highest_medal);
+	}
+
 	BaseMedal @get_highest_medal() {
 		int candidate = -1;
 		for (uint i = 0; i < this.medals.Length; i++) {
@@ -373,6 +377,87 @@ class Medals : BaseComponent {
 		return 0;
 	}
 
+	void build_medals(BaseMedal @highest_medal) {
+		auto app = cast<CTrackMania>(GetApp());
+#if TMNEXT || MP4
+		auto map = app.RootMap;
+#elif TURBO
+		auto map = app.Challenge;
+#endif
+		if (map is null) {
+			return;
+		}
+		for (uint i = int(highest_medal.type) + 1; i < 8; i++) {
+			Medals::Type medal = Medals::Type(i);
+			print(Medals::to_string(medal));
+			if (medal == highest_medal.type) {
+				this.medals.InsertLast(highest_medal);
+				continue;
+			}
+			switch (medal) {
+			case Medals::Type::Bronze:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, map.TMObjective_BronzeTime));
+				break;
+			case Medals::Type::Silver:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, map.TMObjective_SilverTime));
+				break;
+			case Medals::Type::Gold:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, map.TMObjective_GoldTime));
+				break;
+#if TMNEXT || MP4
+			case Medals::Type::Author:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, map.TMObjective_AuthorTime));
+				break;
+#elif TURBO
+			case Medals::Type::Trackmaster:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, map.TMObjective_AuthorTime));
+				break;
+			case Medals::Type::S_Bronze: {
+				uint stm = TurboSTM::GetSuperTime(Text::ParseUInt64(map.MapInfo.Name)).m_time;
+				int delta = map.TMObjective_AuthorTime - stm;
+				this.medals.InsertLast(BaseMedal(medal, false, 0, stm + (delta + 1) / 2));
+				break;
+			}
+			case Medals::Type::S_Silver: {
+				uint stm = TurboSTM::GetSuperTime(Text::ParseUInt64(map.MapInfo.Name)).m_time;
+				int delta = map.TMObjective_AuthorTime - stm;
+				this.medals.InsertLast(BaseMedal(medal, false, 0, stm + (delta + 1) / 4));
+				break;
+			}
+			case Medals::Type::S_Gold: {
+				uint stm = TurboSTM::GetSuperTime(Text::ParseUInt64(map.MapInfo.Name)).m_time;
+				int delta = map.TMObjective_AuthorTime - stm;
+				this.medals.InsertLast(BaseMedal(medal, false, 0, stm + (delta + 1) / 8));
+				break;
+			}
+			case Medals::Type::S_Trackmaster:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, TurboSTM::GetSuperTime(Text::ParseUInt64(map.MapInfo.Name)).m_time));
+				break;
+#endif
+#if TMNEXT && DEPENDENCY_WARRIORMEDALS
+			case Medals::Type::Warrior:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, WarriorMedals::GetWMTime()));
+				break;
+#endif
+#if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
+			case Medals::Type::Champion:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, ChampionMedals::GetCMTime()));
+				break;
+#elif MP4 && DEPENDENCY_DUCKMEDALS
+			case Medals::Type::Duck:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, DuckMedals::GetDuckTime()));
+				break;
+#elif TURBO && DEPENDENCY_DUCKMEDALS
+			case Medals::Type::Duck:
+				this.medals.InsertLast(BaseMedal(medal, false, 0, DuckMedals::GetDuckTime()));
+				break;
+#endif
+			default:
+				break;
+			}
+		}
+	}
+
 	void build_medals(Json::Value @m) {
 		auto app = cast<CTrackMania>(GetApp());
 		print("build medals");
@@ -509,7 +594,7 @@ class Medals : BaseComponent {
 		UI::Text("\\$bbb" + "Achieved");
 		for (uint i = 0; i < this.medals.Length; i++) {
 			UI::TableNextColumn();
-			UI::Text("\\$ddd" + Medals::to_string(Medals::Type(i)));
+			UI::Text("\\$ddd" + Medals::to_string(Medals::Type(medals[i].type)));
 			UI::TableNextColumn();
 			if (medals[i].target != 0) {
 				UI::Text("\\$bbb" +
