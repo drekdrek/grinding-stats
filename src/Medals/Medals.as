@@ -1,113 +1,113 @@
 namespace Medals {
-	enum Type {
-		None = -1,
-		Bronze = 0,
-		Silver = 1,
-		Gold = 2,
+enum Type {
+	None = -1,
+	Bronze = 0,
+	Silver = 1,
+	Gold = 2,
 #if TMNEXT || MP4
-		Author = 3,
+	Author = 3,
 #elif TURBO
-		Trackmaster = 3,
-		S_Bronze = 4,
-		S_Silver = 5,
-		S_Gold = 6,
-		S_Trackmaster = 7,
+	Trackmaster = 3,
+	S_Bronze = 4,
+	S_Silver = 5,
+	S_Gold = 6,
+	S_Trackmaster = 7,
 #endif
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
-		Warrior = 4,
+	Warrior = 4,
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
-		Champion = 5,
+	Champion = 5,
 #elif MP4 && DEPENDENCY_DUCKMEDALS
-		Duck = 4,
+	Duck = 4,
 #elif TURBO && DEPENDENCY_DUCKMEDALS
-		Duck = 8,
+	Duck = 8,
 #endif
-	}
+}
 
-	string get_color(Medals::Type type) {
-		switch (type) {
-			case Medals::Type::None:
-				return "\\$444";
-			case Medals::Type::Bronze:
-				return "\\$964";
-			case Medals::Type::Silver:
-				return "\\$899";
-			case Medals::Type::Gold:
-				return "\\$db4";
+string get_color(Medals::Type type) {
+	switch (type) {
+	case Medals::Type::None:
+		return "\\$444";
+	case Medals::Type::Bronze:
+		return "\\$964";
+	case Medals::Type::Silver:
+		return "\\$899";
+	case Medals::Type::Gold:
+		return "\\$db4";
 #if TMNEXT || MP4
-			case Medals::Type::Author:
-				return "\\$071";
+	case Medals::Type::Author:
+		return "\\$071";
 #elif TURBO
-			case Medals::Type::Trackmaster:
-				return "\\$071";
-			case Medals::Type::S_Bronze:
-				return "\\$964";
-			case Medals::Type::S_Silver:
-				return "\\$899";
-			case Medals::Type::S_Gold:
-				return "\\$db4";
-			case Medals::Type::S_Trackmaster:
-				return "\\$071";
+	case Medals::Type::Trackmaster:
+		return "\\$071";
+	case Medals::Type::S_Bronze:
+		return "\\$964";
+	case Medals::Type::S_Silver:
+		return "\\$899";
+	case Medals::Type::S_Gold:
+		return "\\$db4";
+	case Medals::Type::S_Trackmaster:
+		return "\\$071";
 #endif
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
-			case Medals::Type::Warrior:
-				return WarriorMedals::GetColorStr();
+	case Medals::Type::Warrior:
+		return WarriorMedals::GetColorStr();
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
-			case Medals::Type::Champion:
-				return "\\$F47";
+	case Medals::Type::Champion:
+		return "\\$F47";
 #elif MP4 && DEPENDENCY_DUCKMEDALS
-			case Medals::Type::Duck:
-				return "\\$F47";
+	case Medals::Type::Duck:
+		return "\\$F47";
 #elif TURBO && DEPENDENCY_DUCKMEDALS
-			case Medals::Type::Duck:
-				return "\\$F47";
+	case Medals::Type::Duck:
+		return "\\$F47";
 #endif
-		}
-		return "\\$000"; // Default color if type is unknown
 	}
+	return "\\$000"; // Default color if type is unknown
+}
 
-	string to_string(Medals::Type type) {
-		switch (type) {
-		case Medals::Type::Bronze:
-			return "Bronze";
-		case Medals::Type::Silver:
-			return "Silver";
-		case Medals::Type::Gold:
-			return "Gold";
+string to_string(Medals::Type type) {
+	switch (type) {
+	case Medals::Type::Bronze:
+		return "Bronze";
+	case Medals::Type::Silver:
+		return "Silver";
+	case Medals::Type::Gold:
+		return "Gold";
 #if TMNEXT || MP4
-		case Medals::Type::Author:
-			return "Author";
+	case Medals::Type::Author:
+		return "Author";
 #elif TURBO
-		case Medals::Type::Trackmaster:
-			return "Trackmaster";
-		case Medals::Type::S_Bronze:
-			return "S. Bronze";
-		case Medals::Type::S_Silver:
-			return "S. Silver";
-		case Medals::Type::S_Gold:
-			return "S. Gold";
-		case Medals::Type::S_Trackmaster:
-			return "S. Trackmaster";
+	case Medals::Type::Trackmaster:
+		return "Trackmaster";
+	case Medals::Type::S_Bronze:
+		return "S. Bronze";
+	case Medals::Type::S_Silver:
+		return "S. Silver";
+	case Medals::Type::S_Gold:
+		return "S. Gold";
+	case Medals::Type::S_Trackmaster:
+		return "S. Trackmaster";
 #endif
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
-		case Medals::Type::Warrior:
-			return "Warrior";
+	case Medals::Type::Warrior:
+		return "Warrior";
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
-		case Medals::Type::Champion:
-			return "Champion";
+	case Medals::Type::Champion:
+		return "Champion";
 #elif MP4 && DEPENDENCY_DUCKMEDALS
-		case Medals::Type::Duck:
-			return "Duck";
+	case Medals::Type::Duck:
+		return "Duck";
 #elif TURBO && DEPENDENCY_DUCKMEDALS
-		case Medals::Type::Duck:
-			return "Duck";
+	case Medals::Type::Duck:
+		return "Duck";
 #endif
-		}
-		return "Unknown Medal";
 	}
+	return "Unknown Medal";
+}
 } // namespace Medals
 
 class Medals : BaseComponent {
@@ -222,57 +222,56 @@ class Medals : BaseComponent {
 
 	Json::Value @verify_medals(Json::Value @m) {
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
-	bool add_warrior = true;
+		bool add_warrior = true;
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
-	bool add_champion = true;
+		bool add_champion = true;
 #endif
 #if MP4 || TURBO
 #if DEPENDENCY_DUCKMEDALS
-	bool add_duck = true;
+		bool add_duck = true;
 #endif
 #endif
-	Json::Value ret = Json::Array();
-	for (uint i=0; i < m.Length; i++) {
-		ret.Add(m[i]);
+		Json::Value ret = Json::Array();
+		for (uint i = 0; i < m.Length; i++) {
+			ret.Add(m[i]);
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
-		if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Warrior)
-			add_warrior = false;
+			if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Warrior)
+				add_warrior = false;
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
-	if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Champion)
-			add_champion = false;
+			if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Champion)
+				add_champion = false;
 #endif
 #if MP4 && DEPENDENCY_DUCKMEDALS
-	if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Duck)
-			add_duck = false;
+			if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Duck)
+				add_duck = false;
 #elif TURBO && DEPENDENCY_DUCKMEDALS
-	if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Duck)
-			add_duck = false;
+			if (Medals::Type(uint(m[i].Get("medal"))) == Medals::Type::Duck)
+				add_duck = false;
 #endif
-		
-	}
+		}
 #if TMNEXT && DEPENDENCY_WARRIORMEDALS
-	if (add_warrior) {
-		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":0}'));
-	}
+		if (add_warrior) {
+			ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":0}'));
+		}
 #endif
 #if TMNEXT && DEPENDENCY_CHAMPIONMEDALS
-	if (add_champion) {
-		ret.Add(Json::Parse('{"medal":5,"achieved":false,"achieved_time":0}'));
-	}
+		if (add_champion) {
+			ret.Add(Json::Parse('{"medal":5,"achieved":false,"achieved_time":0}'));
+		}
 #endif
 #if MP4 && DEPENDENCY_DUCKMEDALS
-	if (add_duck) {
-		ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":0}'));
-	}
+		if (add_duck) {
+			ret.Add(Json::Parse('{"medal":4,"achieved":false,"achieved_time":0}'));
+		}
 #elif TURBO && DEPENDENCY_DUCKMEDALS
-	if (add_duck) {
-		ret.Add(Json::Parse('{"medal":8,"achieved":false,"achieved_time":0}'));
-	}
+		if (add_duck) {
+			ret.Add(Json::Parse('{"medal":8,"achieved":false,"achieved_time":0}'));
+		}
 #endif
-	
-	return ret;
+
+		return ret;
 	}
 
 	Json::Value @export_medals() {
@@ -392,9 +391,9 @@ class Medals : BaseComponent {
 			bool achieved = m[i].Get("achieved", false);
 			uint64 achieved_time;
 			try {
-			achieved_time = m[i].Get("achieved_time", 0);
+				achieved_time = m[i].Get("achieved_time", 0);
 			} catch {
-			achieved_time = Text::ParseUInt64(m[i].Get("achieved_time", "0"));
+				achieved_time = Text::ParseUInt64(m[i].Get("achieved_time", "0"));
 			}
 			switch (Medals::Type(medal)) {
 			case Medals::Type::Bronze:
@@ -460,104 +459,102 @@ class Medals : BaseComponent {
 		}
 	}
 	void debug_render_medals() {
-	int window_flags =
-		UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse |
-		UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
-	UI::Begin("Grinding Stats Pretty Medals", window_flags);
-	UI::BeginGroup();
-	UI::Separator();
-	Json::Value export_medals = this.export_medals();
-	// print(Json::Write(export_medals));
-	UI::Text("\\$bbb" + "Exported Medals:");
-	UI::Text("\\$fff[");
-	for (uint i = 0; i < export_medals.Length; i++) {
-		bool achieved = export_medals[i].Get("achieved");
-		UI::Text("\t\\$888{");
-		UI::Text("\t\t\\$bbb\"medal\" \\$0f0: \\$bbb" +
-				 Medals::to_string(Medals::Type(i)) + ",");
-		UI::Text("\t\t\\$bbb\"achieved\" \\$0f0: \\$fff" +
-				 (achieved ? "\\$0f0true" : "\\$f00false") + "\\$fff,");
-		UI::Text("\t\t\\$bbb\"achieved_time\" \\$0f0: \\$fff" +
-				 Recap::time_to_string(
-					 export_medals[i].Get("achieved_time"), true));
+		int window_flags =
+			UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse |
+			UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
+		UI::Begin("Grinding Stats Pretty Medals", window_flags);
+		UI::BeginGroup();
+		UI::Separator();
+		Json::Value export_medals = this.export_medals();
+		// print(Json::Write(export_medals));
+		UI::Text("\\$bbb" + "Exported Medals:");
+		UI::Text("\\$fff[");
+		for (uint i = 0; i < export_medals.Length; i++) {
+			bool achieved = export_medals[i].Get("achieved");
+			UI::Text("\t\\$888{");
+			UI::Text("\t\t\\$bbb\"medal\" \\$0f0: \\$bbb" +
+					 Medals::to_string(Medals::Type(i)) + ",");
+			UI::Text("\t\t\\$bbb\"achieved\" \\$0f0: \\$fff" +
+					 (achieved ? "\\$0f0true" : "\\$f00false") + "\\$fff,");
+			UI::Text("\t\t\\$bbb\"achieved_time\" \\$0f0: \\$fff" +
+					 Recap::time_to_string(
+						 export_medals[i].Get("achieved_time"), true));
 
-		UI::Text("\t\\$888},");
-	}
-	UI::Text("\\$fff]");
-	UI::Separator();
-	UI::EndGroup();
-	UI::End();
-	if (this.medals.Length == 0)
-		return;
-	UI::SetNextWindowPos(200, 200,
-						 false ? UI::Cond::Always : UI::Cond::FirstUseEver);
-
-	if (!UI::IsOverlayShown())
-		window_flags |= UI::WindowFlags::NoInputs;
-	UI::Begin("Grinding Stats Debug", window_flags);
-	UI::BeginGroup();
-	UI::BeginTable("table", 4, UI::TableFlags::SizingFixedFit);
-	UI::TableNextColumn();
-	UI::Text("\\$f00DEBUG");
-	UI::TableNextRow();
-	UI::TableNextColumn();
-	UI::Text("\\$ddd" + "Medal");
-	UI::TableNextColumn();
-	UI::Text("\\$bbb" + "Target Time");
-	UI::TableNextColumn();
-	UI::Text("\\$ddd" + "Achieved Time");
-	UI::TableNextColumn();
-	UI::Text("\\$bbb" + "Achieved");
-	for (uint i = 0; i < this.medals.Length; i++) {
-		UI::TableNextColumn();
-		UI::Text("\\$ddd" + Medals::to_string(Medals::Type(i)));
-		UI::TableNextColumn();
-		if (medals[i].target != 0) {
-			UI::Text("\\$bbb" +
-					 Recap::time_to_string(medals[i].target, true));
-		} else {
-			UI::Text("\\$bbb" + "No medal time set");
+			UI::Text("\t\\$888},");
 		}
+		UI::Text("\\$fff]");
+		UI::Separator();
+		UI::EndGroup();
+		UI::End();
+		if (this.medals.Length == 0)
+			return;
+		UI::SetNextWindowPos(200, 200,
+							 false ? UI::Cond::Always : UI::Cond::FirstUseEver);
 
+		if (!UI::IsOverlayShown())
+			window_flags |= UI::WindowFlags::NoInputs;
+		UI::Begin("Grinding Stats Debug", window_flags);
+		UI::BeginGroup();
+		UI::BeginTable("table", 4, UI::TableFlags::SizingFixedFit);
 		UI::TableNextColumn();
-		if (medals[i].achieved_time != 0) {
-			UI::Text("\\$ddd" +
-					 Recap::time_to_string(medals[i].achieved_time, true));
-		} else if (medals[i].achieved) {
-			UI::Text("\\$ddd" + "0:00.000");
-		} else {
-			UI::Text("\\$ddd" + "No medal achieved");
-		}
-
-		UI::TableNextColumn();
-		if (medals[i].achieved) {
-			UI::Text("\\$0f0" + "Yes");
-		} else {
-			UI::Text("\\$f00" + "No");
-		}
-	}
-	UI::EndTable();
-
-	UI::Separator();
-	UI::BeginTable("table2", 3, UI::TableFlags::SizingFixedFit);
-	BaseMedal @highest_medal = this.get_highest_medal();
-	if (highest_medal !is null) {
+		UI::Text("\\$f00DEBUG");
 		UI::TableNextRow();
 		UI::TableNextColumn();
-		UI::Text("\\$ddd" + "Highest Medal");
+		UI::Text("\\$ddd" + "Medal");
 		UI::TableNextColumn();
-		UI::Text("\\$ddd" + Medals::to_string(highest_medal.type));
+		UI::Text("\\$bbb" + "Target Time");
 		UI::TableNextColumn();
-		if (highest_medal.achieved_time != 0)
-			UI::Text("\\$ddd" + Recap::time_to_string(
-									highest_medal.achieved_time, true));
-		else
-			UI::Text("\\$ddd" + "No medal time set");
+		UI::Text("\\$ddd" + "Achieved Time");
+		UI::TableNextColumn();
+		UI::Text("\\$bbb" + "Achieved");
+		for (uint i = 0; i < this.medals.Length; i++) {
+			UI::TableNextColumn();
+			UI::Text("\\$ddd" + Medals::to_string(Medals::Type(i)));
+			UI::TableNextColumn();
+			if (medals[i].target != 0) {
+				UI::Text("\\$bbb" +
+						 Recap::time_to_string(medals[i].target, true));
+			} else {
+				UI::Text("\\$bbb" + "No medal time set");
+			}
+
+			UI::TableNextColumn();
+			if (medals[i].achieved_time != 0) {
+				UI::Text("\\$ddd" +
+						 Recap::time_to_string(medals[i].achieved_time, true));
+			} else if (medals[i].achieved) {
+				UI::Text("\\$ddd" + "0:00.000");
+			} else {
+				UI::Text("\\$ddd" + "No medal achieved");
+			}
+
+			UI::TableNextColumn();
+			if (medals[i].achieved) {
+				UI::Text("\\$0f0" + "Yes");
+			} else {
+				UI::Text("\\$f00" + "No");
+			}
+		}
+		UI::EndTable();
+
+		UI::Separator();
+		UI::BeginTable("table2", 3, UI::TableFlags::SizingFixedFit);
+		BaseMedal @highest_medal = this.get_highest_medal();
+		if (highest_medal !is null) {
+			UI::TableNextRow();
+			UI::TableNextColumn();
+			UI::Text("\\$ddd" + "Highest Medal");
+			UI::TableNextColumn();
+			UI::Text("\\$ddd" + Medals::to_string(highest_medal.type));
+			UI::TableNextColumn();
+			if (highest_medal.achieved_time != 0)
+				UI::Text("\\$ddd" + Recap::time_to_string(
+										highest_medal.achieved_time, true));
+			else
+				UI::Text("\\$ddd" + "No medal time set");
+		}
+		UI::EndTable();
+		UI::EndGroup();
+		UI::End();
 	}
-	UI::EndTable();
-	UI::EndGroup();
-	UI::End();
 }
-
-}
-

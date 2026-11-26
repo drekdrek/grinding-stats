@@ -8,7 +8,8 @@ class SuperTime {
 	string m_player;
 }
 
-array<SuperTime @> g_superTimes;
+array<SuperTime @>
+	g_superTimes;
 SuperTime @g_hoveringSuperTime;
 
 SuperTime @GetSuperTime(int number) {

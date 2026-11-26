@@ -5,7 +5,9 @@ class SQLite : AbstractData {
 
 	SQLite(SQLite::Database @db) {
 		super();
-		@ this.db = db;
+		// clang-format off
+		@this.db = db;
+		// clang-format on
 		initialize();
 
 		try {
@@ -20,7 +22,9 @@ class SQLite : AbstractData {
 		if (id == "" || id == "Unassigned") {
 			return;
 		}
-		@ this.db = db;
+		// clang-format off
+		@this.db = db;
+		// clang-format on
 		initialize();
 
 		try {

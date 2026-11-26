@@ -1,13 +1,15 @@
 enum displays {
-    Only_when_Openplanet_menu_is_open,
-    Always_except_when_interface_is_hidden,
-    Always
+	Only_when_Openplanet_menu_is_open,
+	Always_except_when_interface_is_hidden,
+	Always
 }
 
 enum data_source {
-    Local_File,
-    // Cloud // not implemented yet
+	Local_File,
+	// Cloud // not implemented yet
 }
+
+	// clang-format off
 
 [Setting name="Enabled" category="UI"]
 bool setting_enabled = true;
@@ -67,3 +69,5 @@ string setting_custom_recap = "";
 
 [Setting name="Autosave Interval (Seconds)" category="Misc" description="How often to save data to disk. Set to 0 to disable."]
 uint setting_autosave_interval = 300;
+
+// clang-format on

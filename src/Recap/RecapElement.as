@@ -35,6 +35,4 @@ class RecapElement {
 		this.respawns = respawns;
 		this.updated_at = updated_at;
 	}
-
-
 }
